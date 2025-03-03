@@ -29,9 +29,6 @@ namespace bdmanager
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             
-            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-            Application.ApplicationExit += Application_ApplicationExit;
-            
             try
             {
                 _mainForm = new MainForm();
@@ -49,24 +46,6 @@ namespace bdmanager
                     _mutex.ReleaseMutex();
                     _mutex.Dispose();
                 }
-            }
-        }
-        
-        private static void Application_ApplicationExit(object sender, EventArgs e)
-        {
-            EnsureCleanShutdown();
-        }
-        
-        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-        {
-            EnsureCleanShutdown();
-        }
-        
-        private static void EnsureCleanShutdown()
-        {
-            if (_mainForm != null)
-            {
-                _mainForm.EnsureProcessesStopped();
             }
         }
     }

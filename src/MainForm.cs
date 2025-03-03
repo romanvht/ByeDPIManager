@@ -157,9 +157,9 @@ namespace bdmanager
             }
         }
 
-        private async void ToggleButton_Click(object sender, EventArgs e)
+        private void ToggleButton_Click(object sender, EventArgs e)
         {
-            await ToggleConnection();
+            ToggleConnection();
         }
 
         private void SettingsButton_Click(object sender, EventArgs e)
@@ -167,7 +167,7 @@ namespace bdmanager
             OpenSettings();
         }
 
-        private async Task ToggleConnection()
+        private void ToggleConnection()
         {
             RoundButton toggleButton = null;
             foreach (Control control in this.Controls)
@@ -185,11 +185,11 @@ namespace bdmanager
             
             if (_processManager.IsRunning)
             {
-                await _processManager.StopAsync();
+                _processManager.Stop();
             }
             else
             {
-                await _processManager.StartAsync();
+                _processManager.Start();
             }
             
             toggleButton.Enabled = true;
@@ -326,21 +326,12 @@ namespace bdmanager
             return SystemIcons.Application;
         }
 
-        private async void ShutdownProcesses()
+        private void ShutdownProcesses()
         {
             if (_processManager != null && _processManager.IsRunning)
             {
-                AddLog("Завершение работы - останавливаем процессы...");
-                await _processManager.StopAsync();
-                AddLog("Процессы остановлены");
-            }
-        }
-        
-        public void EnsureProcessesStopped()
-        {
-            if (_processManager != null)
-            {
-                _processManager.ForceShutdown();
+                AddLog("Останавливаем процессы");
+                _processManager.Stop();
             }
         }
     }

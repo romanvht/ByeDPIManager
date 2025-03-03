@@ -21,7 +21,7 @@ namespace bdmanager
 
         public bool IsRunning => _byeDpiProcess != null && !_byeDpiProcess.HasExited && _proxifyreProcess != null && !_proxifyreProcess.HasExited;
 
-        public async Task StartAsync()
+        public void Start()
         {
             try
             {
@@ -55,7 +55,7 @@ namespace bdmanager
                         StartInfo = new ProcessStartInfo
                         {
                             FileName = _settings.ByeDpiPath,
-                            Arguments = _settings.ByeDpiArguments,
+                            Arguments = _settings.GetByeDpiArguments(),
                             UseShellExecute = false,
                             CreateNoWindow = true,
                             RedirectStandardOutput = true,
@@ -78,9 +78,8 @@ namespace bdmanager
 
                     _byeDpiProcess.Exited += (sender, e) =>
                     {
+                        Stop();
                         RaiseLogMessage("ByeDPI процесс остановлен");
-                        _byeDpiProcess = null;
-                        StopAsync().Wait();
                     };
 
                     _byeDpiProcess.Start();
@@ -92,7 +91,7 @@ namespace bdmanager
                 catch (Exception byeDpiEx)
                 {
                     RaiseLogMessage($"Ошибка при запуске ByeDPI: {byeDpiEx.Message}");
-                    await StopAsync();
+                    Stop();
                     return;
                 }
 
@@ -127,9 +126,8 @@ namespace bdmanager
 
                     _proxifyreProcess.Exited += (sender, e) =>
                     {
+                        Stop();
                         RaiseLogMessage("ProxiFyre процесс остановлен");
-                        _proxifyreProcess = null;
-                        StopAsync().Wait();
                     };
 
                     _proxifyreProcess.Start();
@@ -141,7 +139,7 @@ namespace bdmanager
                 catch (Exception proxiFyreEx)
                 {
                     RaiseLogMessage($"Ошибка при запуске ProxiFyre: {proxiFyreEx.Message}");
-                    await StopAsync();
+                    Stop();
                     return;
                 }
 
@@ -154,54 +152,46 @@ namespace bdmanager
                 {
                     RaiseLogMessage($"Внутренняя ошибка: {ex.InnerException.Message}");
                 }
-                await StopAsync();
+                Stop();
             }
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             try
             {
                 if (_byeDpiProcess != null && !_byeDpiProcess.HasExited)
                 {
-                    _byeDpiProcess.Kill();
-                    await Task.Delay(500);
-                    RaiseLogMessage("ByeDPI остановлен");
+                    try 
+                    { 
+                        _byeDpiProcess.Kill();
+                        _byeDpiProcess = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        RaiseLogMessage($"Ошибка при остановке ByeDPI: {ex.Message}");
+                    }
                 }
 
                 if (_proxifyreProcess != null && !_proxifyreProcess.HasExited)
                 {
-                    _proxifyreProcess.Kill();
-                    await Task.Delay(500);
-                    RaiseLogMessage("ProxiFyre остановлен");
+                    try 
+                    { 
+                        _proxifyreProcess.Kill();
+                        _proxifyreProcess = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        RaiseLogMessage($"Ошибка при остановке ProxiFyre: {ex.Message}");
+                    }
                 }
 
                 RaiseStatusChanged(false);
             }
             catch (Exception ex)
             {
-                RaiseLogMessage($"Ошибка при остановке: {ex.Message}");
+                RaiseLogMessage($"Общая ошибка при остановке процессов: {ex.Message}");
             }
-        }
-
-        public void ForceShutdown()
-        {
-            try
-            {
-                if (IsRunning)
-                {
-                    if (_byeDpiProcess != null && !_byeDpiProcess.HasExited)
-                    {
-                        try { _byeDpiProcess.Kill(); } catch { }
-                    }
-
-                    if (_proxifyreProcess != null && !_proxifyreProcess.HasExited)
-                    {
-                        try { _proxifyreProcess.Kill(); } catch { }
-                    }
-                }
-            }
-            catch { }
         }
 
         private void RaiseLogMessage(string message)
