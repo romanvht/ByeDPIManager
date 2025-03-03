@@ -11,7 +11,7 @@ namespace bdmanager
 {
     public partial class MainForm : Form
     {
-        private string appName = Program.AppName;
+        private string appName;
         private AppSettings _settings;
         private ProcessManager _processManager;
         private SettingsForm _settingsForm;
@@ -20,6 +20,8 @@ namespace bdmanager
 
         public MainForm()
         {
+            appName = Program.AppName;
+
             InitializeComponent();
             InitializeApplication();
         }
@@ -104,7 +106,6 @@ namespace bdmanager
             
             MenuItem exitMenuItem = new MenuItem("Выход");
             exitMenuItem.Click += (s, e) => { 
-                ShutdownProcesses();
                 _notifyIcon.Visible = false;
                 Application.Exit(); 
             };
@@ -120,10 +121,9 @@ namespace bdmanager
 
         private void InitializeApplication()
         {
-            _settings = AppSettings.Load();
-            
-            _processManager = new ProcessManager(_settings);
-            
+            _settings = Program._settings;
+            _processManager = Program._processManager;
+
             string appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _logger = new Logger(appDir);
             _logger.LogAdded += (s, message) => AddLogToUi(message);
@@ -131,7 +131,7 @@ namespace bdmanager
             _processManager.LogMessage += (s, message) => _logger.Log(message);
             _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
             
-            _settingsForm = new SettingsForm(_settings);
+            _settingsForm = new SettingsForm();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -153,7 +153,7 @@ namespace bdmanager
             }
             else
             {
-                ShutdownProcesses();
+                Application.Exit();
             }
         }
 
@@ -197,7 +197,7 @@ namespace bdmanager
 
         private void OpenSettings()
         {
-            _settingsForm = new SettingsForm(_settings);
+            _settingsForm = new SettingsForm();
             
             if (_settingsForm.ShowDialog() == DialogResult.OK)
             {
@@ -324,15 +324,6 @@ namespace bdmanager
             }
             
             return SystemIcons.Application;
-        }
-
-        private void ShutdownProcesses()
-        {
-            if (_processManager != null && _processManager.IsRunning)
-            {
-                AddLog("Останавливаем процессы");
-                _processManager.Stop();
-            }
         }
     }
 } 

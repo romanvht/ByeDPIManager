@@ -12,9 +12,9 @@ namespace bdmanager
         private ListBox _appListBox;
         private TextBox _appTextBox;
 
-        public SettingsForm(AppSettings settings)
+        public SettingsForm()
         {
-            _settings = settings;
+            _settings = Program._settings;
             InitializeComponent();
         }
 

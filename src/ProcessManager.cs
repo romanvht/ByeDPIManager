@@ -79,7 +79,6 @@ namespace bdmanager
                     _byeDpiProcess.Exited += (sender, e) =>
                     {
                         Stop();
-                        RaiseLogMessage("ByeDPI процесс остановлен");
                     };
 
                     _byeDpiProcess.Start();
@@ -106,8 +105,7 @@ namespace bdmanager
                             UseShellExecute = false,
                             CreateNoWindow = true,
                             RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            Arguments = "run -instance console"
+                            RedirectStandardError = true
                         },
                         EnableRaisingEvents = true
                     };
@@ -127,7 +125,6 @@ namespace bdmanager
                     _proxifyreProcess.Exited += (sender, e) =>
                     {
                         Stop();
-                        RaiseLogMessage("ProxiFyre процесс остановлен");
                     };
 
                     _proxifyreProcess.Start();
@@ -166,6 +163,7 @@ namespace bdmanager
                     { 
                         _byeDpiProcess.Kill();
                         _byeDpiProcess = null;
+                        RaiseLogMessage("ByeDPI процесс остановлен");
                     }
                     catch (Exception ex)
                     {
@@ -179,6 +177,7 @@ namespace bdmanager
                     { 
                         _proxifyreProcess.Kill();
                         _proxifyreProcess = null;
+                        RaiseLogMessage("ProxiFyre процесс остановлен");
                     }
                     catch (Exception ex)
                     {
