@@ -4,9 +4,10 @@
 
 ## Требования
 
-1. [ProxiFyre](https://github.com/wiresock/proxifyre)
-2. [ByeDPI](https://github.com/hufrea/byedpi)
-3. [Windows Packet Filter](https://github.com/wiresock/ndisapi)
+1. Windows 7+ (x64), .NET Framework 4.7.2+
+2. [ProxiFyre](https://github.com/wiresock/proxifyre)
+3. [ByeDPI](https://github.com/hufrea/byedpi)
+4. [Windows Packet Filter](https://github.com/wiresock/ndisapi)
 
 ## Использование
 
