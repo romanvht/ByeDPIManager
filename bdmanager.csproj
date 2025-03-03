@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>bdmanager</RootNamespace>
+    <Product>ByeDPI Manager</Product>
+    <AssemblyName>ByeDPI Manager</AssemblyName>
+    <Authors>romanvht</Authors>
+    <Description>Менеджер для ByeDPI и ProxiFyre</Description>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.1.1</AssemblyVersion>
+    <FileVersion>0.0.1.1</FileVersion>
+    <Copyright>romanvht</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="icon.ico" />
+    <EmbeddedResource Include="icon.ico" />
+  </ItemGroup>
+
+</Project> 
