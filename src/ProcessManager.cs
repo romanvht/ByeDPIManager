@@ -19,7 +19,7 @@ namespace bdmanager
             _settings = settings;
         }
 
-        public bool IsRunning => _settings.IsRunning;
+        public bool IsRunning => _byeDpiProcess != null && !_byeDpiProcess.HasExited && _proxifyreProcess != null && !_proxifyreProcess.HasExited;
 
         public async Task StartAsync()
         {
@@ -145,8 +145,6 @@ namespace bdmanager
                     return;
                 }
 
-                _settings.IsRunning = true;
-                _settings.Save();
                 RaiseStatusChanged(true);
             }
             catch (Exception ex)
@@ -178,8 +176,6 @@ namespace bdmanager
                     RaiseLogMessage("ProxiFyre остановлен");
                 }
 
-                _settings.IsRunning = false;
-                _settings.Save();
                 RaiseStatusChanged(false);
             }
             catch (Exception ex)
@@ -203,15 +199,9 @@ namespace bdmanager
                     {
                         try { _proxifyreProcess.Kill(); } catch { }
                     }
-                    
-                    _settings.IsRunning = false;
-                    try { _settings.Save(); } catch { }
                 }
             }
-            catch
-            {
-
-            }
+            catch { }
         }
 
         private void RaiseLogMessage(string message)
@@ -268,8 +258,6 @@ namespace bdmanager
                 
                 if (processesFound)
                 {
-                    _settings.IsRunning = false;
-                    _settings.Save();
                     RaiseStatusChanged(false);
                 }
             }
