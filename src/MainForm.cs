@@ -14,6 +14,7 @@ namespace bdmanager
         private ProcessManager _processManager;
         private SettingsForm _settingsForm;
         private NotifyIcon _notifyIcon;
+        private RoundButton _toggleButton;
         private MenuItem _toggleMenuItem;
         private Logger _logger;
 
@@ -41,7 +42,7 @@ namespace bdmanager
             BackColor = Color.FromArgb(30, 30, 30);
             ForeColor = Color.White;
             
-            RoundButton toggleButton = new RoundButton
+            _toggleButton = new RoundButton
             {
                 Text = "Подключить",
                 Size = new Size(160, 80),
@@ -53,8 +54,8 @@ namespace bdmanager
                 BorderSize = 1,
                 BorderColor = Color.FromArgb(100, 100, 100)
             };
-            toggleButton.Click += ToggleButton_Click;
-            Controls.Add(toggleButton);
+            _toggleButton.Click += ToggleButton_Click;
+            Controls.Add(_toggleButton);
             
             RoundButton settingsButton = new RoundButton
             {
@@ -291,36 +292,24 @@ namespace bdmanager
                 Invoke(new Action(() => UpdateStatus(isRunning)));
                 return;
             }
-            
-            RoundButton toggleButton = null;
-            foreach (Control control in Controls)
-            {
-                if (control is RoundButton button && (button.Text == "Подключить" || button.Text == "Отключить"))
-                {
-                    toggleButton = button;
-                    break;
-                }
-            }
-            
-            if (toggleButton == null) return;
-            
-            toggleButton.Text = isRunning ? "Отключить" : "Подключить";
+
+            _toggleButton.Text = isRunning ? "Отключить" : "Подключить";
             _toggleMenuItem.Text = isRunning ? "Отключить" : "Подключить";
             _notifyIcon.Text = $"{appName}: {(isRunning ? "Подключено" : "Отключено")}";
             
             if (isRunning)
             {
-                toggleButton.BackColor = Color.FromArgb(200, 50, 50);
-                toggleButton.HoverColor = Color.FromArgb(220, 60, 60);
-                toggleButton.PressedColor = Color.FromArgb(180, 40, 40);
-                toggleButton.BorderColor = Color.FromArgb(240, 70, 70);
+                _toggleButton.BackColor = Color.FromArgb(200, 50, 50);
+                _toggleButton.HoverColor = Color.FromArgb(220, 60, 60);
+                _toggleButton.PressedColor = Color.FromArgb(180, 40, 40);
+                _toggleButton.BorderColor = Color.FromArgb(240, 70, 70);
             }
             else
             {
-                toggleButton.BackColor = Color.FromArgb(40, 120, 50);
-                toggleButton.HoverColor = Color.FromArgb(50, 140, 60);
-                toggleButton.PressedColor = Color.FromArgb(30, 100, 40);
-                toggleButton.BorderColor = Color.FromArgb(60, 160, 70);
+                _toggleButton.BackColor = Color.FromArgb(40, 120, 50);
+                _toggleButton.HoverColor = Color.FromArgb(50, 140, 60);
+                _toggleButton.PressedColor = Color.FromArgb(30, 100, 40);
+                _toggleButton.BorderColor = Color.FromArgb(60, 160, 70);
             }
         }
 
