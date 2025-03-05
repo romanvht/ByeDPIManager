@@ -14,6 +14,7 @@ namespace bdmanager
         private ProcessManager _processManager;
         private SettingsForm _settingsForm;
         private NotifyIcon _notifyIcon;
+        private MenuItem _toggleMenuItem;
         private Logger _logger;
 
         public MainForm()
@@ -91,29 +92,7 @@ namespace bdmanager
             };
             logPanel.Controls.Add(logBox);
             
-            _notifyIcon = new NotifyIcon
-            {
-                Icon = GetIconFromResources(),
-                Text = appName,
-                Visible = true
-            };
-            
-            ContextMenu trayMenu = new ContextMenu();
-            MenuItem openMenuItem = new MenuItem("Открыть");
-            openMenuItem.Click += (s, e) => { Show(); WindowState = FormWindowState.Normal; };
-            
-            MenuItem exitMenuItem = new MenuItem("Выход");
-            exitMenuItem.Click += (s, e) => { 
-                _notifyIcon.Visible = false;
-                Application.Exit(); 
-            };
-            
-            trayMenu.MenuItems.Add(openMenuItem);
-            trayMenu.MenuItems.Add(exitMenuItem);
-            
-            _notifyIcon.ContextMenu = trayMenu;
-            _notifyIcon.DoubleClick += (s, e) => { Show(); WindowState = FormWindowState.Normal; };
-            
+            InitializeTray();
             ResumeLayout(false);
         }
 
@@ -130,6 +109,45 @@ namespace bdmanager
             _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
             
             _settingsForm = new SettingsForm();
+        }
+
+        private void InitializeTray()
+        {
+            _notifyIcon = new NotifyIcon
+            {
+                Icon = GetIconFromResources(),
+                Text = appName,
+                Visible = true
+            };
+            
+            ContextMenu trayMenu = new ContextMenu();
+
+            MenuItem openMenuItem = new MenuItem("Открыть");
+            openMenuItem.Click += (s, e) => { 
+                Show(); 
+                WindowState = FormWindowState.Normal; 
+            };
+
+            _toggleMenuItem = new MenuItem("Подключить");
+            _toggleMenuItem.Click += (s, e) => { 
+                ToggleConnection();
+            };
+
+            MenuItem exitMenuItem = new MenuItem("Выход");
+            exitMenuItem.Click += (s, e) => { 
+                _notifyIcon.Visible = false;
+                Application.Exit(); 
+            };
+            
+            trayMenu.MenuItems.Add(openMenuItem);
+            trayMenu.MenuItems.Add(_toggleMenuItem);
+            trayMenu.MenuItems.Add(exitMenuItem);
+            
+            _notifyIcon.ContextMenu = trayMenu;
+            _notifyIcon.DoubleClick += (s, e) => { 
+                Show(); 
+                WindowState = FormWindowState.Normal; 
+            };
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -287,6 +305,8 @@ namespace bdmanager
             if (toggleButton == null) return;
             
             toggleButton.Text = isRunning ? "Отключить" : "Подключить";
+            _toggleMenuItem.Text = isRunning ? "Отключить" : "Подключить";
+            _notifyIcon.Text = $"{appName}: {(isRunning ? "Подключено" : "Отключено")}";
             
             if (isRunning)
             {
@@ -302,10 +322,6 @@ namespace bdmanager
                 toggleButton.PressedColor = Color.FromArgb(30, 100, 40);
                 toggleButton.BorderColor = Color.FromArgb(60, 160, 70);
             }
-            
-            toggleButton.ForeColor = Color.White;
-            
-            _notifyIcon.Text = $"bdmanager: {(isRunning ? "Подключено" : "Отключено")}";
         }
 
         private Icon GetIconFromResources()
