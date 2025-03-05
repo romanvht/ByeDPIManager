@@ -49,8 +49,8 @@ namespace bdmanager {
             EnableRaisingEvents = true
           };
 
-          _byeDpiProcess.OutputDataReceived += ProcessOutputHandler;
-          _byeDpiProcess.ErrorDataReceived += ProcessOutputHandler;
+          _byeDpiProcess.OutputDataReceived += ByeDpiOutputHandler;
+          _byeDpiProcess.ErrorDataReceived += ByeDpiOutputHandler;
           _byeDpiProcess.Exited += ProcessStopHandler;
 
           _byeDpiProcess.Start();
@@ -78,8 +78,8 @@ namespace bdmanager {
             EnableRaisingEvents = true
           };
 
-          _proxifyreProcess.OutputDataReceived += ProcessOutputHandler;
-          _proxifyreProcess.ErrorDataReceived += ProcessOutputHandler;
+          _proxifyreProcess.OutputDataReceived += ProxifyreOutputHandler;
+          _proxifyreProcess.ErrorDataReceived += ProxifyreOutputHandler;
           _proxifyreProcess.Exited += ProcessStopHandler;
 
           _proxifyreProcess.Start();
@@ -135,10 +135,16 @@ namespace bdmanager {
       }
     }
 
-    private void ProcessOutputHandler(object sender, DataReceivedEventArgs e) {
-      if (sender is Process process && !string.IsNullOrEmpty(e.Data)) {
-        RaiseLogMessage($"{process.ProcessName}: {e.Data}");
-      }
+    private void ByeDpiOutputHandler(object sender, DataReceivedEventArgs e) {
+        if (!string.IsNullOrEmpty(e.Data)) {
+            RaiseLogMessage($"ByeDPI: {e.Data}");
+        }
+    }
+
+    private void ProxifyreOutputHandler(object sender, DataReceivedEventArgs e) {
+        if (!string.IsNullOrEmpty(e.Data)) {
+            RaiseLogMessage($"ProxiFyre: {e.Data}");
+        }
     }
 
     private void ProcessStopHandler(object sender, EventArgs e) {
