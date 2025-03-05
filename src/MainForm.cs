@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace bdmanager {
   public partial class MainForm : Form {
@@ -190,26 +191,17 @@ namespace bdmanager {
 
     private void AddLogToUi(string message) {
       if (_logBox.IsDisposed) return;
+
+      if (_logBox.InvokeRequired) {
+        _logBox.Invoke(new Action(() => AddLogToUi(message)));
+        return;
+      }
+
       string timestamp = DateTime.Now.ToString("HH:mm:ss");
       string logLine = $"[{timestamp}] {message}\n";
 
-      string[] lines = _logBox.Text.Split('\n');
-      if (lines.Length > 500) {
-        bool wasAtBottom = _logBox.SelectionStart >= _logBox.Text.Length - 5;
-
-        StringBuilder newText = new StringBuilder();
-        for (int i = lines.Length - 500; i < lines.Length; i++) {
-          if (i >= 0 && i < lines.Length && !string.IsNullOrEmpty(lines[i])) {
-            newText.AppendLine(lines[i]);
-          }
-        }
-
-        _logBox.Text = newText.ToString();
-
-        if (wasAtBottom) {
-          _logBox.SelectionStart = _logBox.Text.Length;
-          _logBox.ScrollToCaret();
-        }
+      if (_logBox.Lines.Length > 500) {
+        _logBox.Text = string.Join("\n", _logBox.Lines.Skip(_logBox.Lines.Length - 500));
       }
 
       _logBox.AppendText(logLine);

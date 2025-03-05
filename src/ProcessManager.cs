@@ -136,15 +136,15 @@ namespace bdmanager {
     }
 
     private void ByeDpiOutputHandler(object sender, DataReceivedEventArgs e) {
-        if (!string.IsNullOrEmpty(e.Data)) {
-            RaiseLogMessage($"ByeDPI: {e.Data}");
-        }
+      if (!string.IsNullOrEmpty(e.Data)) {
+        RaiseLogMessage($"ByeDPI: {e.Data}");
+      }
     }
 
     private void ProxifyreOutputHandler(object sender, DataReceivedEventArgs e) {
-        if (!string.IsNullOrEmpty(e.Data)) {
-            RaiseLogMessage($"ProxiFyre: {e.Data}");
-        }
+      if (!string.IsNullOrEmpty(e.Data)) {
+        RaiseLogMessage($"ProxiFyre: {e.Data}");
+      }
     }
 
     private void ProcessStopHandler(object sender, EventArgs e) {
