@@ -107,10 +107,15 @@ namespace bdmanager {
 
     public void Stop() {
       try {
-        if (_byeDpiProcess != null && !_byeDpiProcess.HasExited) {
+        if (_byeDpiProcess?.HasExited == false) {
           try {
+            _byeDpiProcess.OutputDataReceived -= ProcessOutputHandler;
+            _byeDpiProcess.ErrorDataReceived -= ProcessOutputHandler;
+            _byeDpiProcess.Exited -= ProcessStopHandler;
+
             _byeDpiProcess.Kill();
             _byeDpiProcess = null;
+
             RaiseLogMessage("ByeDPI процесс остановлен");
           }
           catch (Exception ex) {
@@ -118,10 +123,15 @@ namespace bdmanager {
           }
         }
 
-        if (_proxifyreProcess != null && !_proxifyreProcess.HasExited) {
+        if (_proxifyreProcess?.HasExited == false) {
           try {
+            _proxifyreProcess.OutputDataReceived -= ProcessOutputHandler;
+            _proxifyreProcess.ErrorDataReceived -= ProcessOutputHandler;
+            _proxifyreProcess.Exited -= ProcessStopHandler;
+
             _proxifyreProcess.Kill();
             _proxifyreProcess = null;
+
             RaiseLogMessage("ProxiFyre процесс остановлен");
           }
           catch (Exception ex) {
