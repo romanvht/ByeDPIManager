@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace bdmanager {
@@ -22,7 +23,7 @@ namespace bdmanager {
 
     private void InitLogFile() {
       try {
-        string dateStr = DateTime.Now.ToString("yyyy-MM-dd");
+        string dateStr = DateTime.Now.ToString("dd-MM-yyyy");
         _logFilePath = Path.Combine(_logsDir, $"bdmanager_{dateStr}.log");
 
         if (!File.Exists(_logFilePath)) {
@@ -41,24 +42,17 @@ namespace bdmanager {
       try {
         if (!Directory.Exists(_logsDir)) return;
 
-        var files = Directory.GetFiles(_logsDir, "bdmanager_*.log");
-        var currentDate = DateTime.Now.Date;
+        var files = Directory.GetFiles(_logsDir, "bdmanager_*.log").OrderByDescending(File.GetCreationTime).ToList();
 
-        foreach (var file in files) {
-          try {
-            var fileName = Path.GetFileNameWithoutExtension(file);
-            if (fileName.StartsWith("bdmanager_") && fileName.Length > 11) {
-              var dateString = fileName.Substring(11);
-              if (DateTime.TryParse(dateString, out var fileDate)) {
-                if ((currentDate - fileDate.Date).TotalDays > 7) {
-                  File.Delete(file);
-                  Console.WriteLine($"Удален старый лог: {file}");
-                }
-              }
+        if (files.Count > 10) {
+          foreach (var file in files.Skip(10)) {
+            try {
+              File.Delete(file);
+              Console.WriteLine($"Удален старый лог: {file}");
             }
-          }
-          catch {
-
+            catch (Exception ex) {
+              Console.WriteLine($"Ошибка удаления файла {file}: {ex.Message}");
+            }
           }
         }
       }
@@ -74,10 +68,7 @@ namespace bdmanager {
 
     private void WriteToFile(string message) {
       try {
-        if (string.IsNullOrEmpty(_logFilePath)) return;
-
-        string dateStr = DateTime.Now.ToString("yyyy-MM-dd");
-        if (!_logFilePath.Contains(dateStr)) {
+        if (string.IsNullOrEmpty(_logFilePath)) {
           InitLogFile();
         }
 
