@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 namespace bdmanager
 {

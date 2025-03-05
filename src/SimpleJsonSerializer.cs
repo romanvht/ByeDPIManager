@@ -1,11 +1,8 @@
-using System;
-using System.Text;
-
 namespace bdmanager
 {
     public static class SimpleJsonSerializer
     {
-        public static string Serialize(object obj, bool indent = true)
+        public static string Serialize(object obj)
         {
             var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
             string json = serializer.Serialize(obj);
