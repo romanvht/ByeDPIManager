@@ -19,17 +19,17 @@ namespace bdmanager
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             
-            this.Text = "Настройки";
-            this.Size = new Size(510, 490);
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Load += SettingsForm_Load;
-            this.BackColor = SystemColors.Control;
-            this.ForeColor = SystemColors.ControlText;
+            Text = "Настройки";
+            Size = new Size(510, 490);
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Load += SettingsForm_Load;
+            BackColor = SystemColors.Control;
+            ForeColor = SystemColors.ControlText;
             
             TabControl tabControl = new TabControl
             {
@@ -37,7 +37,7 @@ namespace bdmanager
                 Size = new Size(460, 380),
                 Name = "tabControl"
             };
-            this.Controls.Add(tabControl);
+            Controls.Add(tabControl);
             
             TabPage byeDpiTabPage = new TabPage
             {
@@ -249,7 +249,7 @@ namespace bdmanager
                 Name = "okButton"
             };
             okButton.Click += OkButton_Click;
-            this.Controls.Add(okButton);
+            Controls.Add(okButton);
             
             Button cancelButton = new Button
             {
@@ -259,17 +259,17 @@ namespace bdmanager
                 Size = new Size(80, 30),
                 Name = "cancelButton"
             };
-            this.Controls.Add(cancelButton);
+            Controls.Add(cancelButton);
             
-            this.AcceptButton = okButton;
-            this.CancelButton = cancelButton;
+            AcceptButton = okButton;
+            CancelButton = cancelButton;
             
-            this.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            TabControl tabControl = this.Controls["tabControl"] as TabControl;
+            TabControl tabControl = Controls["tabControl"] as TabControl;
 
             TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
             GroupBox byeDpiGroupBox = byeDpiTabPage.Controls["byeDpiGroupBox"] as GroupBox;
@@ -301,7 +301,7 @@ namespace bdmanager
 
         private void OkButton_Click(object sender, EventArgs e)
         {
-            TabControl tabControl = this.Controls["tabControl"] as TabControl;
+            TabControl tabControl = Controls["tabControl"] as TabControl;
 
             TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
             GroupBox byeDpiGroupBox = byeDpiTabPage.Controls["byeDpiGroupBox"] as GroupBox;
@@ -346,7 +346,7 @@ namespace bdmanager
                 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    TabControl tabControl = this.Controls["tabControl"] as TabControl;
+                    TabControl tabControl = Controls["tabControl"] as TabControl;
                     if (tabControl != null)
                     {
                         TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
@@ -376,7 +376,7 @@ namespace bdmanager
                 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    TabControl tabControl = this.Controls["tabControl"] as TabControl;
+                    TabControl tabControl = Controls["tabControl"] as TabControl;
                     if (tabControl != null)
                     {
                         TabPage proxiFyreTabPage = tabControl.TabPages["proxiFyreTabPage"];

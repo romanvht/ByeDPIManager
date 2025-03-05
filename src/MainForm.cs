@@ -26,25 +26,25 @@ namespace bdmanager
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             
-            this.Text = appName;
-            this.Size = new Size(480, 380);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.FormClosing += MainForm_FormClosing;
-            this.Load += MainForm_Load;
-            this.Icon = GetIconFromResources();
+            Text = appName;
+            Size = new Size(480, 380);
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            Icon = GetIconFromResources();
             
-            this.BackColor = Color.FromArgb(30, 30, 30);
-            this.ForeColor = Color.White;
+            BackColor = Color.FromArgb(30, 30, 30);
+            ForeColor = Color.White;
             
             RoundButton toggleButton = new RoundButton
             {
                 Text = "Подключить",
                 Size = new Size(160, 80),
-                Location = new Point((this.ClientSize.Width - 160) / 2, 40),
+                Location = new Point((ClientSize.Width - 160) / 2, 40),
                 BackColor = Color.FromArgb(45, 45, 45),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
@@ -53,13 +53,13 @@ namespace bdmanager
                 BorderColor = Color.FromArgb(100, 100, 100)
             };
             toggleButton.Click += ToggleButton_Click;
-            this.Controls.Add(toggleButton);
+            Controls.Add(toggleButton);
             
             RoundButton settingsButton = new RoundButton
             {
                 Text = "Настройки",
                 Size = new Size(120, 40),
-                Location = new Point((this.ClientSize.Width - 120) / 2, 140),
+                Location = new Point((ClientSize.Width - 120) / 2, 140),
                 BackColor = Color.FromArgb(60, 60, 60),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 9),
@@ -68,16 +68,16 @@ namespace bdmanager
                 BorderColor = Color.FromArgb(100, 100, 100)
             };
             settingsButton.Click += SettingsButton_Click;
-            this.Controls.Add(settingsButton);
+            Controls.Add(settingsButton);
             
             Panel logPanel = new Panel
             {
-                Size = new Size(this.ClientSize.Width - 20, 120),
-                Location = new Point(10, this.ClientSize.Height - 130),
+                Size = new Size(ClientSize.Width - 20, 120),
+                Location = new Point(10, ClientSize.Height - 130),
                 BackColor = Color.FromArgb(20, 20, 20),
                 BorderStyle = BorderStyle.FixedSingle
             };
-            this.Controls.Add(logPanel);
+            Controls.Add(logPanel);
             
             RichTextBox logBox = new RichTextBox
             {
@@ -100,7 +100,7 @@ namespace bdmanager
             
             ContextMenu trayMenu = new ContextMenu();
             MenuItem openMenuItem = new MenuItem("Открыть");
-            openMenuItem.Click += (s, e) => { this.Show(); this.WindowState = FormWindowState.Normal; };
+            openMenuItem.Click += (s, e) => { Show(); WindowState = FormWindowState.Normal; };
             
             MenuItem exitMenuItem = new MenuItem("Выход");
             exitMenuItem.Click += (s, e) => { 
@@ -112,9 +112,9 @@ namespace bdmanager
             trayMenu.MenuItems.Add(exitMenuItem);
             
             _notifyIcon.ContextMenu = trayMenu;
-            _notifyIcon.DoubleClick += (s, e) => { this.Show(); this.WindowState = FormWindowState.Normal; };
+            _notifyIcon.DoubleClick += (s, e) => { Show(); WindowState = FormWindowState.Normal; };
             
-            this.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         private void InitializeApplication()
@@ -145,8 +145,8 @@ namespace bdmanager
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 e.Cancel = true;
-                this.WindowState = FormWindowState.Minimized;
-                this.Hide();
+                WindowState = FormWindowState.Minimized;
+                Hide();
                 _notifyIcon.ShowBalloonTip(3000, appName, "Приложение свернуто в трей", ToolTipIcon.Info);
             }
             else
@@ -168,7 +168,7 @@ namespace bdmanager
         private void ToggleConnection()
         {
             RoundButton toggleButton = null;
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 if (control is RoundButton button && (button.Text == "Подключить" || button.Text == "Отключить"))
                 {
@@ -211,9 +211,9 @@ namespace bdmanager
         
         private void AddLogToUi(string message)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action<string>(UpdateLogInUi), message);
+                Invoke(new Action<string>(UpdateLogInUi), message);
                 return;
             }
             
@@ -223,7 +223,7 @@ namespace bdmanager
         private void UpdateLogInUi(string message)
         {
             Panel logPanel = null;
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 if (control is Panel panel && panel.Controls.Count > 0 && panel.Controls[0] is RichTextBox)
                 {
@@ -268,14 +268,14 @@ namespace bdmanager
 
         private void UpdateStatus(bool isRunning)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(new Action(() => UpdateStatus(isRunning)));
+                Invoke(new Action(() => UpdateStatus(isRunning)));
                 return;
             }
             
             RoundButton toggleButton = null;
-            foreach (Control control in this.Controls)
+            foreach (Control control in Controls)
             {
                 if (control is RoundButton button && (button.Text == "Подключить" || button.Text == "Отключить"))
                 {
