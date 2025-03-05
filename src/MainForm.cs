@@ -189,6 +189,7 @@ namespace bdmanager {
     }
 
     private void AddLogToUi(string message) {
+      if (_logBox.IsDisposed) return;
       string timestamp = DateTime.Now.ToString("HH:mm:ss");
       string logLine = $"[{timestamp}] {message}\n";
 

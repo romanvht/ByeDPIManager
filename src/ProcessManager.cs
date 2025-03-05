@@ -98,9 +98,6 @@ namespace bdmanager {
       }
       catch (Exception ex) {
         RaiseLogMessage($"Общая ошибка при запуске: {ex.Message}");
-        if (ex.InnerException != null) {
-          RaiseLogMessage($"Внутренняя ошибка: {ex.InnerException.Message}");
-        }
         Stop();
       }
     }
@@ -109,10 +106,6 @@ namespace bdmanager {
       try {
         if (_byeDpiProcess?.HasExited == false) {
           try {
-            _byeDpiProcess.OutputDataReceived -= ProcessOutputHandler;
-            _byeDpiProcess.ErrorDataReceived -= ProcessOutputHandler;
-            _byeDpiProcess.Exited -= ProcessStopHandler;
-
             _byeDpiProcess.Kill();
             _byeDpiProcess = null;
 
@@ -125,10 +118,6 @@ namespace bdmanager {
 
         if (_proxifyreProcess?.HasExited == false) {
           try {
-            _proxifyreProcess.OutputDataReceived -= ProcessOutputHandler;
-            _proxifyreProcess.ErrorDataReceived -= ProcessOutputHandler;
-            _proxifyreProcess.Exited -= ProcessStopHandler;
-
             _proxifyreProcess.Kill();
             _proxifyreProcess = null;
 
@@ -147,8 +136,7 @@ namespace bdmanager {
     }
 
     private void ProcessOutputHandler(object sender, DataReceivedEventArgs e) {
-      if (!string.IsNullOrEmpty(e.Data)) {
-        Process process = sender as Process;
+      if (sender is Process process && !string.IsNullOrEmpty(e.Data)) {
         RaiseLogMessage($"{process.ProcessName}: {e.Data}");
       }
     }
