@@ -13,7 +13,7 @@ namespace bdmanager
 
         public SettingsForm()
         {
-            _settings = Program._settings;
+            _settings = Program.settings;
             InitializeComponent();
         }
 

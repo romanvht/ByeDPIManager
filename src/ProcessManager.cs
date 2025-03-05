@@ -13,15 +13,12 @@ namespace bdmanager
         public event EventHandler<string> LogMessage;
         public event EventHandler<bool> StatusChanged;
 
-        public ProcessManager(AppSettings settings)
-        {
-            _settings = settings;
-        }
-
-        public bool IsRunning => _byeDpiProcess != null && !_byeDpiProcess.HasExited && _proxifyreProcess != null && !_proxifyreProcess.HasExited;
+        public bool IsRunning => _byeDpiProcess?.HasExited == false && _proxifyreProcess?.HasExited == false;
 
         public void Start()
         {
+            _settings = Program.settings;
+
             try
             {
                 if (!File.Exists(_settings.ByeDpiPath))
@@ -63,22 +60,9 @@ namespace bdmanager
                         EnableRaisingEvents = true
                     };
 
-                    _byeDpiProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                            RaiseLogMessage($"ByeDPI: {e.Data}");
-                    };
-
-                    _byeDpiProcess.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                            RaiseLogMessage($"ByeDPI: {e.Data}");
-                    };
-
-                    _byeDpiProcess.Exited += (sender, e) =>
-                    {
-                        Stop();
-                    };
+                    _byeDpiProcess.OutputDataReceived += ProcessOutputHandler;
+                    _byeDpiProcess.ErrorDataReceived += ProcessOutputHandler;
+                    _byeDpiProcess.Exited += ProcessStopHandler;
 
                     _byeDpiProcess.Start();
                     _byeDpiProcess.BeginOutputReadLine();
@@ -109,22 +93,9 @@ namespace bdmanager
                         EnableRaisingEvents = true
                     };
 
-                    _proxifyreProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                            RaiseLogMessage($"ProxiFyre: {e.Data}");
-                    };
-
-                    _proxifyreProcess.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                            RaiseLogMessage($"ProxiFyre: {e.Data}");
-                    };
-
-                    _proxifyreProcess.Exited += (sender, e) =>
-                    {
-                        Stop();
-                    };
+                    _proxifyreProcess.OutputDataReceived += ProcessOutputHandler;
+                    _proxifyreProcess.ErrorDataReceived += ProcessOutputHandler;
+                    _proxifyreProcess.Exited += ProcessStopHandler;
 
                     _proxifyreProcess.Start();
                     _proxifyreProcess.BeginOutputReadLine();
@@ -190,6 +161,19 @@ namespace bdmanager
             {
                 RaiseLogMessage($"Общая ошибка при остановке процессов: {ex.Message}");
             }
+        }
+
+        private void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Data)) {
+                Process process = sender as Process;
+                RaiseLogMessage($"{process.ProcessName}: {e.Data}");
+            }
+        }
+
+        private void ProcessStopHandler(object sender, EventArgs e)
+        {
+            Stop();
         }
 
         private void RaiseLogMessage(string message)

@@ -11,12 +11,13 @@ namespace bdmanager
     {
         private string appName;
         private AppSettings _settings;
-        private ProcessManager _processManager;
         private SettingsForm _settingsForm;
-        private NotifyIcon _notifyIcon;
-        private RoundButton _toggleButton;
-        private MenuItem _toggleMenuItem;
+        private ProcessManager _processManager;
         private Logger _logger;
+        private RoundButton _toggleButton;
+        private RichTextBox _logBox;
+        private NotifyIcon _notifyIcon;
+        private MenuItem _toggleMenuItem;
 
         public MainForm()
         {
@@ -81,7 +82,7 @@ namespace bdmanager
             };
             Controls.Add(logPanel);
             
-            RichTextBox logBox = new RichTextBox
+            _logBox = new RichTextBox
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = true,
@@ -91,7 +92,7 @@ namespace bdmanager
                 BorderStyle = BorderStyle.None,
                 Margin = new Padding(5)
             };
-            logPanel.Controls.Add(logBox);
+            logPanel.Controls.Add(_logBox);
             
             InitializeTray();
             ResumeLayout(false);
@@ -99,17 +100,15 @@ namespace bdmanager
 
         private void InitializeApplication()
         {
-            _settings = Program._settings;
-            _processManager = Program._processManager;
+            _settings = Program.settings;
+            _settingsForm = new SettingsForm();
 
-            string appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _logger = new Logger(appDir);
+            _logger = Program.logger;
             _logger.LogAdded += (s, message) => AddLogToUi(message);
-            
+
+            _processManager = Program.processManager;
             _processManager.LogMessage += (s, message) => _logger.Log(message);
             _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
-            
-            _settingsForm = new SettingsForm();
         }
 
         private void InitializeTray()
@@ -186,19 +185,7 @@ namespace bdmanager
 
         private void ToggleConnection()
         {
-            RoundButton toggleButton = null;
-            foreach (Control control in Controls)
-            {
-                if (control is RoundButton button && (button.Text == "Подключить" || button.Text == "Отключить"))
-                {
-                    toggleButton = button;
-                    break;
-                }
-            }
-            
-            if (toggleButton == null) return;
-            
-            toggleButton.Enabled = false;
+            _toggleButton.Enabled = false;
             
             if (_processManager.IsRunning)
             {
@@ -209,7 +196,7 @@ namespace bdmanager
                 _processManager.Start();
             }
             
-            toggleButton.Enabled = true;
+            _toggleButton.Enabled = true;
         }
 
         private void OpenSettings()
@@ -219,49 +206,19 @@ namespace bdmanager
             if (_settingsForm.ShowDialog() == DialogResult.OK)
             {
                 _settings.Save();
-                AddLog("Настройки сохранены");
+                _logger.Log("Настройки сохранены");
             }
-        }
-
-        private void AddLog(string message)
-        {
-            _logger.Log(message);
         }
         
         private void AddLogToUi(string message)
         {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<string>(UpdateLogInUi), message);
-                return;
-            }
-            
-            UpdateLogInUi(message);
-        }
-        
-        private void UpdateLogInUi(string message)
-        {
-            Panel logPanel = null;
-            foreach (Control control in Controls)
-            {
-                if (control is Panel panel && panel.Controls.Count > 0 && panel.Controls[0] is RichTextBox)
-                {
-                    logPanel = panel;
-                    break;
-                }
-            }
-            
-            if (logPanel == null || logPanel.Controls.Count == 0) return;
-            
-            RichTextBox logBox = (RichTextBox)logPanel.Controls[0];
-            
             string timestamp = DateTime.Now.ToString("HH:mm:ss");
             string logLine = $"[{timestamp}] {message}\n";
             
-            string[] lines = logBox.Text.Split('\n');
+            string[] lines = _logBox.Text.Split('\n');
             if (lines.Length > 500)
             {
-                bool wasAtBottom = logBox.SelectionStart >= logBox.Text.Length - 5;
+                bool wasAtBottom = _logBox.SelectionStart >= _logBox.Text.Length - 5;
                 
                 StringBuilder newText = new StringBuilder();
                 for (int i = lines.Length - 500; i < lines.Length; i++)
@@ -272,17 +229,17 @@ namespace bdmanager
                     }
                 }
                 
-                logBox.Text = newText.ToString();
+                _logBox.Text = newText.ToString();
                 
                 if (wasAtBottom)
                 {
-                    logBox.SelectionStart = logBox.Text.Length;
-                    logBox.ScrollToCaret();
+                    _logBox.SelectionStart = _logBox.Text.Length;
+                    _logBox.ScrollToCaret();
                 }
             }
             
-            logBox.AppendText(logLine);
-            logBox.ScrollToCaret();
+            _logBox.AppendText(logLine);
+            _logBox.ScrollToCaret();
         }
 
         private void UpdateStatus(bool isRunning)

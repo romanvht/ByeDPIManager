@@ -6,24 +6,24 @@ namespace bdmanager
 {
     static class Program
     {
+        private static bool createdNew = false;
         private static Mutex _mutex = null;
         private static MainForm _mainForm = null;
         
-        public static ProcessManager _processManager = null;
-        public static AppSettings _settings = null;
-        public static string AppName => System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+        public static string AppName = null;
+        public static AppSettings settings = null;
+        public static ProcessManager processManager = null;
+        public static Logger logger = null;
 
         [STAThread]
         static void Main()
         {
-            bool createdNew;
-            
+            AppName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
             _mutex = new Mutex(true, AppName, out createdNew);
             
             if (!createdNew)
             {
-                MessageBox.Show("Приложение уже запущено.", AppName, 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Приложение уже запущено.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             
@@ -36,15 +36,15 @@ namespace bdmanager
             
             try
             {
-                _settings = AppSettings.Load();
-                _processManager = new ProcessManager(_settings);
+                logger = new Logger();
+                settings = AppSettings.Load();
+                processManager = new ProcessManager();
                 _mainForm = new MainForm();
                 Application.Run(_mainForm);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка: {ex.Message}", AppName, 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Произошла ошибка: {ex.Message}", AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -73,9 +73,9 @@ namespace bdmanager
 
         public static void ShutdownProcesses()
         {
-            if (_processManager != null && _processManager.IsRunning)
+            if (processManager != null && processManager.IsRunning)
             {
-                _processManager.Stop();
+                processManager.Stop();
             }
         }
     }

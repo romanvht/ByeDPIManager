@@ -11,9 +11,9 @@ namespace bdmanager
         
         public event EventHandler<string> LogAdded;
         
-        public Logger(string appDir)
+        public Logger()
         {
-            _logsDir = Path.Combine(appDir, "logs");
+            _logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             
             if (!Directory.Exists(_logsDir))
             {
