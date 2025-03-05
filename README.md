@@ -4,8 +4,8 @@
 
 ## Требования
 
-1. Windows 7+ (x64), .NET Framework 4.7.2+
-2. [Visual C++ Redist 2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+1. Windows 7+, .NET Framework 4.7.2+
+2. [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [Windows Packet Filter](https://github.com/wiresock/ndisapi)
 4. [ProxiFyre](https://github.com/wiresock/proxifyre)
 5. [ByeDPI](https://github.com/hufrea/byedpi)
