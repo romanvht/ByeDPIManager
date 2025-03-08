@@ -3,12 +3,12 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
-using System.Text;
 using System.Linq;
 
 namespace bdmanager {
   public partial class MainForm : Form {
-    private string appName;
+    private string _appName = Program.AppName;
+    private bool _trayShow = false;
     private AppSettings _settings;
     private SettingsForm _settingsForm;
     private ProcessManager _processManager;
@@ -19,16 +19,27 @@ namespace bdmanager {
     private MenuItem _toggleMenuItem;
 
     public MainForm() {
-      appName = Program.AppName;
-
-      InitializeComponent();
       InitializeApplication();
+      InitializeComponent();
+      InitializeTray();
+    }
+
+    private void InitializeApplication() {
+      _settings = Program.settings;
+      _settingsForm = new SettingsForm();
+
+      _logger = Program.logger;
+      _logger.LogAdded += (s, message) => AddLogToUi(message);
+
+      _processManager = Program.processManager;
+      _processManager.LogMessage += (s, message) => _logger.Log(message);
+      _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
     }
 
     private void InitializeComponent() {
       SuspendLayout();
 
-      Text = appName;
+      Text = _appName;
       Size = new Size(480, 380);
       StartPosition = FormStartPosition.CenterScreen;
       FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -87,26 +98,13 @@ namespace bdmanager {
       };
       logPanel.Controls.Add(_logBox);
 
-      InitializeTray();
       ResumeLayout(false);
-    }
-
-    private void InitializeApplication() {
-      _settings = Program.settings;
-      _settingsForm = new SettingsForm();
-
-      _logger = Program.logger;
-      _logger.LogAdded += (s, message) => AddLogToUi(message);
-
-      _processManager = Program.processManager;
-      _processManager.LogMessage += (s, message) => _logger.Log(message);
-      _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
     }
 
     private void InitializeTray() {
       _notifyIcon = new NotifyIcon {
         Icon = GetIconFromResources(),
-        Text = appName,
+        Text = _appName,
         Visible = true
       };
 
@@ -152,7 +150,11 @@ namespace bdmanager {
         e.Cancel = true;
         WindowState = FormWindowState.Minimized;
         Hide();
-        _notifyIcon.ShowBalloonTip(3000, appName, "Приложение свернуто в трей", ToolTipIcon.Info);
+
+        if (!_trayShow) {
+          _notifyIcon.ShowBalloonTip(3000, _appName, "Приложение свернуто в трей", ToolTipIcon.Info);
+          _trayShow = true;
+        }
       }
       else {
         Application.Exit();
@@ -216,7 +218,7 @@ namespace bdmanager {
 
       _toggleButton.Text = isRunning ? "Отключить" : "Подключить";
       _toggleMenuItem.Text = isRunning ? "Отключить" : "Подключить";
-      _notifyIcon.Text = $"{appName}: {(isRunning ? "Подключено" : "Отключено")}";
+      _notifyIcon.Text = $"{_appName}: {(isRunning ? "Подключено" : "Отключено")}";
 
       if (isRunning) {
         _toggleButton.BackColor = Color.FromArgb(200, 50, 50);
