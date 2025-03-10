@@ -85,11 +85,6 @@ namespace bdmanager {
       BackColor = _hoverColor;
     }
 
-    protected override void OnMouseLeave(EventArgs e) {
-      base.OnMouseLeave(e);
-      BackColor = Color.FromArgb(50, 50, 50);
-    }
-
     protected override void OnMouseDown(MouseEventArgs e) {
       base.OnMouseDown(e);
       BackColor = _pressedColor;
