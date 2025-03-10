@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -6,21 +7,23 @@ namespace bdmanager {
   static class Program {
     private static bool _createdNew = false;
     private static Mutex _mutex = null;
-    private static MainForm _mainForm = null;
 
-    public static string AppName = null;
+    public static string appName = null;
+    public static bool isAutorun = false;
     public static AppSettings settings = null;
     public static ProcessManager processManager = null;
+    public static AutorunManager autorunManager = null;
     public static Logger logger = null;
 
     [STAThread]
-    static void Main() {
-      AppName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+    static void Main(string[] args) {
+      appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+      isAutorun = args.Any(arg => arg.ToLower() == "--autorun");
 
-      _mutex = new Mutex(true, AppName, out _createdNew);
+      _mutex = new Mutex(true, appName, out _createdNew);
 
       if (!_createdNew) {
-        MessageBox.Show("Приложение уже запущено.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show("Приложение уже запущено.", appName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         return;
       }
 
@@ -35,11 +38,11 @@ namespace bdmanager {
         logger = new Logger();
         settings = AppSettings.Load();
         processManager = new ProcessManager();
-        _mainForm = new MainForm();
-        Application.Run(_mainForm);
+        autorunManager = new AutorunManager();
+        Application.Run(new MainForm());
       }
       catch (Exception ex) {
-        MessageBox.Show($"Произошла ошибка: {ex.Message}", AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show($"Произошла ошибка: {ex.Message}", appName, MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
       finally {
         if (_mutex != null) {

@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace bdmanager {
   public class AppSettings {
+    public bool AutoStart { get; set; } = false;
+    public bool AutoConnect { get; set; } = false;
+    public bool StartMinimized { get; set; } = false;
+
     public string ByeDpiArguments { get; set; } = "-Ku -a3 -An -Kt,h -d1 -s3+s -An";
 
     public string ProxiFyreIp { get; set; } = "127.0.0.1";
@@ -15,7 +19,7 @@ namespace bdmanager {
     public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");
     public string ProxiFyreConfigPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "app-config.json");
 
-    private static readonly string SettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Program.AppName, "settings.json");
+    private static readonly string SettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Program.appName, "settings.json");
 
     public static AppSettings Load() {
       try {

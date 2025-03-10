@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -6,6 +7,7 @@ using System.Windows.Forms;
 namespace bdmanager {
   public partial class SettingsForm : Form {
     private AppSettings _settings;
+    private AutorunManager _autorunManager;
 
     private TabControl _tabControl;
 
@@ -16,9 +18,14 @@ namespace bdmanager {
     private TextBox _proxiFyrePortTextBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
+    
+    private CheckBox _autoStartCheckBox;
+    private CheckBox _autoConnectCheckBox;
+    private CheckBox _StartMinimizedCheckBox;
 
     public SettingsForm() {
       _settings = Program.settings;
+      _autorunManager = Program.autorunManager;
       InitializeComponent();
     }
 
@@ -224,6 +231,48 @@ namespace bdmanager {
       removeAppButton.Click += RemoveAppButton_Click;
       appsGroupBox.Controls.Add(removeAppButton);
 
+      // Autorun
+      TabPage autorunTabPage = new TabPage {
+        Text = "Автозапуск",
+        Name = "autorunTabPage",
+        BackColor = SystemColors.Control
+      };
+      _tabControl.TabPages.Add(autorunTabPage);
+
+      GroupBox autorunGroupBox = new GroupBox {
+        Text = "Настройки автозапуска",
+        Location = new Point(10, 10),
+        Size = new Size(430, 120),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "autorunGroupBox"
+      };
+      autorunTabPage.Controls.Add(autorunGroupBox);
+
+      _autoStartCheckBox = new CheckBox {
+        Text = "Автозапуск при старте устройства",
+        Location = new Point(15, 25),
+        Size = new Size(400, 20),
+        Name = "autoStartCheckBox"
+      };
+      autorunGroupBox.Controls.Add(_autoStartCheckBox);
+
+      _autoConnectCheckBox = new CheckBox {
+        Text = "Автоматическое подключение",
+        Location = new Point(15, 55),
+        Size = new Size(400, 20),
+        Name = "autoConnectCheckBox"
+      };
+      autorunGroupBox.Controls.Add(_autoConnectCheckBox);
+      
+      _StartMinimizedCheckBox = new CheckBox {
+        Text = "Запускать свернутым в трей",
+        Location = new Point(15, 85),
+        Size = new Size(400, 20),
+        Name = "StartMinimizedCheckBox"
+      };
+      autorunGroupBox.Controls.Add(_StartMinimizedCheckBox);
+
       // Form Buttons
       Button okButton = new Button {
         Text = "ОК",
@@ -255,6 +304,15 @@ namespace bdmanager {
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
       _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
       _proxiFyrePortTextBox.Text = _settings.ProxiFyrePort.ToString();
+      
+      bool autorunEnabled = _autorunManager.IsAutorunEnabled();
+      if (_settings.AutoStart != autorunEnabled) {
+        _settings.AutoStart = autorunEnabled;
+      }
+      
+      _autoStartCheckBox.Checked = _settings.AutoStart;
+      _autoConnectCheckBox.Checked = _settings.AutoConnect;
+      _StartMinimizedCheckBox.Checked = _settings.StartMinimized;
 
       _appListBox.Items.Clear();
       if (_settings.ProxifiedApps != null) {
@@ -268,6 +326,12 @@ namespace bdmanager {
       _settings.ByeDpiPath = _byeDpiPathTextBox.Text;
       _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
       _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
+      
+      _settings.AutoStart = _autoStartCheckBox.Checked;
+      _settings.AutoConnect = _autoConnectCheckBox.Checked;
+      _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
+      
+      _autorunManager.SetAutorun(_settings.AutoStart);
 
       if (!string.IsNullOrEmpty(_settings.ProxiFyrePath)) {
         string proxiFyreDir = Path.GetDirectoryName(_settings.ProxiFyrePath);

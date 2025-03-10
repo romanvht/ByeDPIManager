@@ -4,10 +4,12 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
+using System.Management;
 
 namespace bdmanager {
   public partial class MainForm : Form {
-    private string _appName = Program.AppName;
+    private string _appName = Program.appName;
     private bool _trayShow = false;
     private AppSettings _settings;
     private SettingsForm _settingsForm;
@@ -141,6 +143,20 @@ namespace bdmanager {
     private void MainForm_Load(object sender, EventArgs e) {
       _logger.Log("Приложение запущено");
       _processManager.CleanupOnStartup();
+  
+      if (_settings.AutoStart && Program.isAutorun) {
+        if (_settings.StartMinimized) {
+          _logger.Log("Запуск в тихом режиме");
+          WindowState = FormWindowState.Minimized;
+          Hide();
+          _trayShow = true;
+        }
+
+        if (_settings.AutoConnect) {
+          _logger.Log("Автоматическое подключение...");
+          ToggleConnection();
+        }
+      }
 
       UpdateStatus(_processManager.IsRunning);
     }
