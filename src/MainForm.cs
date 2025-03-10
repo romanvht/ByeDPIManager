@@ -4,8 +4,6 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Linq;
-using System.Diagnostics;
-using System.Management;
 
 namespace bdmanager {
   public partial class MainForm : Form {
