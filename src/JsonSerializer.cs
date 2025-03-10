@@ -1,5 +1,5 @@
 namespace bdmanager {
-  public static class SimpleJsonSerializer {
+  public static class JsonSerializer {
     public static string Serialize(object obj) {
       var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
       string json = serializer.Serialize(obj);

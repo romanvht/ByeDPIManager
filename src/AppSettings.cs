@@ -21,7 +21,7 @@ namespace bdmanager {
       try {
         if (File.Exists(SettingsPath)) {
           string json = File.ReadAllText(SettingsPath);
-          return SimpleJsonSerializer.Deserialize<AppSettings>(json);
+          return JsonSerializer.Deserialize<AppSettings>(json);
         }
       }
       catch (Exception ex) {
@@ -38,7 +38,7 @@ namespace bdmanager {
           Directory.CreateDirectory(directory);
         }
 
-        string json = SimpleJsonSerializer.Serialize(this);
+        string json = JsonSerializer.Serialize(this);
         File.WriteAllText(SettingsPath, json);
       }
       catch (Exception ex) {

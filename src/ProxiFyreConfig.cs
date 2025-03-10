@@ -9,13 +9,13 @@ namespace bdmanager {
     public static ProxiFyreConfig Load(string filePath) {
       if (File.Exists(filePath)) {
         string json = File.ReadAllText(filePath);
-        return SimpleJsonSerializer.Deserialize<ProxiFyreConfig>(json);
+        return JsonSerializer.Deserialize<ProxiFyreConfig>(json);
       }
       return new ProxiFyreConfig();
     }
 
     public void Save(string filePath) {
-      string json = SimpleJsonSerializer.Serialize(this);
+      string json = JsonSerializer.Serialize(this);
       File.WriteAllText(filePath, json);
     }
   }
