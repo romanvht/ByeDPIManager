@@ -15,10 +15,10 @@ namespace bdmanager {
     private TextBox _byeDpiArgsTextBox;
 
     private TextBox _proxiFyrePathTextBox;
-    private TextBox _proxiFyrePortTextBox;
+    private NumericUpDown _proxiFyrePortNumBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
-    
+
     private CheckBox _autoStartCheckBox;
     private CheckBox _autoConnectCheckBox;
     private CheckBox _StartMinimizedCheckBox;
@@ -163,12 +163,14 @@ namespace bdmanager {
       };
       proxiFyreGroupBox.Controls.Add(proxiFyrePortLabel);
 
-      _proxiFyrePortTextBox = new TextBox {
+      _proxiFyrePortNumBox = new NumericUpDown {
         Location = new Point(120, 60),
         Size = new Size(80, 23),
-        Name = "proxiFyrePortTextBox"
+        Name = "proxiFyrePortNumBox",
+        Minimum = 1,
+        Maximum = 65535
       };
-      proxiFyreGroupBox.Controls.Add(_proxiFyrePortTextBox);
+      proxiFyreGroupBox.Controls.Add(_proxiFyrePortNumBox);
 
       // Apps
       GroupBox appsGroupBox = new GroupBox {
@@ -264,7 +266,7 @@ namespace bdmanager {
         Name = "autoConnectCheckBox"
       };
       autorunGroupBox.Controls.Add(_autoConnectCheckBox);
-      
+
       _StartMinimizedCheckBox = new CheckBox {
         Text = "Запускать свернутым в трей",
         Location = new Point(15, 85),
@@ -303,13 +305,13 @@ namespace bdmanager {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
       _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
-      _proxiFyrePortTextBox.Text = _settings.ProxiFyrePort.ToString();
-      
+      _proxiFyrePortNumBox.Text = _settings.ProxiFyrePort.ToString();
+
       bool autorunEnabled = _autorunManager.IsAutorunEnabled();
       if (_settings.AutoStart != autorunEnabled) {
         _settings.AutoStart = autorunEnabled;
       }
-      
+
       _autoStartCheckBox.Checked = _settings.AutoStart;
       _autoConnectCheckBox.Checked = _settings.AutoConnect;
       _StartMinimizedCheckBox.Checked = _settings.StartMinimized;
@@ -326,26 +328,17 @@ namespace bdmanager {
       _settings.ByeDpiPath = _byeDpiPathTextBox.Text;
       _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
       _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
-      
-      _settings.AutoStart = _autoStartCheckBox.Checked;
-      _settings.AutoConnect = _autoConnectCheckBox.Checked;
-      _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
-      
-      _autorunManager.SetAutorun(_settings.AutoStart);
-
-      if (!string.IsNullOrEmpty(_settings.ProxiFyrePath)) {
-        string proxiFyreDir = Path.GetDirectoryName(_settings.ProxiFyrePath);
-        _settings.ProxiFyreConfigPath = Path.Combine(proxiFyreDir, "app-config.json");
-      }
-
-      if (int.TryParse(_proxiFyrePortTextBox.Text, out int port)) {
-        _settings.ProxiFyrePort = port;
-      }
-
+      _settings.ProxiFyrePort = (int) _proxiFyrePortNumBox.Value;
       _settings.ProxifiedApps.Clear();
+
       foreach (string app in _appListBox.Items) {
         _settings.ProxifiedApps.Add(app);
       }
+
+      _settings.AutoStart = _autoStartCheckBox.Checked;
+      _settings.AutoConnect = _autoConnectCheckBox.Checked;
+      _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
+      _autorunManager.SetAutorun(_settings.AutoStart);
     }
 
     private void BrowseForExe(TextBox targetTextBox, string title) {

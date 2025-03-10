@@ -17,7 +17,6 @@ namespace bdmanager {
 
     public string ByeDpiPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "byedpi", "ciadpi.exe");
     public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");
-    public string ProxiFyreConfigPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "app-config.json");
 
     private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "settings.json");
 
@@ -52,8 +51,7 @@ namespace bdmanager {
 
     public void UpdateProxiFyreConfig() {
       try {
-        string proxiFyreDir = Path.GetDirectoryName(ProxiFyrePath);
-        ProxiFyreConfigPath = Path.Combine(proxiFyreDir, "app-config.json");
+        string ConfigPath = Path.Combine(Path.GetDirectoryName(ProxiFyrePath), "app-config.json");
 
         ProxiFyreConfig config = new ProxiFyreConfig();
         ProxyConfig proxyConfig = new ProxyConfig {
@@ -63,10 +61,10 @@ namespace bdmanager {
         };
 
         config.proxies.Add(proxyConfig);
-        config.Save(ProxiFyreConfigPath);
+        config.Save(ConfigPath);
 
-        if (!File.Exists(ProxiFyreConfigPath)) {
-          throw new Exception($"Не удалось создать файл конфигурации: {ProxiFyreConfigPath}");
+        if (!File.Exists(ConfigPath)) {
+          throw new Exception($"Не удалось создать файл конфигурации: {ConfigPath}");
         }
       }
       catch (Exception ex) {
