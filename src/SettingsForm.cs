@@ -304,7 +304,7 @@ namespace bdmanager {
     }
 
     private void AppBrowseButton_Click(object sender, EventArgs e) {
-      BrowseForExe(_appTextBox, "Выберите исполняемый файл приложения для прокси");
+      BrowseForExe(_appTextBox, "Выберите приложение");
 
       if (!string.IsNullOrWhiteSpace(_appTextBox.Text)) {
         AddAppToList(_appTextBox.Text);
