@@ -19,7 +19,7 @@ namespace bdmanager {
     public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");
     public string ProxiFyreConfigPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "app-config.json");
 
-    private static readonly string SettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Program.appName, "settings.json");
+    private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "settings.json");
 
     public static AppSettings Load() {
       try {
@@ -55,17 +55,7 @@ namespace bdmanager {
         string proxiFyreDir = Path.GetDirectoryName(ProxiFyrePath);
         ProxiFyreConfigPath = Path.Combine(proxiFyreDir, "app-config.json");
 
-        string configDir = Path.GetDirectoryName(ProxiFyreConfigPath);
-        if (!Directory.Exists(configDir)) {
-          Directory.CreateDirectory(configDir);
-        }
-
         ProxiFyreConfig config = new ProxiFyreConfig();
-
-        if (ProxifiedApps == null || ProxifiedApps.Count == 0) {
-          ProxifiedApps = new List<string> { };
-        }
-
         ProxyConfig proxyConfig = new ProxyConfig {
           appNames = ProxifiedApps,
           socks5ProxyEndpoint = $"{ProxiFyreIp}:{ProxiFyrePort}",
@@ -73,7 +63,6 @@ namespace bdmanager {
         };
 
         config.proxies.Add(proxyConfig);
-
         config.Save(ProxiFyreConfigPath);
 
         if (!File.Exists(ProxiFyreConfigPath)) {
