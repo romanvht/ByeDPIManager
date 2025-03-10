@@ -40,6 +40,7 @@ namespace bdmanager {
           _byeDpiProcess = new Process {
             StartInfo = new ProcessStartInfo {
               FileName = _settings.ByeDpiPath,
+              WorkingDirectory = Path.GetDirectoryName(_settings.ByeDpiPath),
               Arguments = _settings.GetByeDpiArguments(),
               UseShellExecute = false,
               CreateNoWindow = true,
@@ -57,7 +58,7 @@ namespace bdmanager {
           _byeDpiProcess.BeginOutputReadLine();
           _byeDpiProcess.BeginErrorReadLine();
 
-          RaiseLogMessage("ByeDPI запущен");
+          RaiseLogMessage($"ByeDPI запущен: {_settings.GetByeDpiArguments()}");
         }
         catch (Exception byeDpiEx) {
           RaiseLogMessage($"Ошибка при запуске ByeDPI: {byeDpiEx.Message}");

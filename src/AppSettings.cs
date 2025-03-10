@@ -96,8 +96,12 @@ namespace bdmanager {
           current.Append(c);
           escaping = false;
         }
-        else if (c == '\\' && !(quoting && quoteChar == '\'')) {
-          escaping = true;
+        else if (c == '\\' && quoting) {
+          if (i + 1 < input.Length && input[i + 1] == quoteChar) {
+            escaping = true;
+          } else {
+            current.Append(c);
+          }
         }
         else if (quoting && c == quoteChar) {
           quoting = false;

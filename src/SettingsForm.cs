@@ -6,6 +6,14 @@ using System.Windows.Forms;
 namespace bdmanager {
   public partial class SettingsForm : Form {
     private AppSettings _settings;
+
+    private TabControl _tabControl;
+
+    private TextBox _byeDpiPathTextBox;
+    private TextBox _byeDpiArgsTextBox;
+
+    private TextBox _proxiFyrePathTextBox;
+    private TextBox _proxiFyrePortTextBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
 
@@ -27,19 +35,21 @@ namespace bdmanager {
       BackColor = SystemColors.Control;
       ForeColor = SystemColors.ControlText;
 
-      TabControl tabControl = new TabControl {
+      // Tabs
+      _tabControl = new TabControl {
         Location = new Point(15, 15),
         Size = new Size(460, 380),
         Name = "tabControl"
       };
-      Controls.Add(tabControl);
+      Controls.Add(_tabControl);
 
+      // ByeDPI
       TabPage byeDpiTabPage = new TabPage {
         Text = "ByeDPI",
         Name = "byeDpiTabPage",
         BackColor = SystemColors.Control
       };
-      tabControl.TabPages.Add(byeDpiTabPage);
+      _tabControl.TabPages.Add(byeDpiTabPage);
 
       GroupBox byeDpiGroupBox = new GroupBox {
         Text = "Настройки ByeDPI",
@@ -60,12 +70,12 @@ namespace bdmanager {
       };
       byeDpiGroupBox.Controls.Add(byeDpiPathLabel);
 
-      TextBox byeDpiPathTextBox = new TextBox {
+      _byeDpiPathTextBox = new TextBox {
         Location = new Point(120, 25),
         Size = new Size(250, 50),
         Name = "byeDpiPathTextBox"
       };
-      byeDpiGroupBox.Controls.Add(byeDpiPathTextBox);
+      byeDpiGroupBox.Controls.Add(_byeDpiPathTextBox);
 
       Button byeDpiBrowseButton = new Button {
         Text = "...",
@@ -85,21 +95,22 @@ namespace bdmanager {
       };
       byeDpiGroupBox.Controls.Add(byeDpiArgsLabel);
 
-      TextBox byeDpiArgsTextBox = new TextBox {
+      _byeDpiArgsTextBox = new TextBox {
         Location = new Point(120, 60),
         Size = new Size(290, 250),
         Name = "byeDpiArgsTextBox",
         Multiline = true,
         ScrollBars = ScrollBars.Vertical
       };
-      byeDpiGroupBox.Controls.Add(byeDpiArgsTextBox);
+      byeDpiGroupBox.Controls.Add(_byeDpiArgsTextBox);
 
+      // ProxiFyre
       TabPage proxiFyreTabPage = new TabPage {
         Text = "ProxiFyre",
         Name = "proxiFyreTabPage",
         BackColor = SystemColors.Control
       };
-      tabControl.TabPages.Add(proxiFyreTabPage);
+      _tabControl.TabPages.Add(proxiFyreTabPage);
 
       GroupBox proxiFyreGroupBox = new GroupBox {
         Text = "Настройки ProxiFyre",
@@ -120,12 +131,12 @@ namespace bdmanager {
       };
       proxiFyreGroupBox.Controls.Add(proxiFyrePathLabel);
 
-      TextBox proxiFyrePathTextBox = new TextBox {
+      _proxiFyrePathTextBox = new TextBox {
         Location = new Point(120, 25),
         Size = new Size(250, 23),
         Name = "proxiFyrePathTextBox"
       };
-      proxiFyreGroupBox.Controls.Add(proxiFyrePathTextBox);
+      proxiFyreGroupBox.Controls.Add(_proxiFyrePathTextBox);
 
       Button proxiFyreBrowseButton = new Button {
         Text = "...",
@@ -145,13 +156,14 @@ namespace bdmanager {
       };
       proxiFyreGroupBox.Controls.Add(proxiFyrePortLabel);
 
-      TextBox proxiFyrePortTextBox = new TextBox {
+      _proxiFyrePortTextBox = new TextBox {
         Location = new Point(120, 60),
         Size = new Size(80, 23),
         Name = "proxiFyrePortTextBox"
       };
-      proxiFyreGroupBox.Controls.Add(proxiFyrePortTextBox);
+      proxiFyreGroupBox.Controls.Add(_proxiFyrePortTextBox);
 
+      // Apps
       GroupBox appsGroupBox = new GroupBox {
         Text = "Приложения, которые пойдут через прокси",
         Location = new Point(10, 120),
@@ -162,13 +174,12 @@ namespace bdmanager {
       };
       proxiFyreTabPage.Controls.Add(appsGroupBox);
 
-      ListBox appListBox = new ListBox {
+      _appListBox = new ListBox {
         Location = new Point(15, 25),
         Size = new Size(400, 130),
         Name = "appListBox"
       };
-      appsGroupBox.Controls.Add(appListBox);
-      _appListBox = appListBox;
+      appsGroupBox.Controls.Add(_appListBox);
 
       Label appNameLabel = new Label {
         Text = "Имя или путь к приложению:",
@@ -179,13 +190,12 @@ namespace bdmanager {
       };
       appsGroupBox.Controls.Add(appNameLabel);
 
-      TextBox appTextBox = new TextBox {
+      _appTextBox = new TextBox {
         Location = new Point(175, 155),
         Size = new Size(200, 23),
         Name = "appTextBox"
       };
-      appsGroupBox.Controls.Add(appTextBox);
-      _appTextBox = appTextBox;
+      appsGroupBox.Controls.Add(_appTextBox);
 
       Button appBrowseButton = new Button {
         Text = "...",
@@ -214,6 +224,7 @@ namespace bdmanager {
       removeAppButton.Click += RemoveAppButton_Click;
       appsGroupBox.Controls.Add(removeAppButton);
 
+      // Form Buttons
       Button okButton = new Button {
         Text = "ОК",
         DialogResult = DialogResult.OK,
@@ -240,25 +251,10 @@ namespace bdmanager {
     }
 
     private void SettingsForm_Load(object sender, EventArgs e) {
-      TabControl tabControl = Controls["tabControl"] as TabControl;
-
-      TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
-      GroupBox byeDpiGroupBox = byeDpiTabPage.Controls["byeDpiGroupBox"] as GroupBox;
-
-      TextBox byeDpiPathTextBox = byeDpiGroupBox.Controls["byeDpiPathTextBox"] as TextBox;
-      byeDpiPathTextBox.Text = _settings.ByeDpiPath;
-
-      TextBox byeDpiArgsTextBox = byeDpiGroupBox.Controls["byeDpiArgsTextBox"] as TextBox;
-      byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
-
-      TabPage proxiFyreTabPage = tabControl.TabPages["proxiFyreTabPage"];
-      GroupBox proxiFyreGroupBox = proxiFyreTabPage.Controls["proxiFyreGroupBox"] as GroupBox;
-
-      TextBox proxiFyrePathTextBox = proxiFyreGroupBox.Controls["proxiFyrePathTextBox"] as TextBox;
-      proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
-
-      TextBox proxiFyrePortTextBox = proxiFyreGroupBox.Controls["proxiFyrePortTextBox"] as TextBox;
-      proxiFyrePortTextBox.Text = _settings.ProxiFyrePort.ToString();
+      _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
+      _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
+      _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
+      _proxiFyrePortTextBox.Text = _settings.ProxiFyrePort.ToString();
 
       _appListBox.Items.Clear();
       if (_settings.ProxifiedApps != null) {
@@ -269,30 +265,16 @@ namespace bdmanager {
     }
 
     private void OkButton_Click(object sender, EventArgs e) {
-      TabControl tabControl = Controls["tabControl"] as TabControl;
-
-      TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
-      GroupBox byeDpiGroupBox = byeDpiTabPage.Controls["byeDpiGroupBox"] as GroupBox;
-
-      TextBox byeDpiPathTextBox = byeDpiGroupBox.Controls["byeDpiPathTextBox"] as TextBox;
-      _settings.ByeDpiPath = byeDpiPathTextBox.Text;
-
-      TextBox byeDpiArgsTextBox = byeDpiGroupBox.Controls["byeDpiArgsTextBox"] as TextBox;
-      _settings.ByeDpiArguments = byeDpiArgsTextBox.Text;
-
-      TabPage proxiFyreTabPage = tabControl.TabPages["proxiFyreTabPage"];
-      GroupBox proxiFyreGroupBox = proxiFyreTabPage.Controls["proxiFyreGroupBox"] as GroupBox;
-
-      TextBox proxiFyrePathTextBox = proxiFyreGroupBox.Controls["proxiFyrePathTextBox"] as TextBox;
-      _settings.ProxiFyrePath = proxiFyrePathTextBox.Text;
+      _settings.ByeDpiPath = _byeDpiPathTextBox.Text;
+      _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
+      _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
 
       if (!string.IsNullOrEmpty(_settings.ProxiFyrePath)) {
         string proxiFyreDir = Path.GetDirectoryName(_settings.ProxiFyrePath);
         _settings.ProxiFyreConfigPath = Path.Combine(proxiFyreDir, "app-config.json");
       }
 
-      TextBox proxiFyrePortTextBox = proxiFyreGroupBox.Controls["proxiFyrePortTextBox"] as TextBox;
-      if (int.TryParse(proxiFyrePortTextBox.Text, out int port)) {
+      if (int.TryParse(_proxiFyrePortTextBox.Text, out int port)) {
         _settings.ProxiFyrePort = port;
       }
 
@@ -302,84 +284,48 @@ namespace bdmanager {
       }
     }
 
-    private void ByeDpiBrowseButton_Click(object sender, EventArgs e) {
+    private void BrowseForExe(TextBox targetTextBox, string title) {
       using (OpenFileDialog dialog = new OpenFileDialog()) {
         dialog.Filter = "Исполняемые файлы (*.exe)|*.exe|Все файлы (*.*)|*.*";
-        dialog.Title = "Выберите исполняемый файл ByeDPI";
+        dialog.Title = title;
 
         if (dialog.ShowDialog() == DialogResult.OK) {
-          TabControl tabControl = Controls["tabControl"] as TabControl;
-          if (tabControl != null) {
-            TabPage byeDpiTabPage = tabControl.TabPages["byeDpiTabPage"];
-            if (byeDpiTabPage != null) {
-              GroupBox byeDpiGroupBox = byeDpiTabPage.Controls["byeDpiGroupBox"] as GroupBox;
-              if (byeDpiGroupBox != null) {
-                TextBox byeDpiPathTextBox = byeDpiGroupBox.Controls["byeDpiPathTextBox"] as TextBox;
-                if (byeDpiPathTextBox != null) {
-                  byeDpiPathTextBox.Text = dialog.FileName;
-                }
-              }
-            }
-          }
+          targetTextBox.Text = dialog.FileName;
         }
       }
+    }
+
+    private void ByeDpiBrowseButton_Click(object sender, EventArgs e) {
+      BrowseForExe(_byeDpiPathTextBox, "Выберите исполняемый файл ByeDPI");
     }
 
     private void ProxiFyreBrowseButton_Click(object sender, EventArgs e) {
-      using (OpenFileDialog dialog = new OpenFileDialog()) {
-        dialog.Filter = "Исполняемые файлы (*.exe)|*.exe|Все файлы (*.*)|*.*";
-        dialog.Title = "Выберите исполняемый файл ProxiFyre";
-
-        if (dialog.ShowDialog() == DialogResult.OK) {
-          TabControl tabControl = Controls["tabControl"] as TabControl;
-          if (tabControl != null) {
-            TabPage proxiFyreTabPage = tabControl.TabPages["proxiFyreTabPage"];
-            if (proxiFyreTabPage != null) {
-              GroupBox proxiFyreGroupBox = proxiFyreTabPage.Controls["proxiFyreGroupBox"] as GroupBox;
-              if (proxiFyreGroupBox != null) {
-                TextBox proxiFyrePathTextBox = proxiFyreGroupBox.Controls["proxiFyrePathTextBox"] as TextBox;
-                if (proxiFyrePathTextBox != null) {
-                  proxiFyrePathTextBox.Text = dialog.FileName;
-                }
-              }
-            }
-          }
-        }
-      }
+      BrowseForExe(_proxiFyrePathTextBox, "Выберите исполняемый файл ProxiFyre");
     }
 
     private void AppBrowseButton_Click(object sender, EventArgs e) {
-      using (OpenFileDialog dialog = new OpenFileDialog()) {
-        dialog.Filter = "Исполняемые файлы (*.exe)|*.exe|Все файлы (*.*)|*.*";
-        dialog.Title = "Выберите исполняемый файл приложения для прокси";
+      BrowseForExe(_appTextBox, "Выберите исполняемый файл приложения для прокси");
 
-        if (dialog.ShowDialog() == DialogResult.OK) {
-          string fullPath = dialog.FileName;
+      if (!string.IsNullOrWhiteSpace(_appTextBox.Text)) {
+        AddAppToList(_appTextBox.Text);
+      }
+    }
 
-          if (!_appListBox.Items.Contains(fullPath)) {
-            _appListBox.Items.Add(fullPath);
-            _appTextBox.Clear();
-          }
-          else {
-            MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-          }
-        }
+    private void AddAppToList(string appPath) {
+      string appName = appPath.Trim();
+
+      if (!_appListBox.Items.Contains(appName)) {
+        _appListBox.Items.Add(appName);
+        _appTextBox.Clear();
+      } else {
+        MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
       }
     }
 
     private void AddAppButton_Click(object sender, EventArgs e) {
       if (!string.IsNullOrWhiteSpace(_appTextBox.Text)) {
-        string appName = _appTextBox.Text.Trim();
-
-        if (!_appListBox.Items.Contains(appName)) {
-          _appListBox.Items.Add(appName);
-          _appTextBox.Clear();
-        }
-        else {
-          MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение",
-              MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        AddAppToList(_appTextBox.Text);
       }
     }
 
