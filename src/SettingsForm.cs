@@ -305,7 +305,7 @@ namespace bdmanager {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
       _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
-      _proxiFyrePortNumBox.Text = _settings.ProxiFyrePort.ToString();
+      _proxiFyrePortNumBox.Value = _settings.ProxiFyrePort;
 
       bool autorunEnabled = _autorunManager.IsAutorunEnabled();
       if (_settings.AutoStart != autorunEnabled) {
