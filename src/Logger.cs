@@ -23,8 +23,8 @@ namespace bdmanager {
 
     private void InitLogFile() {
       try {
-        string dateStr = DateTime.Now.ToString("dd-MM-yyyy");
-        _logFilePath = Path.Combine(_logsDir, $"bdmanager_{dateStr}.log");
+        string date = DateTime.Now.ToString("dd-MM-yyyy");
+        _logFilePath = Path.Combine(_logsDir, $"bdmanager_{date}.log");
 
         if (!File.Exists(_logFilePath)) {
           File.WriteAllText(_logFilePath, $"=== bdmanager Log started at {DateTime.Now} ===\r\n", Encoding.UTF8);
@@ -68,7 +68,10 @@ namespace bdmanager {
 
     private void WriteToFile(string message) {
       try {
-        if (string.IsNullOrEmpty(_logFilePath)) {
+        string date = DateTime.Now.ToString("dd-MM-yyyy");
+        string logFilePath = Path.Combine(_logsDir, $"bdmanager_{date}.log");
+
+        if (string.IsNullOrEmpty(_logFilePath) || _logFilePath != logFilePath) {
           InitLogFile();
         }
 
@@ -77,8 +80,8 @@ namespace bdmanager {
 
         File.AppendAllText(_logFilePath, logLine, Encoding.UTF8);
       }
-      catch {
-
+      catch (Exception ex) {
+        Console.WriteLine($"Ошибка при записи в лог: {ex.Message}");
       }
     }
   }
