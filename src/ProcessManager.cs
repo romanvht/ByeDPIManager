@@ -8,22 +8,23 @@ namespace bdmanager {
     private Process _proxifyreProcess;
     private AppSettings _settings;
 
-    public event EventHandler<string> LogMessage;
     public event EventHandler<bool> StatusChanged;
 
     public bool IsRunning => _byeDpiProcess?.HasExited == false && _proxifyreProcess?.HasExited == false;
 
-    public void Start() {
+    public ProcessManager() {
       _settings = Program.settings;
+    }
 
+    public void Start() {
       try {
         if (!File.Exists(_settings.ByeDpiPath)) {
-          RaiseLogMessage($"Файл ByeDPI не найден: {_settings.ByeDpiPath}");
+          Program.logger.Log($"Файл ByeDPI не найден: {_settings.ByeDpiPath}");
           return;
         }
 
         if (!File.Exists(_settings.ProxiFyrePath)) {
-          RaiseLogMessage($"Файл ProxiFyre не найден: {_settings.ProxiFyrePath}");
+          Program.logger.Log($"Файл ProxiFyre не найден: {_settings.ProxiFyrePath}");
           return;
         }
 
@@ -53,10 +54,10 @@ namespace bdmanager {
           _byeDpiProcess.BeginOutputReadLine();
           _byeDpiProcess.BeginErrorReadLine();
 
-          RaiseLogMessage($"ByeDPI запущен: {_settings.GetByeDpiArguments()}");
+          Program.logger.Log($"ByeDPI запущен: {_settings.GetByeDpiArguments()}");
         }
         catch (Exception byeDpiEx) {
-          RaiseLogMessage($"Ошибка при запуске ByeDPI: {byeDpiEx.Message}");
+          Program.logger.Log($"Ошибка при запуске ByeDPI: {byeDpiEx.Message}");
           Stop();
           return;
         }
@@ -82,10 +83,10 @@ namespace bdmanager {
           _proxifyreProcess.BeginOutputReadLine();
           _proxifyreProcess.BeginErrorReadLine();
 
-          RaiseLogMessage("ProxiFyre запущен");
+          Program.logger.Log("ProxiFyre запущен");
         }
         catch (Exception proxiFyreEx) {
-          RaiseLogMessage($"Ошибка при запуске ProxiFyre: {proxiFyreEx.Message}");
+          Program.logger.Log($"Ошибка при запуске ProxiFyre: {proxiFyreEx.Message}");
           Stop();
           return;
         }
@@ -93,7 +94,7 @@ namespace bdmanager {
         RaiseStatusChanged(true);
       }
       catch (Exception ex) {
-        RaiseLogMessage($"Общая ошибка при запуске: {ex.Message}");
+        Program.logger.Log($"Общая ошибка при запуске: {ex.Message}");
         Stop();
       }
     }
@@ -105,10 +106,10 @@ namespace bdmanager {
             _byeDpiProcess.Kill();
             _byeDpiProcess = null;
 
-            RaiseLogMessage("ByeDPI процесс остановлен");
+            Program.logger.Log("ByeDPI процесс остановлен");
           }
           catch (Exception ex) {
-            RaiseLogMessage($"Ошибка при остановке ByeDPI: {ex.Message}");
+            Program.logger.Log($"Ошибка при остановке ByeDPI: {ex.Message}");
           }
         }
 
@@ -117,38 +118,34 @@ namespace bdmanager {
             _proxifyreProcess.Kill();
             _proxifyreProcess = null;
 
-            RaiseLogMessage("ProxiFyre процесс остановлен");
+            Program.logger.Log("ProxiFyre процесс остановлен");
           }
           catch (Exception ex) {
-            RaiseLogMessage($"Ошибка при остановке ProxiFyre: {ex.Message}");
+            Program.logger.Log($"Ошибка при остановке ProxiFyre: {ex.Message}");
           }
         }
 
         RaiseStatusChanged(false);
       }
       catch (Exception ex) {
-        RaiseLogMessage($"Общая ошибка при остановке процессов: {ex.Message}");
+        Program.logger.Log($"Общая ошибка при остановке процессов: {ex.Message}");
       }
     }
 
     private void ByeDpiOutputHandler(object sender, DataReceivedEventArgs e) {
       if (!string.IsNullOrEmpty(e.Data)) {
-        RaiseLogMessage($"ByeDPI: {e.Data}");
+        Program.logger.Log($"ByeDPI: {e.Data}");
       }
     }
 
     private void ProxifyreOutputHandler(object sender, DataReceivedEventArgs e) {
       if (!string.IsNullOrEmpty(e.Data)) {
-        RaiseLogMessage($"ProxiFyre: {e.Data}");
+        Program.logger.Log($"ProxiFyre: {e.Data}");
       }
     }
 
     private void ProcessStopHandler(object sender, EventArgs e) {
       Stop();
-    }
-
-    private void RaiseLogMessage(string message) {
-      LogMessage?.Invoke(this, message);
     }
 
     private void RaiseStatusChanged(bool isRunning) {
@@ -165,10 +162,10 @@ namespace bdmanager {
           foreach (var process in byeDpiProcesses) {
             try {
               process.Kill();
-              RaiseLogMessage("Остановлен запущенный процесс ByeDPI");
+              Program.logger.Log("Остановлен запущенный процесс ByeDPI");
             }
             catch (Exception ex) {
-              RaiseLogMessage($"Ошибка при остановке процесса ByeDPI: {ex.Message}");
+              Program.logger.Log($"Ошибка при остановке процесса ByeDPI: {ex.Message}");
             }
           }
         }
@@ -179,10 +176,10 @@ namespace bdmanager {
           foreach (var process in proxiFyreProcesses) {
             try {
               process.Kill();
-              RaiseLogMessage("Остановлен запущенный процесс ProxiFyre");
+              Program.logger.Log("Остановлен запущенный процесс ProxiFyre");
             }
             catch (Exception ex) {
-              RaiseLogMessage($"Ошибка при остановке процесса ProxiFyre: {ex.Message}");
+              Program.logger.Log($"Ошибка при остановке процесса ProxiFyre: {ex.Message}");
             }
           }
         }
@@ -192,7 +189,7 @@ namespace bdmanager {
         }
       }
       catch (Exception ex) {
-        RaiseLogMessage($"Ошибка при очистке процессов при запуске: {ex.Message}");
+        Program.logger.Log($"Ошибка при очистке процессов при запуске: {ex.Message}");
       }
     }
   }

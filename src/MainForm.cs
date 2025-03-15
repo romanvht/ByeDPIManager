@@ -32,7 +32,6 @@ namespace bdmanager {
       _logger.LogAdded += (s, message) => AddLogToUi(message);
 
       _processManager = Program.processManager;
-      _processManager.LogMessage += (s, message) => _logger.Log(message);
       _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
     }
 

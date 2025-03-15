@@ -63,6 +63,7 @@ namespace bdmanager {
         config.proxies.Add(proxyConfig);
         config.Save(ConfigPath);
 
+        Program.logger.Log("Конфигурация ProxiFyre обновлена");
         return true;
       }
       catch (Exception ex) {
