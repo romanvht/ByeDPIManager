@@ -50,6 +50,12 @@ namespace bdmanager {
       BackColor = Color.FromArgb(30, 30, 30);
       ForeColor = Color.White;
 
+      _notifyIcon = new NotifyIcon {
+        Icon = GetIconFromResources(),
+        Text = _appName,
+        Visible = true
+      };
+
       _toggleButton = new RoundButton {
         Text = "Подключить",
         Size = new Size(160, 80),
@@ -101,12 +107,6 @@ namespace bdmanager {
     }
 
     private void InitializeTray() {
-      _notifyIcon = new NotifyIcon {
-        Icon = GetIconFromResources(),
-        Text = _appName,
-        Visible = true
-      };
-
       ContextMenu trayMenu = new ContextMenu();
 
       MenuItem openMenuItem = new MenuItem("Открыть");
