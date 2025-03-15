@@ -28,7 +28,7 @@ namespace bdmanager {
         }
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при загрузке настроек: {ex.Message}");
+        Program.logger.Log($"Ошибка при загрузке настроек: {ex.Message}");
       }
 
       return new AppSettings();
@@ -45,11 +45,11 @@ namespace bdmanager {
         File.WriteAllText(SettingsPath, json);
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при сохранении настроек: {ex.Message}");
+        Program.logger.Log($"Ошибка при сохранении настроек: {ex.Message}");
       }
     }
 
-    public void UpdateProxiFyreConfig() {
+    public bool UpdateProxiFyreConfig() {
       try {
         string ConfigPath = Path.Combine(Path.GetDirectoryName(ProxiFyrePath), "app-config.json");
 
@@ -63,12 +63,11 @@ namespace bdmanager {
         config.proxies.Add(proxyConfig);
         config.Save(ConfigPath);
 
-        if (!File.Exists(ConfigPath)) {
-          throw new Exception($"Не удалось создать файл конфигурации: {ConfigPath}");
-        }
+        return true;
       }
       catch (Exception ex) {
-        throw new Exception($"Ошибка при обновлении конфигурации ProxiFyre: {ex.Message}", ex);
+        Program.logger.Log($"Ошибка при обновлении конфигурации ProxiFyre: {ex.Message}");
+        return false;
       }
     }
 
@@ -143,7 +142,7 @@ namespace bdmanager {
         return string.Join(" ", result);
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при обработке аргументов ByeDPI: {ex.Message}");
+        Program.logger.Log($"Ошибка при обработке аргументов ByeDPI: {ex.Message}");
         return ByeDpiArguments;
       }
     }

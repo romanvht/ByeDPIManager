@@ -375,8 +375,7 @@ namespace bdmanager {
         _appListBox.Items.Add(appName);
         _appTextBox.Clear();
       } else {
-        MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение",
-            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Information);
       }
     }
 

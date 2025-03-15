@@ -27,12 +27,7 @@ namespace bdmanager {
           return;
         }
 
-        try {
-          _settings.UpdateProxiFyreConfig();
-          RaiseLogMessage("Конфигурация ProxiFyre обновлена");
-        }
-        catch (Exception configEx) {
-          RaiseLogMessage($"Ошибка при обновлении конфигурации ProxiFyre: {configEx.Message}");
+        if (!_settings.UpdateProxiFyreConfig()) {
           return;
         }
 
