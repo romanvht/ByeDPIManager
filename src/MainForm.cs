@@ -151,7 +151,7 @@ namespace bdmanager {
         }
 
         if (_settings.AutoConnect) {
-          _logger.Log("Автоматическое подключение...");
+          _logger.Log("Автоматическое подключение");
           ToggleConnection();
         }
       }
