@@ -109,15 +109,29 @@ namespace bdmanager {
         }
         
         IsTesting = true;
-        ProxyTestStartButton.Text = "Стоп";
-        ProxyLogsRichBox.Clear();
+        
+        Action updateUi = () => {
+          try {
+            ProxyTestStartButton.Text = "Стоп";
+            ProxyLogsRichBox.Clear();
+            
+            if (ProxyTestProgressLabel != null) {
+              ProxyTestProgressLabel.Text = "0/0";
+              ProxyTestProgressLabel.Visible = true;
+            }
+          } catch { }
+        };
+        
+        if (ProxyTestStartButton.InvokeRequired) {
+          try {
+            ProxyTestStartButton.BeginInvoke(updateUi);
+          } catch { }
+        } else {
+          updateUi();
+        }
+        
         ClearLatestLogs();
         _cancellationTokenSource = new CancellationTokenSource();
-        
-        if (ProxyTestProgressLabel != null) {
-          ProxyTestProgressLabel.Text = "0/0";
-          ProxyTestProgressLabel.Visible = true;
-        }
 
         SaveProxyTestSettings(proxyTestSettings);
 
@@ -130,8 +144,20 @@ namespace bdmanager {
         }
 
         int totalTests = commands.Count();
-        if (ProxyTestProgressLabel != null) {
-          ProxyTestProgressLabel.Text = $"0/{totalTests}";
+        Action updateProgress = () => {
+          try {
+            if (ProxyTestProgressLabel != null) {
+              ProxyTestProgressLabel.Text = $"0/{totalTests}";
+            }
+          } catch { }
+        };
+        
+        if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
+          try {
+            ProxyTestProgressLabel.BeginInvoke(updateProgress);
+          } catch { }
+        } else {
+          updateProgress();
         }
 
         var commandsResults = await CheckDomainsAccessAsync(commands, domains, proxyTestSettings, _cancellationTokenSource.Token);
@@ -190,31 +216,28 @@ namespace bdmanager {
       finally {
         IsTesting = false;
         
+        Action updateButtons = () => {
+          try {
+            if (ProxyTestStartButton != null && !ProxyTestStartButton.IsDisposed) {
+              ProxyTestStartButton.Text = "Старт";
+            }
+            
+            if (ProxyTestProgressLabel != null && !ProxyTestProgressLabel.IsDisposed) {
+              ProxyTestProgressLabel.Visible = false;
+            }
+          } 
+          catch { }
+        };
+        
         if (ProxyTestStartButton != null && !ProxyTestStartButton.IsDisposed) {
           if (ProxyTestStartButton.InvokeRequired) {
             try {
-              ProxyTestStartButton.BeginInvoke(new Action(() => {
-                try {
-                  ProxyTestStartButton.Text = "Старт";
-                } catch { }
-              }));
-            } catch { }
-          } else {
-            ProxyTestStartButton.Text = "Старт";
-          }
-        }
-        
-        if (ProxyTestProgressLabel != null && !ProxyTestProgressLabel.IsDisposed) {
-          if (ProxyTestProgressLabel.InvokeRequired) {
-            try {
-              ProxyTestProgressLabel.BeginInvoke(new Action(() => {
-                try {
-                  ProxyTestProgressLabel.Visible = false;
-                } catch { }
-              }));
-            } catch { }
-          } else {
-            ProxyTestProgressLabel.Visible = false;
+              ProxyTestStartButton.BeginInvoke(updateButtons);
+            } 
+            catch { }
+          } 
+          else {
+            updateButtons();
           }
         }
       }
@@ -277,12 +300,29 @@ namespace bdmanager {
         cancellationToken.ThrowIfCancellationRequested();
 
         completedTests++;
-        if (ProxyTestProgressLabel != null) {
-          ProxyTestProgressLabel.Text = $"{completedTests}/{totalTests}";
+        
+        Action updateProgress = () => {
+          try {
+            if (ProxyTestProgressLabel != null) {
+              ProxyTestProgressLabel.Text = $"{completedTests}/{totalTests}";
+            }
+          } catch { }
+        };
+        
+        if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
+          try {
+            ProxyTestProgressLabel.BeginInvoke(updateProgress);
+          } catch { }
+        } else {
+          updateProgress();
         }
 
-        StartByeDpi(command);
-        AppendLogLine(command, FontStyle.Bold);
+        var args = AppSettings.ShellSplit(command);
+        var filtered = AppSettings.FilterLinuxOnlyArgs(args);
+        var f_command = string.Join(" ", filtered);
+
+        StartByeDpi(f_command);
+        AppendLogLine(f_command, FontStyle.Bold);
 
         try {
           using (var semaphore = new SemaphoreSlim(20))
@@ -303,6 +343,10 @@ namespace bdmanager {
                   string trimmedDomain = domain.Trim();
                   int successCount = await CheckDomainAccessAsync(trimmedDomain, requestsCount, cancellationToken);
                   
+                  if (fullLog) {
+                    AppendLogLine($"{trimmedDomain} - {successCount}/{requestsCount}");
+                  }
+                  
                   lock (domainResults) {
                     domainResults.Add(Tuple.Create(trimmedDomain, successCount));
                     totalSuccess += successCount;
@@ -311,9 +355,7 @@ namespace bdmanager {
                 }
                 catch (OperationCanceledException) { throw; }
                 catch (Exception ex) {
-                  lock (_logLock) {
-                    AppendLogLine($"Ошибка при проверке домена: {ex.Message}");
-                  }
+                  AppendLogLine($"Ошибка при проверке домена: {ex.Message}");
                 }
                 finally {
                   semaphore.Release();
@@ -322,12 +364,6 @@ namespace bdmanager {
             }
             
             await Task.WhenAll(allTasks);
-            
-            if (fullLog && domainResults.Count > 0) {
-              foreach (var result in domainResults) {
-                AppendLogLine($"{result.Item1} - {result.Item2}/{requestsCount}");
-              }
-            }
             
             int totalRequests = requestsCount * totalDomains;
             int successPct = totalRequests == 0 ? 0 : totalSuccess * 100 / totalRequests;
@@ -376,13 +412,8 @@ namespace bdmanager {
               using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
               using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
               {
-                var response = await httpClient.GetAsync(websiteUrl, 
-                    HttpCompletionOption.ResponseHeadersRead, 
-                    linkedCts.Token);
-                
-                if (response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound) {
-                  successRequests++;
-                }
+                var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
+                successRequests++;
               }
             }
             catch (TaskCanceledException) { }
@@ -412,58 +443,36 @@ namespace bdmanager {
 
         LogAdded?.Invoke(this, text);
         
-        AddLogToUi(text, fontStyle);
+        if (ProxyLogsRichBox == null || ProxyLogsRichBox.IsDisposed) return;
+        
+        Action updateUi = () => {
+          try {
+            lock (_logLock) {
+              if (fontStyle.HasValue) {
+                ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, fontStyle.Value);
+              }
+              
+              ProxyLogsRichBox.AppendText(text);
+              ProxyLogsRichBox.AppendText(Environment.NewLine);
+              
+              if (fontStyle.HasValue) {
+                ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, FontStyle.Regular);
+              }
+              
+              ProxyLogsRichBox.ScrollToCaret();
+            }
+          } catch (Exception) { }
+        };
+        
+        if (ProxyLogsRichBox.InvokeRequired) {
+          try {
+            ProxyLogsRichBox.BeginInvoke(updateUi);
+          } catch (Exception) { }
+        } else {
+          updateUi();
+        }
       }
       catch (Exception) { }
-    }
-    
-    private void AddLogToUi(string text, FontStyle? fontStyle = null) {
-      if (ProxyLogsRichBox == null || ProxyLogsRichBox.IsDisposed) return;
-      
-      if (ProxyLogsRichBox.InvokeRequired) {
-        try {
-          ProxyLogsRichBox.BeginInvoke(new Action(() => {
-            try {
-              lock (_logLock) {
-                if (fontStyle.HasValue) {
-                  ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, fontStyle.Value);
-                }
-                
-                ProxyLogsRichBox.AppendText(text);
-                ProxyLogsRichBox.AppendText(Environment.NewLine);
-                
-                if (fontStyle.HasValue) {
-                  ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, FontStyle.Regular);
-                }
-                
-                if (ProxyLogsRichBox.Visible && ProxyLogsRichBox.FindForm()?.WindowState != FormWindowState.Minimized) {
-                  ProxyLogsRichBox.ScrollToCaret();
-                }
-              }
-            } catch (Exception) { }
-          }));
-        } catch (Exception) { }
-        return;
-      }
-      
-      lock (_logLock) {
-        try {
-          if (fontStyle.HasValue) {
-            ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, fontStyle.Value);
-          }
-          
-          ProxyLogsRichBox.AppendText(text);
-          ProxyLogsRichBox.AppendText(Environment.NewLine);
-          
-          if (fontStyle.HasValue) {
-            ProxyLogsRichBox.SelectionFont = new Font(ProxyLogsRichBox.Font, FontStyle.Regular);
-          }
-          
-          if (ProxyLogsRichBox.Visible && ProxyLogsRichBox.FindForm()?.WindowState != FormWindowState.Minimized) {
-            ProxyLogsRichBox.ScrollToCaret();
-          }
-        } catch (Exception) { }
-      }
     }
 
     private void SaveProxyTestSettings(ProxyTestSettings proxyTestSettings) {

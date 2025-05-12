@@ -284,7 +284,7 @@ namespace bdmanager {
 
       // ProxyTest
       TabPage proxyTestTabPage = new TabPage {
-        Text = "Подбор команд (Beta)",
+        Text = "Подбор стратегий (Beta)",
         Name = "proxyTestTabPage",
         BackColor = SystemColors.Control
       };
