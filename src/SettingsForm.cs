@@ -1,3 +1,4 @@
+using bdmanager.src.ProxyTest;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,6 +19,7 @@ namespace bdmanager {
     private NumericUpDown _proxiFyrePortNumBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
+    private RichTextBox _proxyLogsRichBox;
 
     private CheckBox _autoStartCheckBox;
     private CheckBox _autoConnectCheckBox;
@@ -39,6 +41,7 @@ namespace bdmanager {
       MaximizeBox = false;
       MinimizeBox = false;
       Load += SettingsForm_Load;
+      FormClosing += SettingsForm_FormClosing;
       BackColor = SystemColors.Control;
       ForeColor = SystemColors.ControlText;
 
@@ -275,6 +278,50 @@ namespace bdmanager {
       };
       autorunGroupBox.Controls.Add(_StartMinimizedCheckBox);
 
+      // ProxyTest
+      TabPage proxyTestTabPage = new TabPage {
+        Text = "Подбор команд (Beta)",
+        Name = "proxyTestTabPage",
+        BackColor = SystemColors.Control
+      };
+      _tabControl.TabPages.Add(proxyTestTabPage);
+
+      GroupBox proxyLogsGroupBox = new GroupBox {
+        Text = "Логи",
+        Location = new Point(10, 10),
+        Size = new Size(430, 300),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "proxyLogsGroupBox"
+      };
+      proxyTestTabPage.Controls.Add(proxyLogsGroupBox);
+
+      _proxyLogsRichBox = new RichTextBox {
+        ForeColor = SystemColors.ControlText,
+        BorderStyle = BorderStyle.FixedSingle,
+        Text = ProxyTestManager.GetLatestLogs(),
+        Name = "proxyLogsRichBox",
+        Dock = DockStyle.Fill,
+        ReadOnly = true
+      };
+      proxyLogsGroupBox.Controls.Add(_proxyLogsRichBox);
+
+      Button proxyTestStartButton = new Button {
+        Text = ProxyTestManager.PROXY_TEST_BUTTON_START,
+        Location = new Point(10, 317),
+        Size = new Size(80, 25)
+      };
+      proxyTestStartButton.Click += ProxyTestStartButton_Click;
+      proxyTestTabPage.Controls.Add(proxyTestStartButton);
+
+      Button proxyTestSettingsButton = new Button {
+        Text = "Настройки",
+        Location = new Point(proxyTestStartButton.Location.X + proxyTestStartButton.Size.Width + 8, 317),
+        Size = new Size(80, 25)
+      };
+      proxyTestSettingsButton.Click += ProxyTestSettingsButton_Click;
+      proxyTestTabPage.Controls.Add(proxyTestSettingsButton);
+
       // Form Buttons
       Button okButton = new Button {
         Text = "ОК",
@@ -301,6 +348,30 @@ namespace bdmanager {
       ResumeLayout(false);
     }
 
+    private void ProxyTestSettingsButton_Click(object sender, EventArgs e) {
+      if (Program.proxyTestManager.IsTesting) {
+        MessageBox.Show("Перед настройкой остановите подбор команд.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+
+      ProxyTestSettingsForm proxyTestSettingsForm = new ProxyTestSettingsForm();
+      proxyTestSettingsForm.ShowDialog();
+    }
+
+    private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
+      Button proxyTestStartButton = (Button)sender;
+      if (!Program.proxyTestManager.IsTesting) {
+        ProxyTestSettings proxyTestSettings = ProxyTestSettingsForm.GetSettings();
+        Program.proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
+        Program.proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
+
+        await Program.proxyTestManager.StartTesting(proxyTestSettings);
+      }
+      else {
+        Program.proxyTestManager.StopTesting();
+      }
+    }
+
     private void SettingsForm_Load(object sender, EventArgs e) {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
@@ -321,6 +392,14 @@ namespace bdmanager {
         foreach (string app in _settings.ProxifiedApps) {
           _appListBox.Items.Add(app);
         }
+      }
+    }
+
+    private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
+      if (Program.proxyTestManager.IsTesting) {
+        MessageBox.Show("Сначала остановите подбор команд.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        e.Cancel = true;
+        return;
       }
     }
 

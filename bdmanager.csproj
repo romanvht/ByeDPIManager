@@ -23,4 +23,15 @@
     <EmbeddedResource Include="icon.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SocksSharp" Version="1.1.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="src\ProxyTest\Assets\proxytest_cmds.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
