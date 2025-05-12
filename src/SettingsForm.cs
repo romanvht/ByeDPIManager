@@ -18,10 +18,16 @@ namespace bdmanager {
     private NumericUpDown _proxiFyrePortNumBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
+    private RichTextBox _proxyLogsRichBox;
+    private Label _proxyTestProgressLabel;
 
     private CheckBox _autoStartCheckBox;
     private CheckBox _autoConnectCheckBox;
     private CheckBox _StartMinimizedCheckBox;
+
+    private NumericUpDown _delayNumericUpDown;
+    private NumericUpDown _requestsCountNumericUpDown;
+    private CheckBox _fullLogCheckBox;
 
     public SettingsForm() {
       _settings = Program.settings;
@@ -39,6 +45,7 @@ namespace bdmanager {
       MaximizeBox = false;
       MinimizeBox = false;
       Load += SettingsForm_Load;
+      FormClosing += SettingsForm_FormClosing;
       BackColor = SystemColors.Control;
       ForeColor = SystemColors.ControlText;
 
@@ -275,6 +282,98 @@ namespace bdmanager {
       };
       autorunGroupBox.Controls.Add(_StartMinimizedCheckBox);
 
+      // ProxyTest
+      TabPage proxyTestTabPage = new TabPage {
+        Text = "Подбор стратегий (Beta)",
+        Name = "proxyTestTabPage",
+        BackColor = SystemColors.Control
+      };
+      _tabControl.TabPages.Add(proxyTestTabPage);
+
+      GroupBox proxySettingsGroupBox = new GroupBox {
+        Text = "Настройки теста",
+        Location = new Point(10, 10),
+        Size = new Size(430, 120),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "proxySettingsGroupBox"
+      };
+      proxyTestTabPage.Controls.Add(proxySettingsGroupBox);
+
+      Label delayLabel = new Label {
+        Text = "Ожидание между командами в секундах:",
+        Location = new Point(10, 20),
+        Size = new Size(250, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(delayLabel);
+
+      _delayNumericUpDown = new NumericUpDown {
+        Location = new Point(300, 18),
+        Size = new Size(120, 20),
+        Maximum = int.MaxValue
+      };
+      proxySettingsGroupBox.Controls.Add(_delayNumericUpDown);
+
+      Label requestsCountLabel = new Label {
+        Text = "Количество запросов к домену:",
+        Location = new Point(10, 50),
+        Size = new Size(250, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(requestsCountLabel);
+
+      _requestsCountNumericUpDown = new NumericUpDown {
+        Location = new Point(300, 48),
+        Size = new Size(120, 20),
+        Minimum = 1,
+        Maximum = int.MaxValue
+      };
+      proxySettingsGroupBox.Controls.Add(_requestsCountNumericUpDown);
+
+      _fullLogCheckBox = new CheckBox {
+        Text = "Расширенный лог с выводом ответа хостов",
+        Location = new Point(10, 80),
+        Size = new Size(400, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
+
+      GroupBox proxyLogsGroupBox = new GroupBox {
+        Text = "Лог [/proxytest/test.log]",
+        Location = new Point(10, 140),
+        Size = new Size(430, 170),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "proxyLogsGroupBox"
+      };
+      proxyTestTabPage.Controls.Add(proxyLogsGroupBox);
+
+      _proxyLogsRichBox = new RichTextBox {
+        ForeColor = SystemColors.ControlText,
+        BorderStyle = BorderStyle.FixedSingle,
+        Text = ProxyTestManager.GetLatestLogs(),
+        Name = "proxyLogsRichBox",
+        Dock = DockStyle.Fill,
+        ReadOnly = true
+      };
+      proxyLogsGroupBox.Controls.Add(_proxyLogsRichBox);
+
+      Button proxyTestStartButton = new Button {
+        Text = "Старт",
+        Location = new Point(10, 317),
+        Size = new Size(80, 25)
+      };
+      proxyTestStartButton.Click += ProxyTestStartButton_Click;
+      proxyTestTabPage.Controls.Add(proxyTestStartButton);
+      
+      _proxyTestProgressLabel = new Label {
+        Text = "",
+        Location = new Point(100, 317),
+        Size = new Size(100, 25),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Visible = false,
+        Name = "proxyTestProgressLabel"
+      };
+      proxyTestTabPage.Controls.Add(_proxyTestProgressLabel);
+
       // Form Buttons
       Button okButton = new Button {
         Text = "ОК",
@@ -301,6 +400,28 @@ namespace bdmanager {
       ResumeLayout(false);
     }
 
+    private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
+      Button proxyTestStartButton = (Button)sender;
+      if (!Program.proxyTestManager.IsTesting) {
+        OkButton_Click(sender, e);
+        _settings.Save();
+
+        _settings.ProxyTestDelay = (int)_delayNumericUpDown.Value;
+        _settings.ProxyTestRequestsCount = (int)_requestsCountNumericUpDown.Value;
+        _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
+        _settings.Save();
+
+        Program.proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
+        Program.proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
+        Program.proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
+
+        await Program.proxyTestManager.StartTesting();
+      }
+      else {
+        Program.proxyTestManager.StopTesting();
+      }
+    }
+
     private void SettingsForm_Load(object sender, EventArgs e) {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
@@ -316,11 +437,23 @@ namespace bdmanager {
       _autoConnectCheckBox.Checked = _settings.AutoConnect;
       _StartMinimizedCheckBox.Checked = _settings.StartMinimized;
 
+      _delayNumericUpDown.Value = _settings.ProxyTestDelay;
+      _requestsCountNumericUpDown.Value = _settings.ProxyTestRequestsCount;
+      _fullLogCheckBox.Checked = _settings.ProxyTestFullLog;
+
       _appListBox.Items.Clear();
       if (_settings.ProxifiedApps != null) {
         foreach (string app in _settings.ProxifiedApps) {
           _appListBox.Items.Add(app);
         }
+      }
+    }
+
+    private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
+      if (Program.proxyTestManager.IsTesting) {
+        MessageBox.Show("Сначала остановите подбор команд.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        e.Cancel = true;
+        return;
       }
     }
 
@@ -338,6 +471,11 @@ namespace bdmanager {
       _settings.AutoStart = _autoStartCheckBox.Checked;
       _settings.AutoConnect = _autoConnectCheckBox.Checked;
       _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
+      
+      _settings.ProxyTestDelay = (int)_delayNumericUpDown.Value;
+      _settings.ProxyTestRequestsCount = (int)_requestsCountNumericUpDown.Value;
+      _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
+      
       _autorunManager.SetAutorun(_settings.AutoStart);
     }
 

@@ -15,6 +15,10 @@ namespace bdmanager {
     public int ProxiFyrePort { get; set; } = 1080;
     public List<string> ProxifiedApps { get; set; } = new List<string>();
 
+    public int ProxyTestDelay { get; set; } = 0;
+    public int ProxyTestRequestsCount { get; set; } = 1;
+    public bool ProxyTestFullLog { get; set; } = false;
+
     public string ByeDpiPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "byedpi", "ciadpi.exe");
     public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");
 
@@ -72,7 +76,7 @@ namespace bdmanager {
       }
     }
 
-    private static List<string> ShellSplit(string input) {
+    public static List<string> ShellSplit(string input) {
       var tokens = new List<string>();
       var escaping = false;
       var quoteChar = ' ';
@@ -120,25 +124,29 @@ namespace bdmanager {
       return tokens;
     }
 
+    public static IEnumerable<string> FilterLinuxOnlyArgs(IEnumerable<string> args) {
+      var linuxOnlyArgs = new HashSet<string>
+      {
+        "-D", "--daemon",
+        "-w", "--pidfile",
+        "-E", "--transparent",
+        "-k", "--ip-opt",
+        "-S", "--md5sig",
+        "-Y", "--drop-sack",
+        "-F", "--tfo"
+      };
+
+      return args.Where(arg => !linuxOnlyArgs.Contains(arg));
+    }
+
     public string GetByeDpiArguments() {
       try {
         if (string.IsNullOrWhiteSpace(ByeDpiArguments)) {
           return string.Empty;
         }
 
-        var linuxOnlyArgs = new HashSet<string>
-        {
-          "-D", "--daemon",
-          "-w", "--pidfile",
-          "-E", "--transparent",
-          "-k", "--ip-opt",
-          "-S", "--md5sig",
-          "-Y", "--drop-sack",
-          "-F", "--tfo"
-        };
-
         var args = ShellSplit(ByeDpiArguments);
-        var result = args.Where(arg => !linuxOnlyArgs.Contains(arg));
+        var result = FilterLinuxOnlyArgs(args);
 
         return string.Join(" ", result);
       }

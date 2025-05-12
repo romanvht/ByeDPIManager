@@ -11,6 +11,7 @@ namespace bdmanager {
     public static AppSettings settings = null;
     public static ProcessManager processManager = null;
     public static AutorunManager autorunManager = null;
+    public static ProxyTestManager proxyTestManager = null;
     public static Logger logger = null;
 
     [STAThread]
@@ -35,6 +36,7 @@ namespace bdmanager {
         settings = AppSettings.Load();
         processManager = new ProcessManager();
         autorunManager = new AutorunManager();
+        proxyTestManager = new ProxyTestManager();
         Application.Run(new MainForm());
       }
       catch (Exception ex) {

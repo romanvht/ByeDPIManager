@@ -10,7 +10,7 @@
     <Authors>romanvht</Authors>
     <Description>Менеджер для ByeDPI и ProxiFyre</Description>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>0.1.2</Version>
+    <Version>0.2.0</Version>
     <Copyright>romanvht</Copyright>
   </PropertyGroup>
 
@@ -21,6 +21,17 @@
   <ItemGroup>
     <None Remove="icon.ico" />
     <EmbeddedResource Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SocksSharp" Version="1.1.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="proxytest\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
