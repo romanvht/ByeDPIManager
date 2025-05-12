@@ -17,7 +17,7 @@ namespace bdmanager {
 
     public const string PROXY_TEST_CMDS = PROXY_TEST_FOLDER + "/cmds.txt";
     public const string PROXY_TEST_SITES = PROXY_TEST_FOLDER + "/sites.txt";
-    public const string PROXY_TEST_LATEST_LOG = PROXY_TEST_FOLDER + "/proxytest.log";
+    public const string PROXY_TEST_LATEST_LOG = PROXY_TEST_FOLDER + "/test.log";
 
     private readonly object _logLock = new object();
 

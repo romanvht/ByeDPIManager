@@ -290,7 +290,6 @@ namespace bdmanager {
       };
       _tabControl.TabPages.Add(proxyTestTabPage);
 
-      // Добавляем элементы управления настройками прямо в основную вкладку
       GroupBox proxySettingsGroupBox = new GroupBox {
         Text = "Настройки теста",
         Location = new Point(10, 10),
@@ -338,7 +337,7 @@ namespace bdmanager {
       proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
 
       GroupBox proxyLogsGroupBox = new GroupBox {
-        Text = "Лог [/proxytest/proxytest.log]",
+        Text = "Лог [/proxytest/test.log]",
         Location = new Point(10, 140),
         Size = new Size(430, 170),
         ForeColor = SystemColors.ControlText,
