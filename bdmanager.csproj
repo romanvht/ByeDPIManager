@@ -29,9 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="src\ProxyTest\Assets\proxytest_cmds.txt">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <Content Include="proxytest\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,3 @@
-using bdmanager.src.ProxyTest;
 using System;
 using System.Linq;
 using System.Threading;

@@ -1,4 +1,3 @@
-using bdmanager.src.ProxyTest;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,10 +19,15 @@ namespace bdmanager {
     private ListBox _appListBox;
     private TextBox _appTextBox;
     private RichTextBox _proxyLogsRichBox;
+    private Label _proxyTestProgressLabel;
 
     private CheckBox _autoStartCheckBox;
     private CheckBox _autoConnectCheckBox;
     private CheckBox _StartMinimizedCheckBox;
+
+    private NumericUpDown _delayNumericUpDown;
+    private NumericUpDown _requestsCountNumericUpDown;
+    private CheckBox _fullLogCheckBox;
 
     public SettingsForm() {
       _settings = Program.settings;
@@ -286,10 +290,57 @@ namespace bdmanager {
       };
       _tabControl.TabPages.Add(proxyTestTabPage);
 
+      // Добавляем элементы управления настройками прямо в основную вкладку
+      GroupBox proxySettingsGroupBox = new GroupBox {
+        Text = "Настройки теста",
+        Location = new Point(10, 10),
+        Size = new Size(430, 120),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "proxySettingsGroupBox"
+      };
+      proxyTestTabPage.Controls.Add(proxySettingsGroupBox);
+
+      Label delayLabel = new Label {
+        Text = "Ожидание между командами в секундах:",
+        Location = new Point(10, 20),
+        Size = new Size(250, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(delayLabel);
+
+      _delayNumericUpDown = new NumericUpDown {
+        Location = new Point(300, 18),
+        Size = new Size(120, 20),
+        Maximum = int.MaxValue
+      };
+      proxySettingsGroupBox.Controls.Add(_delayNumericUpDown);
+
+      Label requestsCountLabel = new Label {
+        Text = "Количество запросов к домену:",
+        Location = new Point(10, 50),
+        Size = new Size(250, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(requestsCountLabel);
+
+      _requestsCountNumericUpDown = new NumericUpDown {
+        Location = new Point(300, 48),
+        Size = new Size(120, 20),
+        Minimum = 1,
+        Maximum = int.MaxValue
+      };
+      proxySettingsGroupBox.Controls.Add(_requestsCountNumericUpDown);
+
+      _fullLogCheckBox = new CheckBox {
+        Text = "Расширенный лог с выводом ответа хостов",
+        Location = new Point(10, 80),
+        Size = new Size(400, 20)
+      };
+      proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
+
       GroupBox proxyLogsGroupBox = new GroupBox {
         Text = "Логи",
-        Location = new Point(10, 10),
-        Size = new Size(430, 300),
+        Location = new Point(10, 140),
+        Size = new Size(430, 170),
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Name = "proxyLogsGroupBox"
@@ -307,20 +358,22 @@ namespace bdmanager {
       proxyLogsGroupBox.Controls.Add(_proxyLogsRichBox);
 
       Button proxyTestStartButton = new Button {
-        Text = ProxyTestManager.PROXY_TEST_BUTTON_START,
+        Text = "Старт",
         Location = new Point(10, 317),
         Size = new Size(80, 25)
       };
       proxyTestStartButton.Click += ProxyTestStartButton_Click;
       proxyTestTabPage.Controls.Add(proxyTestStartButton);
-
-      Button proxyTestSettingsButton = new Button {
-        Text = "Настройки",
-        Location = new Point(proxyTestStartButton.Location.X + proxyTestStartButton.Size.Width + 8, 317),
-        Size = new Size(80, 25)
+      
+      _proxyTestProgressLabel = new Label {
+        Text = "",
+        Location = new Point(100, 317),
+        Size = new Size(100, 25),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Visible = false,
+        Name = "proxyTestProgressLabel"
       };
-      proxyTestSettingsButton.Click += ProxyTestSettingsButton_Click;
-      proxyTestTabPage.Controls.Add(proxyTestSettingsButton);
+      proxyTestTabPage.Controls.Add(_proxyTestProgressLabel);
 
       // Form Buttons
       Button okButton = new Button {
@@ -348,22 +401,21 @@ namespace bdmanager {
       ResumeLayout(false);
     }
 
-    private void ProxyTestSettingsButton_Click(object sender, EventArgs e) {
-      if (Program.proxyTestManager.IsTesting) {
-        MessageBox.Show("Перед настройкой остановите подбор команд.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        return;
-      }
-
-      ProxyTestSettingsForm proxyTestSettingsForm = new ProxyTestSettingsForm();
-      proxyTestSettingsForm.ShowDialog();
-    }
-
     private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
       Button proxyTestStartButton = (Button)sender;
       if (!Program.proxyTestManager.IsTesting) {
-        ProxyTestSettings proxyTestSettings = ProxyTestSettingsForm.GetSettings();
+        OkButton_Click(sender, e);
+        _settings.Save();
+
+        ProxyTestSettings proxyTestSettings = new ProxyTestSettings {
+          Delay = (int)_delayNumericUpDown.Value,
+          RequestsCount = (int)_requestsCountNumericUpDown.Value,
+          FullLog = _fullLogCheckBox.Checked
+        };
+
         Program.proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
         Program.proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
+        Program.proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
 
         await Program.proxyTestManager.StartTesting(proxyTestSettings);
       }
@@ -386,6 +438,11 @@ namespace bdmanager {
       _autoStartCheckBox.Checked = _settings.AutoStart;
       _autoConnectCheckBox.Checked = _settings.AutoConnect;
       _StartMinimizedCheckBox.Checked = _settings.StartMinimized;
+
+      ProxyTestSettings proxyTestSettings = ProxyTestManager.GetSettings();
+      _delayNumericUpDown.Value = proxyTestSettings.Delay;
+      _requestsCountNumericUpDown.Value = proxyTestSettings.RequestsCount;
+      _fullLogCheckBox.Checked = proxyTestSettings.FullLog;
 
       _appListBox.Items.Clear();
       if (_settings.ProxifiedApps != null) {
