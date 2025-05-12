@@ -13,10 +13,8 @@ using System.Windows.Forms;
 
 namespace bdmanager {
   public class ProxyTestManager {
-    public const string CONFIG_FOLDER = "./config";
     public const string PROXY_TEST_FOLDER = "./proxytest";
 
-    public const string PROXY_TEST_CONFIG = CONFIG_FOLDER + "/proxytest.json";
     public const string PROXY_TEST_CMDS = PROXY_TEST_FOLDER + "/cmds.txt";
     public const string PROXY_TEST_SITES = PROXY_TEST_FOLDER + "/sites.txt";
     public const string PROXY_TEST_LATEST_LOG = PROXY_TEST_FOLDER + "/proxytest.log";
@@ -101,7 +99,7 @@ namespace bdmanager {
       return new Uri($"https://{domain}");
     }
 
-    public async Task StartTesting(ProxyTestSettings proxyTestSettings) {
+    public async Task StartTesting() {
       try {
         if (IsTesting) {
           MessageBox.Show("Тестирование уже запущено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -133,8 +131,6 @@ namespace bdmanager {
         ClearLatestLogs();
         _cancellationTokenSource = new CancellationTokenSource();
 
-        SaveProxyTestSettings(proxyTestSettings);
-
         IEnumerable<string> commands = await GetCommandsAsync();
         IEnumerable<string> domains = await GetDomainsAsync();
         
@@ -160,7 +156,7 @@ namespace bdmanager {
           updateProgress();
         }
 
-        var commandsResults = await CheckDomainsAccessAsync(commands, domains, proxyTestSettings, _cancellationTokenSource.Token);
+        var commandsResults = await CheckDomainsAccessAsync(commands, domains, _cancellationTokenSource.Token);
         
         if (!IsTesting) return;
         
@@ -172,7 +168,7 @@ namespace bdmanager {
         for (int i = 0; i < sortedResults.Length; i++) {
           var result = sortedResults[i];
           int orderNumber = i + 1;
-          AppendLogLine($"{orderNumber}. {result.Key}");
+          AppendLogLine($"{result.Key}");
           AppendLogLine($"{result.Value}%");
           AppendLogLine(string.Empty);
         }
@@ -285,12 +281,11 @@ namespace bdmanager {
     private async Task<List<KeyValuePair<string, int>>> CheckDomainsAccessAsync(
       IEnumerable<string> commands,
       IEnumerable<string> domains,
-      ProxyTestSettings proxyTestSettings,
       CancellationToken cancellationToken) 
     {
       var commandsResults = new List<KeyValuePair<string, int>>();
-      int requestsCount = proxyTestSettings.RequestsCount;
-      bool fullLog = proxyTestSettings.FullLog;
+      int requestsCount = _settings.ProxyTestRequestsCount;
+      bool fullLog = _settings.ProxyTestFullLog;
       int totalTests = commands.Count();
       int completedTests = 0;
       
@@ -384,8 +379,8 @@ namespace bdmanager {
         
         StopByeDpi();
         
-        if (proxyTestSettings.Delay > 0) {
-          await Task.Delay(proxyTestSettings.Delay * 1000, cancellationToken);
+        if (_settings.ProxyTestDelay > 0) {
+          await Task.Delay(_settings.ProxyTestDelay * 1000, cancellationToken);
         }
       }
 
@@ -473,32 +468,6 @@ namespace bdmanager {
         }
       }
       catch (Exception) { }
-    }
-
-    private void SaveProxyTestSettings(ProxyTestSettings proxyTestSettings) {
-      try {
-        Directory.CreateDirectory(CONFIG_FOLDER);
-        Directory.CreateDirectory(PROXY_TEST_FOLDER);
-        string settingsJson = JsonSerializer.Serialize(proxyTestSettings);
-        File.WriteAllText(PROXY_TEST_CONFIG, settingsJson);
-      }
-      catch (Exception ex) {
-        AppendLogLine($"Ошибка при сохранении настроек: {ex.Message}");
-      }
-    }
-
-    public static ProxyTestSettings GetSettings() {
-      try {
-        if (!File.Exists(PROXY_TEST_CONFIG))
-          return new ProxyTestSettings();
-
-        string settingsJson = File.ReadAllText(PROXY_TEST_CONFIG);
-        ProxyTestSettings proxyTestSettings = JsonSerializer.Deserialize<ProxyTestSettings>(settingsJson);
-        return proxyTestSettings;
-      }
-      catch (Exception) {
-        return new ProxyTestSettings();
-      }
     }
   }
 }

@@ -407,17 +407,16 @@ namespace bdmanager {
         OkButton_Click(sender, e);
         _settings.Save();
 
-        ProxyTestSettings proxyTestSettings = new ProxyTestSettings {
-          Delay = (int)_delayNumericUpDown.Value,
-          RequestsCount = (int)_requestsCountNumericUpDown.Value,
-          FullLog = _fullLogCheckBox.Checked
-        };
+        _settings.ProxyTestDelay = (int)_delayNumericUpDown.Value;
+        _settings.ProxyTestRequestsCount = (int)_requestsCountNumericUpDown.Value;
+        _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
+        _settings.Save();
 
         Program.proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
         Program.proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
         Program.proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
 
-        await Program.proxyTestManager.StartTesting(proxyTestSettings);
+        await Program.proxyTestManager.StartTesting();
       }
       else {
         Program.proxyTestManager.StopTesting();
@@ -439,10 +438,9 @@ namespace bdmanager {
       _autoConnectCheckBox.Checked = _settings.AutoConnect;
       _StartMinimizedCheckBox.Checked = _settings.StartMinimized;
 
-      ProxyTestSettings proxyTestSettings = ProxyTestManager.GetSettings();
-      _delayNumericUpDown.Value = proxyTestSettings.Delay;
-      _requestsCountNumericUpDown.Value = proxyTestSettings.RequestsCount;
-      _fullLogCheckBox.Checked = proxyTestSettings.FullLog;
+      _delayNumericUpDown.Value = _settings.ProxyTestDelay;
+      _requestsCountNumericUpDown.Value = _settings.ProxyTestRequestsCount;
+      _fullLogCheckBox.Checked = _settings.ProxyTestFullLog;
 
       _appListBox.Items.Clear();
       if (_settings.ProxifiedApps != null) {
@@ -474,6 +472,11 @@ namespace bdmanager {
       _settings.AutoStart = _autoStartCheckBox.Checked;
       _settings.AutoConnect = _autoConnectCheckBox.Checked;
       _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
+      
+      _settings.ProxyTestDelay = (int)_delayNumericUpDown.Value;
+      _settings.ProxyTestRequestsCount = (int)_requestsCountNumericUpDown.Value;
+      _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
+      
       _autorunManager.SetAutorun(_settings.AutoStart);
     }
 
