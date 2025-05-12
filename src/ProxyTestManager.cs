@@ -368,7 +368,7 @@ namespace bdmanager {
             int totalRequests = requestsCount * totalDomains;
             int successPct = totalRequests == 0 ? 0 : totalSuccess * 100 / totalRequests;
             
-            AppendLogLine($"{totalSuccess}/{totalRequests} ({successPct}%)", FontStyle.Bold);
+            AppendLogLine($"{totalSuccess}/{totalRequests} ({successPct}%)");
             
             if (successPct > 50) {
               commandsResults.Add(new KeyValuePair<string, int>(command, successPct));

@@ -338,7 +338,7 @@ namespace bdmanager {
       proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
 
       GroupBox proxyLogsGroupBox = new GroupBox {
-        Text = "Логи",
+        Text = "Лог [/proxytest/proxytest.log]",
         Location = new Point(10, 140),
         Size = new Size(430, 170),
         ForeColor = SystemColors.ControlText,
