@@ -10,7 +10,7 @@
     <Authors>romanvht</Authors>
     <Description>Менеджер для ByeDPI и ProxiFyre</Description>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Copyright>romanvht</Copyright>
   </PropertyGroup>
 
@@ -26,6 +26,8 @@
   <ItemGroup>
     <PackageReference Include="SocksSharp" Version="1.1.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Fody" Version="6.9.2" PrivateAssets="all" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

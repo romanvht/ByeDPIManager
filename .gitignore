@@ -9,3 +9,4 @@ $RECYCLE.BIN/
 *.tmp
 *.log
 *.sln
+FodyWeavers.xsd
