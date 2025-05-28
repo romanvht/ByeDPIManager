@@ -1,5 +1,7 @@
 # ByeDPI Manager
 
+Русский | [English](README.en.md)
+
 Мини утилита для запуска ByeDPI и ProxiFyre.
 
 ## Требования
