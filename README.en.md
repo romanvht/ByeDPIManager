@@ -4,6 +4,8 @@
 
 A mini utility for running ByeDPI and ProxiFyre.
 
+![Interface Screenshot](screens/screen_en.png)
+
 ## Requirements
 
 1. Windows 7+, [.NET Framework 4.7.2+](https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net472-offline-installer)

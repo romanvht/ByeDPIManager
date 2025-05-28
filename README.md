@@ -4,6 +4,8 @@
 
 Мини утилита для запуска ByeDPI и ProxiFyre.
 
+![Скриншот интерфейса](screens/screen_ru.png)
+
 ## Требования
 
 1. Windows 7+, [.NET Framework 4.7.2+](https://dotnet.microsoft.com/ru-ru/download/dotnet-framework/thank-you/net472-offline-installer)
