@@ -34,7 +34,7 @@ namespace bdmanager {
         }
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при инициализации файла лога: {ex.Message}");
+        Console.WriteLine($"Error initializing log file: {ex.Message}");
       }
     }
 
@@ -48,16 +48,16 @@ namespace bdmanager {
           foreach (var file in files.Skip(10)) {
             try {
               File.Delete(file);
-              Console.WriteLine($"Удален старый лог: {file}");
+              Console.WriteLine($"Deleted old log: {file}");
             }
             catch (Exception ex) {
-              Console.WriteLine($"Ошибка удаления файла {file}: {ex.Message}");
+              Console.WriteLine($"Error deleting file {file}: {ex.Message}");
             }
           }
         }
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при очистке старых логов: {ex.Message}");
+        Console.WriteLine($"Error cleaning up old logs: {ex.Message}");
       }
     }
 
@@ -81,7 +81,7 @@ namespace bdmanager {
         File.AppendAllText(_logFilePath, logLine, Encoding.UTF8);
       }
       catch (Exception ex) {
-        Console.WriteLine($"Ошибка при записи в лог: {ex.Message}");
+        Console.WriteLine($"Error writing to log: {ex.Message}");
       }
     }
   }

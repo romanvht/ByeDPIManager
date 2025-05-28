@@ -8,6 +8,7 @@ namespace bdmanager {
     public bool AutoStart { get; set; } = false;
     public bool AutoConnect { get; set; } = false;
     public bool StartMinimized { get; set; } = false;
+    public string Language { get; set; } = "ru";
 
     public string ByeDpiArguments { get; set; } = "-Ku -a3 -An -Kt,h -d1 -s3+s -An";
 
@@ -32,7 +33,7 @@ namespace bdmanager {
         }
       }
       catch (Exception ex) {
-        Program.logger.Log($"Ошибка при загрузке настроек: {ex.Message}");
+        Program.logger.Log($"{ex.Message}");
       }
 
       return new AppSettings();
@@ -49,7 +50,7 @@ namespace bdmanager {
         File.WriteAllText(SettingsPath, json);
       }
       catch (Exception ex) {
-        Program.logger.Log($"Ошибка при сохранении настроек: {ex.Message}");
+        Program.logger.Log($"{ex.Message}");
       }
     }
 
@@ -67,11 +68,10 @@ namespace bdmanager {
         config.proxies.Add(proxyConfig);
         config.Save(ConfigPath);
 
-        Program.logger.Log("Конфигурация ProxiFyre обновлена");
         return true;
       }
       catch (Exception ex) {
-        Program.logger.Log($"Ошибка при обновлении конфигурации ProxiFyre: {ex.Message}");
+        Program.logger.Log($"ProxiFyre: {ex.Message}");
         return false;
       }
     }
@@ -151,7 +151,7 @@ namespace bdmanager {
         return string.Join(" ", result);
       }
       catch (Exception ex) {
-        Program.logger.Log($"Ошибка при обработке аргументов ByeDPI: {ex.Message}");
+        Program.logger.Log($"ByeDPI: {ex.Message}");
         return ByeDpiArguments;
       }
     }

@@ -60,14 +60,14 @@ namespace bdmanager {
     private string[] GetDomains() {
       try {
         if (!File.Exists(PROXY_TEST_SITES)) {
-          AppendLogLine("Файл со списком сайтов не найден. Создайте файл sites.txt в папке proxytest и добавьте в него список доменов для проверки.", FontStyle.Bold);
+          AppendLogLine(Program.localization.GetString("proxy_test.sites_file_not_found"), FontStyle.Bold);
           return Array.Empty<string>();
         }
         
         return File.ReadAllLines(PROXY_TEST_SITES);
       }
       catch (Exception) {
-        AppendLogLine("Ошибка при чтении файла со списком сайтов.", FontStyle.Bold);
+        AppendLogLine(Program.localization.GetString("proxy_test.sites_file_read_error"), FontStyle.Bold);
         return Array.Empty<string>();
       }
     }
@@ -77,14 +77,14 @@ namespace bdmanager {
     private string[] GetCommands() {
       try {
         if (!File.Exists(PROXY_TEST_CMDS)) {
-          AppendLogLine("Файл с командами не найден. Создайте файл cmds.txt в папке proxytest и добавьте в него нужные команды для ByeDPI.", FontStyle.Bold);
+          AppendLogLine(Program.localization.GetString("proxy_test.cmds_file_not_found"), FontStyle.Bold);
           return Array.Empty<string>();
         }
         
         return File.ReadAllLines(PROXY_TEST_CMDS);
       }
       catch (Exception) {
-        AppendLogLine("Ошибка при чтении файла с командами.", FontStyle.Bold);
+        AppendLogLine(Program.localization.GetString("proxy_test.cmds_file_read_error"), FontStyle.Bold);
         return Array.Empty<string>();
       }
     }
@@ -102,7 +102,12 @@ namespace bdmanager {
     public async Task StartTesting() {
       try {
         if (IsTesting) {
-          MessageBox.Show("Тестирование уже запущено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+          MessageBox.Show(
+            Program.localization.GetString("proxy_test.already_running"),
+            Program.localization.GetString("settings_form.title"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information
+          );
           return;
         }
         
@@ -162,7 +167,7 @@ namespace bdmanager {
         
         var sortedResults = commandsResults.OrderByDescending(key => key.Value).ToArray();
 
-        AppendLogLine("Команды с успехом более 50%, применяйте от большего к меньшему", FontStyle.Bold);
+        AppendLogLine(Program.localization.GetString("proxy_test.commands_success_over_50"), FontStyle.Bold);
         AppendLogLine(string.Empty);
 
         for (int i = 0; i < sortedResults.Length; i++) {
@@ -174,14 +179,17 @@ namespace bdmanager {
         }
 
         if (sortedResults.Length == 0) {
-          AppendLogLine("Ни одна команда не дала результат более 50%", FontStyle.Bold);
+          AppendLogLine(Program.localization.GetString("proxy_test.no_commands_over_50"), FontStyle.Bold);
         }
       }
       catch (OperationCanceledException) {
-        AppendLogLine("Тест остановлен.", FontStyle.Bold);
+        AppendLogLine(Program.localization.GetString("proxy_test.stopped"), FontStyle.Bold);
       }
       catch (Exception ex) {
-        AppendLogLine($"Тест прокси остановлен. Произошла ошибка: {ex.Message}", FontStyle.Bold);
+        AppendLogLine(string.Format(
+          Program.localization.GetString("proxy_test.error_occurred"),
+          ex.Message
+        ), FontStyle.Bold);
       }
       finally {
         StopTesting();
@@ -196,18 +204,27 @@ namespace bdmanager {
           _cancellationTokenSource?.Cancel();
         } 
         catch (Exception ex) {
-          AppendLogLine($"Ошибка при отмене операций: {ex.Message}");
+          AppendLogLine(string.Format(
+            Program.localization.GetString("settings_form.proxy_test.cancel_error"),
+            ex.Message
+          ));
         }
         
         try {
           StopByeDpi();
         }
         catch (Exception ex) {
-          AppendLogLine($"Ошибка при остановке ByeDPI: {ex.Message}");
+          AppendLogLine(string.Format(
+            Program.localization.GetString("settings_form.byedpi.stop_error"),
+            ex.Message
+          ));
         }
       }
       catch (Exception ex) {
-        AppendLogLine($"Ошибка при остановке тестирования: {ex.Message}");
+        AppendLogLine(string.Format(
+          Program.localization.GetString("settings_form.proxy_test.stop_error"),
+          ex.Message
+        ));
       }
       finally {
         IsTesting = false;
@@ -215,7 +232,7 @@ namespace bdmanager {
         Action updateButtons = () => {
           try {
             if (ProxyTestStartButton != null && !ProxyTestStartButton.IsDisposed) {
-              ProxyTestStartButton.Text = "Старт";
+              ProxyTestStartButton.Text = Program.localization.GetString("settings_form.proxy_test.start");
             }
             
             if (ProxyTestProgressLabel != null && !ProxyTestProgressLabel.IsDisposed) {
@@ -241,7 +258,12 @@ namespace bdmanager {
 
     private void StartByeDpi(string arguments) {
       if (!File.Exists(_settings.ByeDpiPath)) {
-        MessageBox.Show($"Файл ByeDPI не найден: {_settings.ByeDpiPath}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show(
+          string.Format(Program.localization.GetString("settings_form.byedpi.not_found"), _settings.ByeDpiPath),
+          Program.localization.GetString("settings_form.title"),
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Error
+        );
         StopTesting();
         return;
       }
@@ -261,7 +283,12 @@ namespace bdmanager {
         _byeDpiProcess.Start();
       }
       catch (Exception byeDpiEx) {
-        MessageBox.Show($"Ошибка при запуске ByeDPI: {byeDpiEx.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show(
+          string.Format(Program.localization.GetString("settings_form.byedpi.start_error"), byeDpiEx.Message),
+          Program.localization.GetString("settings_form.title"),
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Error
+        );
         StopByeDpi();
       }
     }
@@ -273,7 +300,10 @@ namespace bdmanager {
           _byeDpiProcess = null;
         }
         catch (Exception ex) {
-          AppendLogLine($"Ошибка при остановке ByeDPI: {ex.Message}", FontStyle.Bold);
+          AppendLogLine(string.Format(
+            Program.localization.GetString("settings_form.byedpi.stop_error"),
+            ex.Message
+          ), FontStyle.Bold);
         }
       }
     }
@@ -350,7 +380,10 @@ namespace bdmanager {
                 }
                 catch (OperationCanceledException) { throw; }
                 catch (Exception ex) {
-                  AppendLogLine($"Ошибка при проверке домена: {ex.Message}");
+                  AppendLogLine(string.Format(
+                    Program.localization.GetString("proxy_test.domain_check_error"),
+                    ex.Message
+                  ));
                 }
                 finally {
                   semaphore.Release();
@@ -374,7 +407,11 @@ namespace bdmanager {
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex) {
-          AppendLogLine($"Ошибка при тестировании команды {command}: {ex.Message}", FontStyle.Bold);
+          AppendLogLine(string.Format(
+            Program.localization.GetString("proxy_test.command_test_error"),
+            command,
+            ex.Message
+          ), FontStyle.Bold);
         }
         
         StopByeDpi();

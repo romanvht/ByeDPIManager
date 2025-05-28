@@ -10,7 +10,7 @@
     <Authors>romanvht</Authors>
     <Description>Менеджер для ByeDPI и ProxiFyre</Description>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>0.2.1</Version>
+    <Version>0.2.5</Version>
     <Copyright>romanvht</Copyright>
   </PropertyGroup>
 
@@ -19,8 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="icon.ico" />
     <EmbeddedResource Include="icon.ico" />
+    <EmbeddedResource Include="locale\ru.json" />
+    <EmbeddedResource Include="locale\en.json" />
   </ItemGroup>
 
   <ItemGroup>

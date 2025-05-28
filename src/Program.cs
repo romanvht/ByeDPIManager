@@ -6,23 +6,21 @@ using System.Windows.Forms;
 namespace bdmanager {
   static class Program {
     private static Mutex _mutex = null;
+    
     public static string appName = null;
     public static bool isAutorun = false;
+
     public static AppSettings settings = null;
     public static ProcessManager processManager = null;
     public static AutorunManager autorunManager = null;
     public static ProxyTestManager proxyTestManager = null;
+    public static Localization localization = null;
     public static Logger logger = null;
 
     [STAThread]
     static void Main(string[] args) {
       appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
       isAutorun = args.Any(arg => arg.ToLower() == "--autorun");
-
-      if (IsRunning()) {
-        MessageBox.Show("Приложение уже запущено. Ищите его в трее.", appName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        return;
-      }
 
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
@@ -34,13 +32,30 @@ namespace bdmanager {
       try {
         logger = new Logger();
         settings = AppSettings.Load();
+        localization = new Localization();
+
+        if (IsRunning()) {
+          MessageBox.Show(
+            localization.GetString("program.already_running"),
+            localization.GetString("app_name"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information
+          );
+          return;
+        }
+
         processManager = new ProcessManager();
         autorunManager = new AutorunManager();
         proxyTestManager = new ProxyTestManager();
         Application.Run(new MainForm());
       }
       catch (Exception ex) {
-        MessageBox.Show($"Произошла ошибка: {ex.Message}", appName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show(
+          string.Format(localization.GetString("program.error"), ex.Message),
+          localization.GetString("app_name"),
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Error
+        );
       }
     }
 

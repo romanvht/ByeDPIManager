@@ -38,7 +38,7 @@ namespace bdmanager {
     private void InitializeComponent() {
       SuspendLayout();
 
-      Text = "Настройки";
+      Text = Program.localization.GetString("settings_form.title");
       Size = new Size(510, 490);
       StartPosition = FormStartPosition.CenterParent;
       FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -59,14 +59,14 @@ namespace bdmanager {
 
       // ByeDPI
       TabPage byeDpiTabPage = new TabPage {
-        Text = "ByeDPI",
+        Text = Program.localization.GetString("settings_form.byedpi.tab"),
         Name = "byeDpiTabPage",
         BackColor = SystemColors.Control
       };
       _tabControl.TabPages.Add(byeDpiTabPage);
 
       GroupBox byeDpiGroupBox = new GroupBox {
-        Text = "Настройки ByeDPI",
+        Text = Program.localization.GetString("settings_form.byedpi.group"),
         Location = new Point(10, 10),
         Size = new Size(430, 330),
         ForeColor = SystemColors.ControlText,
@@ -76,7 +76,7 @@ namespace bdmanager {
       byeDpiTabPage.Controls.Add(byeDpiGroupBox);
 
       Label byeDpiPathLabel = new Label {
-        Text = "Путь к ByeDPI:",
+        Text = Program.localization.GetString("settings_form.byedpi.path_label"),
         Location = new Point(15, 25),
         Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -97,11 +97,12 @@ namespace bdmanager {
         Size = new Size(30, 23),
         Name = "byeDpiBrowseButton"
       };
-      byeDpiBrowseButton.Click += ByeDpiBrowseButton_Click;
+      byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox, 
+        Program.localization.GetString("settings_form.byedpi.browse_title"));
       byeDpiGroupBox.Controls.Add(byeDpiBrowseButton);
 
       Label byeDpiArgsLabel = new Label {
-        Text = "Аргументы:",
+        Text = Program.localization.GetString("settings_form.byedpi.args_label"),
         Location = new Point(15, 60),
         Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -120,14 +121,14 @@ namespace bdmanager {
 
       // ProxiFyre
       TabPage proxiFyreTabPage = new TabPage {
-        Text = "ProxiFyre",
+        Text = Program.localization.GetString("settings_form.proxifyre.tab"),
         Name = "proxiFyreTabPage",
         BackColor = SystemColors.Control
       };
       _tabControl.TabPages.Add(proxiFyreTabPage);
 
       GroupBox proxiFyreGroupBox = new GroupBox {
-        Text = "Настройки ProxiFyre",
+        Text = Program.localization.GetString("settings_form.proxifyre.group"),
         Location = new Point(10, 10),
         Size = new Size(430, 100),
         ForeColor = SystemColors.ControlText,
@@ -137,7 +138,7 @@ namespace bdmanager {
       proxiFyreTabPage.Controls.Add(proxiFyreGroupBox);
 
       Label proxiFyrePathLabel = new Label {
-        Text = "Путь к ProxiFyre:",
+        Text = Program.localization.GetString("settings_form.proxifyre.path_label"),
         Location = new Point(15, 25),
         Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -158,11 +159,12 @@ namespace bdmanager {
         Size = new Size(30, 23),
         Name = "proxiFyreBrowseButton"
       };
-      proxiFyreBrowseButton.Click += ProxiFyreBrowseButton_Click;
+      proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox, 
+        Program.localization.GetString("settings_form.proxifyre.browse_title"));
       proxiFyreGroupBox.Controls.Add(proxiFyreBrowseButton);
 
       Label proxiFyrePortLabel = new Label {
-        Text = "Порт:",
+        Text = Program.localization.GetString("settings_form.proxifyre.port_label"),
         Location = new Point(15, 60),
         Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -181,7 +183,7 @@ namespace bdmanager {
 
       // Apps
       GroupBox appsGroupBox = new GroupBox {
-        Text = "Приложения, которые пойдут через прокси",
+        Text = Program.localization.GetString("settings_form.apps.group"),
         Location = new Point(10, 120),
         Size = new Size(430, 225),
         ForeColor = SystemColors.ControlText,
@@ -198,7 +200,7 @@ namespace bdmanager {
       appsGroupBox.Controls.Add(_appListBox);
 
       Label appNameLabel = new Label {
-        Text = "Имя или путь к приложению:",
+        Text = Program.localization.GetString("settings_form.apps.name_label"),
         Location = new Point(15, 155),
         Size = new Size(160, 20),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -219,11 +221,16 @@ namespace bdmanager {
         Size = new Size(30, 23),
         Name = "appBrowseButton"
       };
-      appBrowseButton.Click += AppBrowseButton_Click;
+      appBrowseButton.Click += (s, e) => {
+        BrowseForExe(_appTextBox, Program.localization.GetString("settings_form.apps.browse_title"));
+        if (!string.IsNullOrWhiteSpace(_appTextBox.Text)) {
+          AddAppToList(_appTextBox.Text);
+        }
+      };
       appsGroupBox.Controls.Add(appBrowseButton);
 
       Button addAppButton = new Button {
-        Text = "Добавить",
+        Text = Program.localization.GetString("settings_form.apps.add"),
         Location = new Point(15, 185),
         Size = new Size(80, 25),
         Name = "addAppButton"
@@ -232,7 +239,7 @@ namespace bdmanager {
       appsGroupBox.Controls.Add(addAppButton);
 
       Button removeAppButton = new Button {
-        Text = "Удалить",
+        Text = Program.localization.GetString("settings_form.apps.remove"),
         Location = new Point(100, 185),
         Size = new Size(80, 25),
         Name = "removeAppButton"
@@ -242,14 +249,14 @@ namespace bdmanager {
 
       // Autorun
       TabPage autorunTabPage = new TabPage {
-        Text = "Автозапуск",
+        Text = Program.localization.GetString("settings_form.autorun.tab"),
         Name = "autorunTabPage",
         BackColor = SystemColors.Control
       };
       _tabControl.TabPages.Add(autorunTabPage);
 
       GroupBox autorunGroupBox = new GroupBox {
-        Text = "Настройки автозапуска",
+        Text = Program.localization.GetString("settings_form.autorun.group"),
         Location = new Point(10, 10),
         Size = new Size(430, 120),
         ForeColor = SystemColors.ControlText,
@@ -259,7 +266,7 @@ namespace bdmanager {
       autorunTabPage.Controls.Add(autorunGroupBox);
 
       _autoStartCheckBox = new CheckBox {
-        Text = "Автозапуск при старте устройства",
+        Text = Program.localization.GetString("settings_form.autorun.auto_start"),
         Location = new Point(15, 25),
         Size = new Size(400, 20),
         Name = "autoStartCheckBox"
@@ -267,7 +274,7 @@ namespace bdmanager {
       autorunGroupBox.Controls.Add(_autoStartCheckBox);
 
       _autoConnectCheckBox = new CheckBox {
-        Text = "Автоматическое подключение",
+        Text = Program.localization.GetString("settings_form.autorun.auto_connect"),
         Location = new Point(15, 55),
         Size = new Size(400, 20),
         Name = "autoConnectCheckBox"
@@ -275,7 +282,7 @@ namespace bdmanager {
       autorunGroupBox.Controls.Add(_autoConnectCheckBox);
 
       _StartMinimizedCheckBox = new CheckBox {
-        Text = "Запускать свернутым в трей",
+        Text = Program.localization.GetString("settings_form.autorun.start_minimized"),
         Location = new Point(15, 85),
         Size = new Size(400, 20),
         Name = "StartMinimizedCheckBox"
@@ -284,14 +291,14 @@ namespace bdmanager {
 
       // ProxyTest
       TabPage proxyTestTabPage = new TabPage {
-        Text = "Подбор стратегий (Beta)",
+        Text = Program.localization.GetString("settings_form.proxy_test.tab"),
         Name = "proxyTestTabPage",
         BackColor = SystemColors.Control
       };
       _tabControl.TabPages.Add(proxyTestTabPage);
 
       GroupBox proxySettingsGroupBox = new GroupBox {
-        Text = "Настройки теста",
+        Text = Program.localization.GetString("settings_form.proxy_test.settings_group"),
         Location = new Point(10, 10),
         Size = new Size(430, 120),
         ForeColor = SystemColors.ControlText,
@@ -301,7 +308,7 @@ namespace bdmanager {
       proxyTestTabPage.Controls.Add(proxySettingsGroupBox);
 
       Label delayLabel = new Label {
-        Text = "Ожидание между командами в секундах:",
+        Text = Program.localization.GetString("settings_form.proxy_test.delay_label"),
         Location = new Point(10, 20),
         Size = new Size(250, 20)
       };
@@ -315,7 +322,7 @@ namespace bdmanager {
       proxySettingsGroupBox.Controls.Add(_delayNumericUpDown);
 
       Label requestsCountLabel = new Label {
-        Text = "Количество запросов к домену:",
+        Text = Program.localization.GetString("settings_form.proxy_test.requests_label"),
         Location = new Point(10, 50),
         Size = new Size(250, 20)
       };
@@ -330,14 +337,14 @@ namespace bdmanager {
       proxySettingsGroupBox.Controls.Add(_requestsCountNumericUpDown);
 
       _fullLogCheckBox = new CheckBox {
-        Text = "Расширенный лог с выводом ответа хостов",
+        Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
         Location = new Point(10, 80),
         Size = new Size(400, 20)
       };
       proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
 
       GroupBox proxyLogsGroupBox = new GroupBox {
-        Text = "Лог [/proxytest/test.log]",
+        Text = Program.localization.GetString("settings_form.proxy_test.logs_group"),
         Location = new Point(10, 140),
         Size = new Size(430, 170),
         ForeColor = SystemColors.ControlText,
@@ -352,12 +359,15 @@ namespace bdmanager {
         Text = ProxyTestManager.GetLatestLogs(),
         Name = "proxyLogsRichBox",
         Dock = DockStyle.Fill,
-        ReadOnly = true
+        ReadOnly = true,
+        ShortcutsEnabled = true,
+        DetectUrls = false,
+        EnableAutoDragDrop = false
       };
       proxyLogsGroupBox.Controls.Add(_proxyLogsRichBox);
 
       Button proxyTestStartButton = new Button {
-        Text = "Старт",
+        Text = Program.localization.GetString("settings_form.proxy_test.start"),
         Location = new Point(10, 317),
         Size = new Size(80, 25)
       };
@@ -376,7 +386,7 @@ namespace bdmanager {
 
       // Form Buttons
       Button okButton = new Button {
-        Text = "ОК",
+        Text = Program.localization.GetString("settings_form.buttons.ok"),
         DialogResult = DialogResult.OK,
         Location = new Point(310, 410),
         Size = new Size(80, 30),
@@ -386,7 +396,7 @@ namespace bdmanager {
       Controls.Add(okButton);
 
       Button cancelButton = new Button {
-        Text = "Отмена",
+        Text = Program.localization.GetString("settings_form.buttons.cancel"),
         DialogResult = DialogResult.Cancel,
         Location = new Point(400, 410),
         Size = new Size(80, 30),
@@ -451,7 +461,12 @@ namespace bdmanager {
 
     private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
       if (Program.proxyTestManager.IsTesting) {
-        MessageBox.Show("Сначала остановите подбор команд.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        MessageBox.Show(
+          Program.localization.GetString("settings_form.proxy_test.warning"),
+          Program.localization.GetString("settings_form.title"),
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Warning
+        );
         e.Cancel = true;
         return;
       }
@@ -490,22 +505,6 @@ namespace bdmanager {
       }
     }
 
-    private void ByeDpiBrowseButton_Click(object sender, EventArgs e) {
-      BrowseForExe(_byeDpiPathTextBox, "Выберите исполняемый файл ByeDPI");
-    }
-
-    private void ProxiFyreBrowseButton_Click(object sender, EventArgs e) {
-      BrowseForExe(_proxiFyrePathTextBox, "Выберите исполняемый файл ProxiFyre");
-    }
-
-    private void AppBrowseButton_Click(object sender, EventArgs e) {
-      BrowseForExe(_appTextBox, "Выберите приложение");
-
-      if (!string.IsNullOrWhiteSpace(_appTextBox.Text)) {
-        AddAppToList(_appTextBox.Text);
-      }
-    }
-
     private void AddAppToList(string appPath) {
       string appName = appPath.Trim();
 
@@ -513,7 +512,12 @@ namespace bdmanager {
         _appListBox.Items.Add(appName);
         _appTextBox.Clear();
       } else {
-        MessageBox.Show("Это приложение уже добавлено в список.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(
+          Program.localization.GetString("settings_form.apps.already_added"),
+          Program.localization.GetString("settings_form.title"),
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Information
+        );
       }
     }
 

@@ -4,23 +4,29 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace bdmanager {
   public partial class MainForm : Form {
     private string _appName = Program.appName;
     private bool _trayShow = false;
+
     private AppSettings _settings;
     private SettingsForm _settingsForm;
     private ProcessManager _processManager;
     private Logger _logger;
+
     private RoundButton _toggleButton;
+    private RoundButton _settingsButton;
     private RichTextBox _logBox;
     private NotifyIcon _notifyIcon;
     private MenuItem _toggleMenuItem;
+    private Panel _languagePanel;
 
     public MainForm() {
       InitializeApplication();
       InitializeComponent();
+      InitializeLanguage();
       InitializeTray();
     }
 
@@ -33,13 +39,15 @@ namespace bdmanager {
 
       _processManager = Program.processManager;
       _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
+
+      Program.localization.LanguageChanged += (s, e) => UpdateLocale();
     }
 
     private void InitializeComponent() {
       SuspendLayout();
 
-      Text = _appName;
-      Size = new Size(480, 380);
+      Text = Program.localization.GetString("app_name");
+      Size = new Size(480, 400);
       StartPosition = FormStartPosition.CenterScreen;
       FormBorderStyle = FormBorderStyle.FixedSingle;
       MaximizeBox = false;
@@ -52,14 +60,14 @@ namespace bdmanager {
 
       _notifyIcon = new NotifyIcon {
         Icon = GetIconFromResources(),
-        Text = _appName,
+        Text = Program.localization.GetString("app_name"),
         Visible = true
       };
 
       _toggleButton = new RoundButton {
-        Text = "Подключить",
+        Text = Program.localization.GetString("main_form.connect"),
         Size = new Size(160, 80),
-        Location = new Point((ClientSize.Width - 160) / 2, 40),
+        Location = new Point((ClientSize.Width - 160) / 2, 30),
         BackColor = Color.FromArgb(45, 45, 45),
         ForeColor = Color.White,
         Font = new Font("Segoe UI", 11, FontStyle.Bold),
@@ -70,10 +78,10 @@ namespace bdmanager {
       _toggleButton.Click += ToggleButton_Click;
       Controls.Add(_toggleButton);
 
-      RoundButton settingsButton = new RoundButton {
-        Text = "Настройки",
+      _settingsButton = new RoundButton {
+        Text = Program.localization.GetString("main_form.settings"),
         Size = new Size(120, 40),
-        Location = new Point((ClientSize.Width - 120) / 2, 140),
+        Location = new Point((ClientSize.Width - 120) / 2, 120),
         BackColor = Color.FromArgb(60, 60, 60),
         ForeColor = Color.White,
         Font = new Font("Segoe UI", 9),
@@ -81,12 +89,12 @@ namespace bdmanager {
         BorderSize = 1,
         BorderColor = Color.FromArgb(100, 100, 100)
       };
-      settingsButton.Click += SettingsButton_Click;
-      Controls.Add(settingsButton);
+      _settingsButton.Click += SettingsButton_Click;
+      Controls.Add(_settingsButton);
 
       Panel logPanel = new Panel {
-        Size = new Size(ClientSize.Width - 20, 120),
-        Location = new Point(10, ClientSize.Height - 130),
+        Size = new Size(ClientSize.Width - 20, 140),
+        Location = new Point(10, ClientSize.Height - 180),
         BackColor = Color.FromArgb(20, 20, 20),
         BorderStyle = BorderStyle.FixedSingle
       };
@@ -103,24 +111,132 @@ namespace bdmanager {
       };
       logPanel.Controls.Add(_logBox);
 
+      _languagePanel = new Panel {
+        Size = new Size(ClientSize.Width - 20, 15),
+        Location = new Point(10, ClientSize.Height - 30),
+        BackColor = Color.FromArgb(30, 30, 30)
+      };
+      Controls.Add(_languagePanel);
+
       ResumeLayout(false);
+    }
+
+    private void InitializeLanguage() {
+      FlowLayoutPanel flowPanel = new FlowLayoutPanel
+      {
+          AutoSize = true,
+          AutoSizeMode = AutoSizeMode.GrowAndShrink,
+          FlowDirection = FlowDirection.LeftToRight,
+          Location = new Point(0, 0),
+      };
+      _languagePanel.Controls.Add(flowPanel);
+
+      foreach (string langCode in Localization.AvailableLanguages)
+      {
+          LinkLabel langLink = new LinkLabel
+          {
+              Text = Program.localization.GetLanguageName(langCode),
+              LinkColor = Color.White,
+              VisitedLinkColor = Color.White,
+              ActiveLinkColor = Color.LightGray,
+              AutoSize = true,
+              Font = new Font("Segoe UI", 8),
+              Tag = langCode,
+              Margin = new Padding(0, 5, 2, 0)
+          };
+
+          langLink.Click += (s, e) =>
+          {
+              if (Program.localization.CurrentLanguage != langCode)
+              {
+                  Program.localization.ChangeLanguage(langCode);
+                  _settings.Language = langCode;
+                  _settings.Save();
+              }
+          };
+
+          langLink.LinkColor = Program.localization.CurrentLanguage == langCode ? 
+            Color.LimeGreen : 
+            Color.White;
+
+          flowPanel.Controls.Add(langLink);
+
+          if (langCode != Localization.AvailableLanguages.Last())
+          {
+              Label separator = new Label
+              {
+                  Text = "|",
+                  ForeColor = Color.White,
+                  AutoSize = true,
+                  Font = new Font("Segoe UI", 8),
+                  Margin = new Padding(0, 5, 2, 0)
+              };
+              flowPanel.Controls.Add(separator);
+          }
+      }
+
+      flowPanel.Location = new Point(
+          (_languagePanel.Width - flowPanel.Width) / 2,
+          (_languagePanel.Height - flowPanel.Height) / 2
+      );
+    }
+
+    private void UpdateLocale() {
+      if (InvokeRequired) {
+        Invoke(new Action(UpdateLocale));
+        return;
+      }
+
+      Text = Program.localization.GetString("app_name");
+
+      _toggleButton.Text = _processManager.IsRunning ? 
+        Program.localization.GetString("main_form.disconnect") : 
+        Program.localization.GetString("main_form.connect");
+
+      _settingsButton.Text = Program.localization.GetString("main_form.settings");
+
+      _notifyIcon.Text = Program.localization.GetString("app_name");
+      
+      _toggleMenuItem.Text = _processManager.IsRunning ? 
+        Program.localization.GetString("main_form.disconnect") : 
+        Program.localization.GetString("main_form.connect");
+
+      if (_notifyIcon.ContextMenu != null) {
+        _notifyIcon.ContextMenu.MenuItems[0].Text = Program.localization.GetString("tray_menu.open");
+        _notifyIcon.ContextMenu.MenuItems[2].Text = Program.localization.GetString("tray_menu.exit");
+      }
+
+      foreach (Control control in _languagePanel.Controls)
+      {
+          if (control is FlowLayoutPanel flowPanel)
+          {
+              foreach (Control langControl in flowPanel.Controls)
+              {
+                  if (langControl is LinkLabel link)
+                  {
+                      string langCode = (string)link.Tag;
+                      link.LinkColor = Program.localization.CurrentLanguage == langCode ? Color.LimeGreen : Color.White;
+                  }
+              }
+          }
+      }
     }
 
     private void InitializeTray() {
       ContextMenu trayMenu = new ContextMenu();
 
-      MenuItem openMenuItem = new MenuItem("Открыть");
+      MenuItem openMenuItem = new MenuItem(Program.localization.GetString("tray_menu.open"));
       openMenuItem.Click += (s, e) => {
         Show();
         WindowState = FormWindowState.Normal;
       };
 
-      _toggleMenuItem = new MenuItem("Подключить");
+      _toggleMenuItem = new MenuItem(Program.localization.GetString("main_form.connect"));
       _toggleMenuItem.Click += (s, e) => {
         ToggleConnection();
       };
 
-      MenuItem exitMenuItem = new MenuItem("Выход");
+      MenuItem exitMenuItem = new MenuItem(Program.localization.GetString("tray_menu.exit"));
       exitMenuItem.Click += (s, e) => {
         _notifyIcon.Visible = false;
         Application.Exit();
@@ -138,19 +254,19 @@ namespace bdmanager {
     }
 
     private void MainForm_Load(object sender, EventArgs e) {
-      _logger.Log("Приложение запущено");
+      _logger.Log(Program.localization.GetString("main_form.app_started"));
       _processManager.CleanupOnStartup();
 
       if (_settings.AutoStart && Program.isAutorun) {
         if (_settings.StartMinimized) {
-          _logger.Log("Запуск в тихом режиме");
+          _logger.Log(Program.localization.GetString("main_form.quiet_mode"));
           WindowState = FormWindowState.Minimized;
           Hide();
           _trayShow = true;
         }
 
         if (_settings.AutoConnect) {
-          _logger.Log("Автоматическое подключение");
+          _logger.Log(Program.localization.GetString("main_form.auto_connect"));
           ToggleConnection();
         }
       }
@@ -165,7 +281,8 @@ namespace bdmanager {
         Hide();
 
         if (!_trayShow) {
-          _notifyIcon.ShowBalloonTip(3000, _appName, "Приложение свернуто в трей", ToolTipIcon.Info);
+          _notifyIcon.ShowBalloonTip(3000, Program.localization.GetString("app_name"), 
+            Program.localization.GetString("main_form.app_minimized"), ToolTipIcon.Info);
           _trayShow = true;
         }
       }
@@ -200,7 +317,7 @@ namespace bdmanager {
 
       if (_settingsForm.ShowDialog() == DialogResult.OK) {
         _settings.Save();
-        _logger.Log("Настройки сохранены");
+        _logger.Log(Program.localization.GetString("main_form.settings_saved"));
       }
     }
 
@@ -229,9 +346,17 @@ namespace bdmanager {
         return;
       }
 
-      _toggleButton.Text = isRunning ? "Отключить" : "Подключить";
-      _toggleMenuItem.Text = isRunning ? "Отключить" : "Подключить";
-      _notifyIcon.Text = $"{_appName}: {(isRunning ? "Подключено" : "Отключено")}";
+      _toggleButton.Text = isRunning ? 
+        Program.localization.GetString("main_form.disconnect") : 
+        Program.localization.GetString("main_form.connect");
+      
+      _toggleMenuItem.Text = isRunning ? 
+        Program.localization.GetString("main_form.disconnect") : 
+        Program.localization.GetString("main_form.connect");
+      
+      _notifyIcon.Text = isRunning ? 
+        Program.localization.GetString("main_form.connected") : 
+        Program.localization.GetString("main_form.disconnected");
 
       if (isRunning) {
         _toggleButton.BackColor = Color.FromArgb(200, 50, 50);
