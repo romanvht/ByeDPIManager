@@ -4,11 +4,9 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace bdmanager {
   public partial class MainForm : Form {
-    private string _appName = Program.appName;
     private bool _trayShow = false;
 
     private AppSettings _settings;
@@ -60,7 +58,6 @@ namespace bdmanager {
 
       _notifyIcon = new NotifyIcon {
         Icon = GetIconFromResources(),
-        Text = Program.localization.GetString("app_name"),
         Visible = true
       };
 
@@ -155,8 +152,8 @@ namespace bdmanager {
               }
           };
 
-          langLink.LinkColor = Program.localization.CurrentLanguage == langCode ? 
-            Color.LimeGreen : 
+          langLink.LinkColor = Program.localization.CurrentLanguage == langCode ?
+            Color.LimeGreen :
             Color.White;
 
           flowPanel.Controls.Add(langLink);
@@ -189,16 +186,16 @@ namespace bdmanager {
 
       Text = Program.localization.GetString("app_name");
 
-      _toggleButton.Text = _processManager.IsRunning ? 
-        Program.localization.GetString("main_form.disconnect") : 
+      _toggleButton.Text = _processManager.IsRunning ?
+        Program.localization.GetString("main_form.disconnect") :
         Program.localization.GetString("main_form.connect");
 
       _settingsButton.Text = Program.localization.GetString("main_form.settings");
 
       _notifyIcon.Text = Program.localization.GetString("app_name");
-      
-      _toggleMenuItem.Text = _processManager.IsRunning ? 
-        Program.localization.GetString("main_form.disconnect") : 
+
+      _toggleMenuItem.Text = _processManager.IsRunning ?
+        Program.localization.GetString("main_form.disconnect") :
         Program.localization.GetString("main_form.connect");
 
       if (_notifyIcon.ContextMenu != null) {
@@ -281,7 +278,7 @@ namespace bdmanager {
         Hide();
 
         if (!_trayShow) {
-          _notifyIcon.ShowBalloonTip(3000, Program.localization.GetString("app_name"), 
+          _notifyIcon.ShowBalloonTip(3000, Program.localization.GetString("app_name"),
             Program.localization.GetString("main_form.app_minimized"), ToolTipIcon.Info);
           _trayShow = true;
         }
@@ -346,17 +343,19 @@ namespace bdmanager {
         return;
       }
 
-      _toggleButton.Text = isRunning ? 
-        Program.localization.GetString("main_form.disconnect") : 
+      _toggleButton.Text = isRunning ?
+        Program.localization.GetString("main_form.disconnect") :
         Program.localization.GetString("main_form.connect");
-      
-      _toggleMenuItem.Text = isRunning ? 
-        Program.localization.GetString("main_form.disconnect") : 
+
+      _toggleMenuItem.Text = isRunning ?
+        Program.localization.GetString("main_form.disconnect") :
         Program.localization.GetString("main_form.connect");
-      
-      _notifyIcon.Text = isRunning ? 
-        Program.localization.GetString("main_form.connected") : 
+
+      _notifyIcon.Text = isRunning ?
+        Program.localization.GetString("main_form.connected") :
         Program.localization.GetString("main_form.disconnected");
+
+      _notifyIcon.Icon = isRunning ? GetIconFromResources(true) : GetIconFromResources();
 
       if (isRunning) {
         _toggleButton.BackColor = Color.FromArgb(200, 50, 50);
@@ -372,16 +371,18 @@ namespace bdmanager {
       }
     }
 
-    private Icon GetIconFromResources() {
+    private Icon GetIconFromResources(bool isConnected = false) {
       Assembly assembly = Assembly.GetExecutingAssembly();
-      string resourceName = "bdmanager.icon.ico";
+
+      string resourceName = isConnected ?
+        "bdmanager.tray-on.ico" :
+        "bdmanager.tray-off.ico";
 
       using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
         if (stream != null) {
           return new Icon(stream);
         }
       }
-
       return SystemIcons.Application;
     }
   }
