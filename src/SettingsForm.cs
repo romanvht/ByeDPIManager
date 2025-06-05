@@ -1,13 +1,13 @@
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 
 namespace bdmanager {
   public partial class SettingsForm : Form {
     private AppSettings _settings;
     private AutorunManager _autorunManager;
+    private ProxyTestManager _proxyTestManager;
 
     private TabControl _tabControl;
 
@@ -32,6 +32,7 @@ namespace bdmanager {
     public SettingsForm() {
       _settings = Program.settings;
       _autorunManager = Program.autorunManager;
+      _proxyTestManager = new ProxyTestManager();
       InitializeComponent();
     }
 
@@ -97,7 +98,7 @@ namespace bdmanager {
         Size = new Size(30, 23),
         Name = "byeDpiBrowseButton"
       };
-      byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox, 
+      byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox,
         Program.localization.GetString("settings_form.byedpi.browse_title"));
       byeDpiGroupBox.Controls.Add(byeDpiBrowseButton);
 
@@ -159,7 +160,7 @@ namespace bdmanager {
         Size = new Size(30, 23),
         Name = "proxiFyreBrowseButton"
       };
-      proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox, 
+      proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox,
         Program.localization.GetString("settings_form.proxifyre.browse_title"));
       proxiFyreGroupBox.Controls.Add(proxiFyreBrowseButton);
 
@@ -373,7 +374,7 @@ namespace bdmanager {
       };
       proxyTestStartButton.Click += ProxyTestStartButton_Click;
       proxyTestTabPage.Controls.Add(proxyTestStartButton);
-      
+
       _proxyTestProgressLabel = new Label {
         Text = "",
         Location = new Point(100, 317),
@@ -383,6 +384,77 @@ namespace bdmanager {
         Name = "proxyTestProgressLabel"
       };
       proxyTestTabPage.Controls.Add(_proxyTestProgressLabel);
+
+      // About
+      TabPage aboutTabPage = new TabPage {
+        Text = Program.localization.GetString("settings_form.about.tab"),
+        Name = "aboutTabPage",
+        BackColor = SystemColors.Control
+      };
+      _tabControl.TabPages.Add(aboutTabPage);
+
+      GroupBox aboutGroupBox = new GroupBox {
+        Text = Program.localization.GetString("settings_form.about.group"),
+        Location = new Point(10, 10),
+        Size = new Size(430, 200),
+        ForeColor = SystemColors.ControlText,
+        BackColor = SystemColors.Control,
+        Name = "aboutGroupBox"
+      };
+      aboutTabPage.Controls.Add(aboutGroupBox);
+
+      Assembly asm = Assembly.GetExecutingAssembly();
+      string version = asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+      string author = asm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
+
+      Label versionLabel = new Label {
+        Text = Program.localization.GetString("settings_form.about.version_label"),
+        Location = new Point(15, 30),
+        Size = new Size(80, 20),
+        Name = "versionLabel"
+      };
+      aboutGroupBox.Controls.Add(versionLabel);
+
+      Label versionValueLabel = new Label {
+        Text = version,
+        Location = new Point(100, 30),
+        Size = new Size(300, 20),
+        Name = "versionValueLabel"
+      };
+      aboutGroupBox.Controls.Add(versionValueLabel);
+
+      Label developerLabel = new Label {
+        Text = Program.localization.GetString("settings_form.about.developer_label"),
+        Location = new Point(15, 60),
+        Size = new Size(80, 20),
+        Name = "developerLabel"
+      };
+      aboutGroupBox.Controls.Add(developerLabel);
+
+      Label developerValueLabel = new Label {
+        Text = author,
+        Location = new Point(100, 60),
+        Size = new Size(300, 20),
+        Name = "developerValueLabel"
+      };
+      aboutGroupBox.Controls.Add(developerValueLabel);
+
+      Label githubLabel = new Label {
+        Text = Program.localization.GetString("settings_form.about.github_label"),
+        Location = new Point(15, 90),
+        Size = new Size(80, 20),
+        Name = "githubLabel"
+      };
+      aboutGroupBox.Controls.Add(githubLabel);
+
+      LinkLabel githubLinkLabel = new LinkLabel {
+        Text = Program.localization.GetString("settings_form.about.github_link"),
+        Location = new Point(100, 90),
+        Size = new Size(300, 20),
+        Name = "githubLinkLabel"
+      };
+      githubLinkLabel.LinkClicked += (s, e) => { System.Diagnostics.Process.Start(githubLinkLabel.Text); };
+      aboutGroupBox.Controls.Add(githubLinkLabel);
 
       // Form Buttons
       Button okButton = new Button {
@@ -412,7 +484,7 @@ namespace bdmanager {
 
     private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
       Button proxyTestStartButton = (Button)sender;
-      if (!Program.proxyTestManager.IsTesting) {
+      if (!_proxyTestManager.IsTesting) {
         OkButton_Click(sender, e);
         _settings.Save();
 
@@ -421,14 +493,14 @@ namespace bdmanager {
         _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
         _settings.Save();
 
-        Program.proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
-        Program.proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
-        Program.proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
+        _proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
+        _proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
+        _proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
 
-        await Program.proxyTestManager.StartTesting();
+        await _proxyTestManager.StartTesting();
       }
       else {
-        Program.proxyTestManager.StopTesting();
+        _proxyTestManager.StopTesting();
       }
     }
 
@@ -460,7 +532,7 @@ namespace bdmanager {
     }
 
     private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
-      if (Program.proxyTestManager.IsTesting) {
+      if (_proxyTestManager.IsTesting) {
         MessageBox.Show(
           Program.localization.GetString("settings_form.proxy_test.warning"),
           Program.localization.GetString("settings_form.title"),
@@ -486,11 +558,11 @@ namespace bdmanager {
       _settings.AutoStart = _autoStartCheckBox.Checked;
       _settings.AutoConnect = _autoConnectCheckBox.Checked;
       _settings.StartMinimized = _StartMinimizedCheckBox.Checked;
-      
+
       _settings.ProxyTestDelay = (int)_delayNumericUpDown.Value;
       _settings.ProxyTestRequestsCount = (int)_requestsCountNumericUpDown.Value;
       _settings.ProxyTestFullLog = _fullLogCheckBox.Checked;
-      
+
       _autorunManager.SetAutorun(_settings.AutoStart);
     }
 

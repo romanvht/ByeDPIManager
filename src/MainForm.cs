@@ -258,8 +258,10 @@ namespace bdmanager {
         if (_settings.StartMinimized) {
           _logger.Log(Program.localization.GetString("main_form.quiet_mode"));
           WindowState = FormWindowState.Minimized;
-          Hide();
           _trayShow = true;
+          BeginInvoke(new Action(() => {
+            Hide();
+          }));
         }
 
         if (_settings.AutoConnect) {

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace bdmanager {
   static class Program {
     private static Mutex _mutex = null;
-    
+
     public static string appName = null;
     public static bool isAutorun = false;
 
@@ -46,7 +46,6 @@ namespace bdmanager {
 
         processManager = new ProcessManager();
         autorunManager = new AutorunManager();
-        proxyTestManager = new ProxyTestManager();
         Application.Run(new MainForm());
       }
       catch (Exception ex) {
