@@ -310,28 +310,30 @@ namespace bdmanager {
 
       Label delayLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.delay_label"),
-        Location = new Point(10, 20),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Location = new Point(10, 25),
         Size = new Size(250, 20)
       };
       proxySettingsGroupBox.Controls.Add(delayLabel);
 
       _delayNumericUpDown = new NumericUpDown {
-        Location = new Point(300, 18),
-        Size = new Size(120, 20),
+        Location = new Point(300, 25),
+        Size = new Size(120, 23),
         Maximum = int.MaxValue
       };
       proxySettingsGroupBox.Controls.Add(_delayNumericUpDown);
 
       Label requestsCountLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.requests_label"),
-        Location = new Point(10, 50),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Location = new Point(10, 55),
         Size = new Size(250, 20)
       };
       proxySettingsGroupBox.Controls.Add(requestsCountLabel);
 
       _requestsCountNumericUpDown = new NumericUpDown {
-        Location = new Point(300, 48),
-        Size = new Size(120, 20),
+        Location = new Point(300, 55),
+        Size = new Size(120, 23),
         Minimum = 1,
         Maximum = int.MaxValue
       };
@@ -339,7 +341,7 @@ namespace bdmanager {
 
       _fullLogCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
-        Location = new Point(10, 80),
+        Location = new Point(12, 85),
         Size = new Size(400, 20)
       };
       proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
@@ -396,7 +398,7 @@ namespace bdmanager {
       GroupBox aboutGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.about.group"),
         Location = new Point(10, 10),
-        Size = new Size(430, 200),
+        Size = new Size(430, 130),
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Name = "aboutGroupBox"
