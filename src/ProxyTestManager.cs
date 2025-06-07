@@ -3,7 +3,6 @@ using SocksSharp.Proxy;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,14 +12,12 @@ using System.Windows.Forms;
 
 namespace bdmanager {
   public class ProxyTestManager {
-    public const string PROXY_TEST_FOLDER = "./proxytest";
-
-    public const string PROXY_TEST_CMDS = PROXY_TEST_FOLDER + "/cmds.txt";
-    public const string PROXY_TEST_SITES = PROXY_TEST_FOLDER + "/sites.txt";
-    public const string PROXY_TEST_LATEST_LOG = PROXY_TEST_FOLDER + "/test.log";
+    public static readonly string PROXY_TEST_FOLDER = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "proxytest");
+    public static readonly string PROXY_TEST_CMDS = Path.Combine(PROXY_TEST_FOLDER, "cmds.txt");
+    public static readonly string PROXY_TEST_SITES = Path.Combine(PROXY_TEST_FOLDER, "sites.txt");
+    public static readonly string PROXY_TEST_LATEST_LOG = Path.Combine(PROXY_TEST_FOLDER, "test.log");
 
     private readonly object _logLock = new object();
-
     public bool IsTesting { get; private set; }
 
     public Button ProxyTestStartButton { get; set; }
