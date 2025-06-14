@@ -246,6 +246,7 @@ namespace bdmanager {
       _notifyIcon.ContextMenu = trayMenu;
       _notifyIcon.DoubleClick += (s, e) => {
         Show();
+        Activate();
         WindowState = FormWindowState.Normal;
       };
     }

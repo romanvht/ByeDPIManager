@@ -64,6 +64,11 @@ namespace bdmanager {
             Program.localization.GetString("process_manager.byedpi.started"),
             _settings.GetByeDpiArguments()
           ));
+
+          if (_byeDpiProcess.HasExited) {
+            Stop();
+            return;
+          }
         }
         catch (Exception byeDpiEx) {
           Program.logger.Log(string.Format(
@@ -96,6 +101,11 @@ namespace bdmanager {
           _proxifyreProcess.BeginErrorReadLine();
 
           Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.started"));
+
+          if (_proxifyreProcess.HasExited) {
+            Stop();
+            return;
+          }
         }
         catch (Exception proxiFyreEx) {
           Program.logger.Log(string.Format(
@@ -174,14 +184,6 @@ namespace bdmanager {
       }
     }
 
-    private void ProcessStopHandler(object sender, EventArgs e) {
-      Stop();
-    }
-
-    private void RaiseStatusChanged(bool isRunning) {
-      StatusChanged?.Invoke(this, isRunning);
-    }
-
     public void CleanupOnStartup() {
       try {
         bool processesFound = false;
@@ -230,6 +232,13 @@ namespace bdmanager {
           ex.Message
         ));
       }
+    }
+    private void ProcessStopHandler(object sender, EventArgs e) {
+      Stop();
+    }
+
+    private void RaiseStatusChanged(bool isRunning) {
+      StatusChanged?.Invoke(this, isRunning);
     }
   }
 }
