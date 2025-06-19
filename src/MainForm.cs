@@ -296,6 +296,16 @@ namespace bdmanager {
     }
 
     private void SettingsButton_Click(object sender, EventArgs e) {
+      if (_processManager.IsRunning) {
+        MessageBox.Show(
+            Program.localization.GetString("main_form.disconnect_first"),
+            Program.localization.GetString("app_name"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning
+        );
+        return;
+      }
+
       OpenSettings();
     }
 

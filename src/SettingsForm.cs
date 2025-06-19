@@ -14,6 +14,7 @@ namespace bdmanager {
     private TextBox _byeDpiPathTextBox;
     private TextBox _byeDpiArgsTextBox;
 
+    private CheckBox _disableProxiFyreCheckBox;
     private TextBox _proxiFyrePathTextBox;
     private NumericUpDown _proxiFyrePortNumBox;
     private ListBox _appListBox;
@@ -40,187 +41,313 @@ namespace bdmanager {
       SuspendLayout();
 
       Text = Program.localization.GetString("settings_form.title");
-      Size = new Size(510, 490);
+      MinimumSize = new Size(550, 550);
       StartPosition = FormStartPosition.CenterParent;
-      FormBorderStyle = FormBorderStyle.FixedDialog;
-      MaximizeBox = false;
-      MinimizeBox = false;
+      FormBorderStyle = FormBorderStyle.Sizable;
+      MaximizeBox = true;
+      MinimizeBox = true;
+      ShowIcon = false;
       Load += SettingsForm_Load;
       FormClosing += SettingsForm_FormClosing;
       BackColor = SystemColors.Control;
       ForeColor = SystemColors.ControlText;
+      Padding = new Padding(10);
 
       // Tabs
       _tabControl = new TabControl {
-        Location = new Point(15, 15),
-        Size = new Size(460, 380),
-        Name = "tabControl"
+        Name = "tabControl",
+        Dock = DockStyle.Fill
       };
       Controls.Add(_tabControl);
 
-      // ByeDPI
+      // Init Tabs
+      AddByeDPI();
+      AddProxiFyre();
+      AddAutorun();
+      AddProxyTest();
+      AddAbout();
+
+      // Buttons
+      FlowLayoutPanel formButtonsPanel = new FlowLayoutPanel {
+          FlowDirection = FlowDirection.RightToLeft,
+          Dock = DockStyle.Bottom,
+          AutoSize = true,
+          Padding = new Padding(0, 10, 0, 0),
+          Name = "formButtonsPanel"
+      };
+      Controls.Add(formButtonsPanel);
+
+      Button okButton = new Button {
+        Text = Program.localization.GetString("settings_form.buttons.ok"),
+        DialogResult = DialogResult.OK,
+        Name = "okButton",
+        Margin = new Padding(3),
+        AutoSize = true
+      };
+      okButton.Click += OkButton_Click;
+      formButtonsPanel.Controls.Add(okButton);
+
+      Button cancelButton = new Button {
+        Text = Program.localization.GetString("settings_form.buttons.cancel"),
+        DialogResult = DialogResult.Cancel,
+        Name = "cancelButton",
+        Margin = new Padding(3),
+        AutoSize = true
+      };
+      formButtonsPanel.Controls.Add(cancelButton);
+
+
+      AcceptButton = okButton;
+      CancelButton = cancelButton;
+
+      ResumeLayout(false);
+      PerformLayout();
+    }
+
+    private void AddByeDPI() {
       TabPage byeDpiTabPage = new TabPage {
         Text = Program.localization.GetString("settings_form.byedpi.tab"),
         Name = "byeDpiTabPage",
-        BackColor = SystemColors.Control
+        BackColor = SystemColors.Control,
+        Padding = new Padding(10)
       };
       _tabControl.TabPages.Add(byeDpiTabPage);
 
       GroupBox byeDpiGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.byedpi.group"),
-        Location = new Point(10, 10),
-        Size = new Size(430, 330),
+        Name = "byeDpiGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "byeDpiGroupBox"
+        Padding = new Padding(10)
       };
       byeDpiTabPage.Controls.Add(byeDpiGroupBox);
 
+      TableLayoutPanel byeDpiLayout = new TableLayoutPanel {
+        Dock = DockStyle.Fill,
+        ColumnCount = 3,
+        RowCount = 3,
+        ColumnStyles = {
+          new ColumnStyle(SizeType.AutoSize),
+          new ColumnStyle(SizeType.Percent, 100F),
+          new ColumnStyle(SizeType.Absolute, 30)
+        },
+        RowStyles = {
+          new RowStyle(SizeType.AutoSize),
+          new RowStyle(SizeType.AutoSize),
+          new RowStyle(SizeType.Percent, 100F)
+        },
+        Name = "byeDpiLayout"
+      };
+      byeDpiGroupBox.Controls.Add(byeDpiLayout);
+
       Label byeDpiPathLabel = new Label {
         Text = Program.localization.GetString("settings_form.byedpi.path_label"),
-        Location = new Point(15, 25),
-        Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
-        Name = "byeDpiPathLabel"
+        Name = "byeDpiPathLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      byeDpiGroupBox.Controls.Add(byeDpiPathLabel);
+      byeDpiLayout.Controls.Add(byeDpiPathLabel, 0, 0);
 
       _byeDpiPathTextBox = new TextBox {
-        Location = new Point(120, 25),
-        Size = new Size(250, 50),
-        Name = "byeDpiPathTextBox"
+        Name = "byeDpiPathTextBox",
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      byeDpiGroupBox.Controls.Add(_byeDpiPathTextBox);
+      byeDpiLayout.Controls.Add(_byeDpiPathTextBox, 1, 0);
 
       Button byeDpiBrowseButton = new Button {
         Text = "...",
-        Location = new Point(380, 24),
-        Size = new Size(30, 23),
-        Name = "byeDpiBrowseButton"
+        Anchor = AnchorStyles.None,
+        Name = "byeDpiBrowseButton",
+        Margin = new Padding(0),
       };
-      byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox,
-        Program.localization.GetString("settings_form.byedpi.browse_title"));
-      byeDpiGroupBox.Controls.Add(byeDpiBrowseButton);
+      byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox, Program.localization.GetString("settings_form.byedpi.browse_title"));
+      byeDpiLayout.Controls.Add(byeDpiBrowseButton, 2, 0);
 
       Label byeDpiArgsLabel = new Label {
         Text = Program.localization.GetString("settings_form.byedpi.args_label"),
-        Location = new Point(15, 60),
-        Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
-        Name = "byeDpiArgsLabel"
+        Name = "byeDpiArgsLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      byeDpiGroupBox.Controls.Add(byeDpiArgsLabel);
+      byeDpiLayout.SetColumnSpan(byeDpiArgsLabel, 3);
+      byeDpiLayout.Controls.Add(byeDpiArgsLabel, 0, 1);
 
       _byeDpiArgsTextBox = new TextBox {
-        Location = new Point(120, 60),
-        Size = new Size(290, 250),
         Name = "byeDpiArgsTextBox",
         Multiline = true,
-        ScrollBars = ScrollBars.Vertical
+        ScrollBars = ScrollBars.Vertical,
+        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      byeDpiGroupBox.Controls.Add(_byeDpiArgsTextBox);
+      byeDpiLayout.SetColumnSpan(_byeDpiArgsTextBox, 3);
+      byeDpiLayout.Controls.Add(_byeDpiArgsTextBox, 0, 2);
+    }
 
-      // ProxiFyre
+    private void AddProxiFyre() {
       TabPage proxiFyreTabPage = new TabPage {
         Text = Program.localization.GetString("settings_form.proxifyre.tab"),
         Name = "proxiFyreTabPage",
-        BackColor = SystemColors.Control
+        BackColor = SystemColors.Control,
+        Padding = new Padding(10)
       };
       _tabControl.TabPages.Add(proxiFyreTabPage);
 
+      TableLayoutPanel proxiFyreTabLayout = new TableLayoutPanel {
+        Dock = DockStyle.Fill,
+        ColumnCount = 1,
+        RowCount = 2,
+        RowStyles = {
+            new RowStyle(SizeType.AutoSize),
+            new RowStyle(SizeType.Percent, 100F)
+        },
+        Name = "proxiFyreTabLayout"
+      };
+      proxiFyreTabPage.Controls.Add(proxiFyreTabLayout);
+
       GroupBox proxiFyreGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.proxifyre.group"),
-        Location = new Point(10, 10),
-        Size = new Size(430, 100),
+        Name = "proxiFyreGroupBox",
+        Dock = DockStyle.Fill,
+        MinimumSize = new Size(0, 110),
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "proxiFyreGroupBox"
+        Padding = new Padding(10),
+        Margin = new Padding(0)
       };
-      proxiFyreTabPage.Controls.Add(proxiFyreGroupBox);
+      proxiFyreTabLayout.Controls.Add(proxiFyreGroupBox, 0, 0);
+
+      TableLayoutPanel proxiFyreLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 3,
+          RowCount = 3,
+          ColumnStyles = {
+              new ColumnStyle(SizeType.AutoSize),
+              new ColumnStyle(SizeType.Percent, 100F),
+              new ColumnStyle(SizeType.Absolute, 30)
+          },
+          RowStyles = {
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize)
+          },
+          Name = "proxiFyreLayout"
+      };
+      proxiFyreGroupBox.Controls.Add(proxiFyreLayout);
+
+      _disableProxiFyreCheckBox = new CheckBox {
+        Text = Program.localization.GetString("settings_form.proxifyre.disable"),
+        Name = "disableProxiFyreCheckBox",
+        Margin = new Padding(3, 0, 3, 3),
+        AutoSize = true
+      };
+      proxiFyreLayout.SetColumnSpan(_disableProxiFyreCheckBox, 3);
+      proxiFyreLayout.Controls.Add(_disableProxiFyreCheckBox, 0, 0);
 
       Label proxiFyrePathLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxifyre.path_label"),
-        Location = new Point(15, 25),
-        Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
-        Name = "proxiFyrePathLabel"
+        Name = "proxiFyrePathLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      proxiFyreGroupBox.Controls.Add(proxiFyrePathLabel);
+      proxiFyreLayout.Controls.Add(proxiFyrePathLabel, 0, 1);
 
       _proxiFyrePathTextBox = new TextBox {
-        Location = new Point(120, 25),
-        Size = new Size(250, 23),
-        Name = "proxiFyrePathTextBox"
+        Name = "proxiFyrePathTextBox",
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      proxiFyreGroupBox.Controls.Add(_proxiFyrePathTextBox);
+      proxiFyreLayout.Controls.Add(_proxiFyrePathTextBox, 1, 1);
 
       Button proxiFyreBrowseButton = new Button {
         Text = "...",
-        Location = new Point(380, 24),
-        Size = new Size(30, 23),
-        Name = "proxiFyreBrowseButton"
+        Anchor = AnchorStyles.None,
+        Name = "proxiFyreBrowseButton",
+        Margin = new Padding(0),
       };
-      proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox,
-        Program.localization.GetString("settings_form.proxifyre.browse_title"));
-      proxiFyreGroupBox.Controls.Add(proxiFyreBrowseButton);
+      proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox, Program.localization.GetString("settings_form.proxifyre.browse_title"));
+      proxiFyreLayout.Controls.Add(proxiFyreBrowseButton, 2, 1);
 
       Label proxiFyrePortLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxifyre.port_label"),
-        Location = new Point(15, 60),
-        Size = new Size(100, 20),
         TextAlign = ContentAlignment.MiddleLeft,
-        Name = "proxiFyrePortLabel"
+        Name = "proxiFyrePortLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      proxiFyreGroupBox.Controls.Add(proxiFyrePortLabel);
+      proxiFyreLayout.Controls.Add(proxiFyrePortLabel, 0, 2);
 
       _proxiFyrePortNumBox = new NumericUpDown {
-        Location = new Point(120, 60),
-        Size = new Size(80, 23),
         Name = "proxiFyrePortNumBox",
         Minimum = 1,
-        Maximum = 65535
+        Maximum = 65535,
+        Anchor = AnchorStyles.Left | AnchorStyles.Top,
+        Margin = new Padding(0, 3, 0, 3),
+        Width = 80
       };
-      proxiFyreGroupBox.Controls.Add(_proxiFyrePortNumBox);
+      proxiFyreLayout.Controls.Add(_proxiFyrePortNumBox, 1, 2);
 
-      // Apps
       GroupBox appsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.apps.group"),
-        Location = new Point(10, 120),
-        Size = new Size(430, 225),
+        Name = "appsGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "appsGroupBox"
+        Padding = new Padding(10),
+        Margin = new Padding(0)
       };
-      proxiFyreTabPage.Controls.Add(appsGroupBox);
+      proxiFyreTabLayout.Controls.Add(appsGroupBox, 0, 1);
+
+      TableLayoutPanel appsLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 3,
+          RowCount = 4,
+          ColumnStyles = {
+              new ColumnStyle(SizeType.AutoSize),
+              new ColumnStyle(SizeType.Percent, 100F),
+              new ColumnStyle(SizeType.Absolute, 30)
+          },
+          RowStyles = {
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize)
+          },
+          Name = "appsLayout"
+      };
+      appsGroupBox.Controls.Add(appsLayout);
 
       _appListBox = new ListBox {
-        Location = new Point(15, 25),
-        Size = new Size(400, 130),
-        Name = "appListBox"
+        Name = "appListBox",
+        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
+        Margin = new Padding(3)
       };
-      appsGroupBox.Controls.Add(_appListBox);
+      appsLayout.SetColumnSpan(_appListBox, 3);
+      appsLayout.Controls.Add(_appListBox, 0, 0);
 
       Label appNameLabel = new Label {
         Text = Program.localization.GetString("settings_form.apps.name_label"),
-        Location = new Point(15, 155),
-        Size = new Size(160, 20),
         TextAlign = ContentAlignment.MiddleLeft,
-        Name = "appNameLabel"
+        Name = "appNameLabel",
+        Margin = new Padding(0, 3, 0, 3),
+        AutoSize = true
       };
-      appsGroupBox.Controls.Add(appNameLabel);
+      appsLayout.SetColumnSpan(appNameLabel, 3);
+      appsLayout.Controls.Add(appNameLabel, 0, 1);
 
       _appTextBox = new TextBox {
-        Location = new Point(175, 155),
-        Size = new Size(200, 23),
-        Name = "appTextBox"
+        Name = "appTextBox",
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      appsGroupBox.Controls.Add(_appTextBox);
+      appsLayout.SetColumnSpan(_appTextBox, 2);
+      appsLayout.Controls.Add(_appTextBox, 0, 2);
 
       Button appBrowseButton = new Button {
         Text = "...",
-        Location = new Point(385, 154),
-        Size = new Size(30, 23),
-        Name = "appBrowseButton"
+        Anchor = AnchorStyles.None,
+        Name = "appBrowseButton",
+        Margin = new Padding(0)
       };
       appBrowseButton.Click += (s, e) => {
         BrowseForExe(_appTextBox, Program.localization.GetString("settings_form.apps.browse_title"));
@@ -228,260 +355,322 @@ namespace bdmanager {
           AddAppToList(_appTextBox.Text);
         }
       };
-      appsGroupBox.Controls.Add(appBrowseButton);
+      appsLayout.Controls.Add(appBrowseButton, 1, 2);
+
+      FlowLayoutPanel appButtonsPanel = new FlowLayoutPanel {
+          FlowDirection = FlowDirection.RightToLeft,
+          Dock = DockStyle.Fill,
+          WrapContents = false,
+          AutoSize = true,
+          Name = "appButtonsPanel"
+      };
+      appsLayout.SetColumnSpan(appButtonsPanel, 3);
+      appsLayout.Controls.Add(appButtonsPanel, 0, 3);
 
       Button addAppButton = new Button {
         Text = Program.localization.GetString("settings_form.apps.add"),
-        Location = new Point(15, 185),
-        Size = new Size(80, 25),
-        Name = "addAppButton"
+        Name = "addAppButton",
+        Margin = new Padding(3, 3, 0, 3),
       };
       addAppButton.Click += AddAppButton_Click;
-      appsGroupBox.Controls.Add(addAppButton);
+      appButtonsPanel.Controls.Add(addAppButton);
 
       Button removeAppButton = new Button {
         Text = Program.localization.GetString("settings_form.apps.remove"),
-        Location = new Point(100, 185),
-        Size = new Size(80, 25),
-        Name = "removeAppButton"
+        Name = "removeAppButton",
+        Margin = new Padding(3),
       };
       removeAppButton.Click += RemoveAppButton_Click;
-      appsGroupBox.Controls.Add(removeAppButton);
+      appButtonsPanel.Controls.Add(removeAppButton);
+    }
 
-      // Autorun
+    private void AddAutorun() {
       TabPage autorunTabPage = new TabPage {
         Text = Program.localization.GetString("settings_form.autorun.tab"),
         Name = "autorunTabPage",
-        BackColor = SystemColors.Control
+        BackColor = SystemColors.Control,
+        Padding = new Padding(10)
       };
       _tabControl.TabPages.Add(autorunTabPage);
 
       GroupBox autorunGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.autorun.group"),
-        Location = new Point(10, 10),
-        Size = new Size(430, 120),
+        Name = "autorunGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "autorunGroupBox"
+        Padding = new Padding(10)
       };
       autorunTabPage.Controls.Add(autorunGroupBox);
 
+      FlowLayoutPanel autorunLayout = new FlowLayoutPanel {
+          Dock = DockStyle.Fill,
+          FlowDirection = FlowDirection.TopDown,
+          AutoSize = true,
+          WrapContents = false,
+          Name = "autorunLayout"
+      };
+      autorunGroupBox.Controls.Add(autorunLayout);
+
       _autoStartCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.autorun.auto_start"),
-        Location = new Point(15, 25),
-        Size = new Size(400, 20),
-        Name = "autoStartCheckBox"
+        Name = "autoStartCheckBox",
+        Margin = new Padding(3),
+        AutoSize = true
       };
-      autorunGroupBox.Controls.Add(_autoStartCheckBox);
+      autorunLayout.Controls.Add(_autoStartCheckBox);
 
       _autoConnectCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.autorun.auto_connect"),
-        Location = new Point(15, 55),
-        Size = new Size(400, 20),
-        Name = "autoConnectCheckBox"
+        Name = "autoConnectCheckBox",
+        Margin = new Padding(3),
+        AutoSize = true
       };
-      autorunGroupBox.Controls.Add(_autoConnectCheckBox);
+      autorunLayout.Controls.Add(_autoConnectCheckBox);
 
       _StartMinimizedCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.autorun.start_minimized"),
-        Location = new Point(15, 85),
-        Size = new Size(400, 20),
-        Name = "StartMinimizedCheckBox"
+        Name = "StartMinimizedCheckBox",
+        Margin = new Padding(3),
+        AutoSize = true
       };
-      autorunGroupBox.Controls.Add(_StartMinimizedCheckBox);
+      autorunLayout.Controls.Add(_StartMinimizedCheckBox);
+    }
 
-      // ProxyTest
+    private void AddProxyTest() {
       TabPage proxyTestTabPage = new TabPage {
         Text = Program.localization.GetString("settings_form.proxy_test.tab"),
         Name = "proxyTestTabPage",
-        BackColor = SystemColors.Control
+        BackColor = SystemColors.Control,
+        Padding = new Padding(10)
       };
       _tabControl.TabPages.Add(proxyTestTabPage);
 
+      TableLayoutPanel proxyTestTabLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 1,
+          RowCount = 2,
+          RowStyles = {
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.Percent, 100F)
+          },
+          Name = "proxyTestTabLayout"
+      };
+      proxyTestTabPage.Controls.Add(proxyTestTabLayout);
+
       GroupBox proxySettingsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.proxy_test.settings_group"),
-        Location = new Point(10, 10),
-        Size = new Size(430, 120),
+        Name = "proxySettingsGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "proxySettingsGroupBox"
+        MinimumSize = new Size(0, 110),
+        Padding = new Padding(10),
+        Margin = new Padding(0)
       };
-      proxyTestTabPage.Controls.Add(proxySettingsGroupBox);
+      proxyTestTabLayout.Controls.Add(proxySettingsGroupBox, 0, 0);
+
+      TableLayoutPanel proxySettingsLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 2,
+          RowCount = 3,
+          ColumnStyles = {
+              new ColumnStyle(SizeType.Percent, 100F),
+              new ColumnStyle(SizeType.Absolute, 120)
+          },
+          RowStyles = {
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize)
+          },
+          Name = "proxySettingsLayout"
+      };
+      proxySettingsGroupBox.Controls.Add(proxySettingsLayout);
 
       Label delayLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.delay_label"),
         TextAlign = ContentAlignment.MiddleLeft,
-        Location = new Point(10, 25),
-        Size = new Size(250, 20)
+        Margin = new Padding(0, 3, 0, 3),
+        AutoSize = true
       };
-      proxySettingsGroupBox.Controls.Add(delayLabel);
+      proxySettingsLayout.Controls.Add(delayLabel, 0, 0);
 
       _delayNumericUpDown = new NumericUpDown {
-        Location = new Point(300, 25),
-        Size = new Size(120, 23),
-        Maximum = int.MaxValue
+        Maximum = int.MaxValue,
+        Anchor = AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      proxySettingsGroupBox.Controls.Add(_delayNumericUpDown);
+      proxySettingsLayout.Controls.Add(_delayNumericUpDown, 1, 0);
 
       Label requestsCountLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.requests_label"),
         TextAlign = ContentAlignment.MiddleLeft,
-        Location = new Point(10, 55),
-        Size = new Size(250, 20)
+        Margin = new Padding(0, 3, 0, 3),
+        AutoSize = true
       };
-      proxySettingsGroupBox.Controls.Add(requestsCountLabel);
+      proxySettingsLayout.Controls.Add(requestsCountLabel, 0, 1);
 
       _requestsCountNumericUpDown = new NumericUpDown {
-        Location = new Point(300, 55),
-        Size = new Size(120, 23),
         Minimum = 1,
-        Maximum = int.MaxValue
+        Maximum = int.MaxValue,
+        Anchor = AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
       };
-      proxySettingsGroupBox.Controls.Add(_requestsCountNumericUpDown);
+      proxySettingsLayout.Controls.Add(_requestsCountNumericUpDown, 1, 1);
 
       _fullLogCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
-        Location = new Point(12, 85),
-        Size = new Size(400, 20)
+        Margin = new Padding(3),
+        AutoSize = true
       };
-      proxySettingsGroupBox.Controls.Add(_fullLogCheckBox);
+      proxySettingsLayout.SetColumnSpan(_fullLogCheckBox, 2);
+      proxySettingsLayout.Controls.Add(_fullLogCheckBox, 0, 2);
 
       GroupBox proxyLogsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.proxy_test.logs_group"),
-        Location = new Point(10, 140),
-        Size = new Size(430, 170),
+        Name = "proxyLogsGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "proxyLogsGroupBox"
+        Padding = new Padding(10),
+        Margin = new Padding(0)
       };
-      proxyTestTabPage.Controls.Add(proxyLogsGroupBox);
+      proxyTestTabLayout.Controls.Add(proxyLogsGroupBox, 0, 1);
+
+      TableLayoutPanel proxyLogsLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 2,
+          RowCount = 2,
+          ColumnStyles = {
+              new ColumnStyle(SizeType.AutoSize),
+              new ColumnStyle(SizeType.Percent, 100F)
+          },
+          RowStyles = {
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.AutoSize)
+          },
+          Name = "proxyLogsLayout"
+      };
+      proxyLogsGroupBox.Controls.Add(proxyLogsLayout);
 
       _proxyLogsRichBox = new RichTextBox {
-        ForeColor = SystemColors.ControlText,
-        BorderStyle = BorderStyle.FixedSingle,
         Text = ProxyTestManager.GetLatestLogs(),
         Name = "proxyLogsRichBox",
-        Dock = DockStyle.Fill,
-        ReadOnly = true,
         ShortcutsEnabled = true,
         DetectUrls = false,
-        EnableAutoDragDrop = false
+        EnableAutoDragDrop = false,
+        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
+        Margin = new Padding(0, 0, 0, 3)
       };
-      proxyLogsGroupBox.Controls.Add(_proxyLogsRichBox);
+      proxyLogsLayout.SetColumnSpan(_proxyLogsRichBox, 2);
+      proxyLogsLayout.Controls.Add(_proxyLogsRichBox, 0, 0);
 
       Button proxyTestStartButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.start"),
-        Location = new Point(10, 317),
-        Size = new Size(80, 25)
+        Margin = new Padding(0, 3, 0, 0),
+        AutoSize = true
       };
       proxyTestStartButton.Click += ProxyTestStartButton_Click;
-      proxyTestTabPage.Controls.Add(proxyTestStartButton);
+      proxyLogsLayout.Controls.Add(proxyTestStartButton, 0, 1);
 
       _proxyTestProgressLabel = new Label {
         Text = "",
-        Location = new Point(100, 317),
-        Size = new Size(100, 25),
+        Name = "proxyTestProgressLabel",
         TextAlign = ContentAlignment.MiddleLeft,
         Visible = false,
-        Name = "proxyTestProgressLabel"
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
+        Margin = new Padding(3, 3, 0, 0),
+        AutoSize = false
       };
-      proxyTestTabPage.Controls.Add(_proxyTestProgressLabel);
+      proxyLogsLayout.Controls.Add(_proxyTestProgressLabel, 1, 1);
+    }
 
-      // About
+    private void AddAbout() {
       TabPage aboutTabPage = new TabPage {
         Text = Program.localization.GetString("settings_form.about.tab"),
         Name = "aboutTabPage",
-        BackColor = SystemColors.Control
+        BackColor = SystemColors.Control,
+        Padding = new Padding(10)
       };
       _tabControl.TabPages.Add(aboutTabPage);
 
       GroupBox aboutGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.about.group"),
-        Location = new Point(10, 10),
-        Size = new Size(430, 130),
+        Name = "aboutGroupBox",
+        Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Name = "aboutGroupBox"
+        Padding = new Padding(10)
       };
       aboutTabPage.Controls.Add(aboutGroupBox);
 
+      TableLayoutPanel aboutLayout = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          ColumnCount = 2,
+          RowCount = 3,
+          ColumnStyles = {
+              new ColumnStyle(SizeType.AutoSize),
+              new ColumnStyle(SizeType.Percent, 100F)
+          },
+          RowStyles = {
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize),
+              new RowStyle(SizeType.AutoSize)
+          },
+          Name = "aboutLayout",
+          AutoSize = true
+      };
+      aboutGroupBox.Controls.Add(aboutLayout);
+
       Assembly asm = Assembly.GetExecutingAssembly();
-      string version = asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-      string author = asm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
+      string version = asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+      string author = asm.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright;
 
       Label versionLabel = new Label {
         Text = Program.localization.GetString("settings_form.about.version_label"),
-        Location = new Point(15, 30),
-        Size = new Size(80, 20),
-        Name = "versionLabel"
+        Name = "versionLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      aboutGroupBox.Controls.Add(versionLabel);
+      aboutLayout.Controls.Add(versionLabel, 0, 0);
 
       Label versionValueLabel = new Label {
         Text = version,
-        Location = new Point(100, 30),
-        Size = new Size(300, 20),
-        Name = "versionValueLabel"
+        Name = "versionValueLabel",
+        Margin = new Padding(10, 3, 0, 3),
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
       };
-      aboutGroupBox.Controls.Add(versionValueLabel);
+      aboutLayout.Controls.Add(versionValueLabel, 1, 0);
 
       Label developerLabel = new Label {
         Text = Program.localization.GetString("settings_form.about.developer_label"),
-        Location = new Point(15, 60),
-        Size = new Size(80, 20),
-        Name = "developerLabel"
+        Name = "developerLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      aboutGroupBox.Controls.Add(developerLabel);
+      aboutLayout.Controls.Add(developerLabel, 0, 1);
 
       Label developerValueLabel = new Label {
         Text = author,
-        Location = new Point(100, 60),
-        Size = new Size(300, 20),
-        Name = "developerValueLabel"
+        Name = "developerValueLabel",
+        Margin = new Padding(10, 3, 0, 3),
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
       };
-      aboutGroupBox.Controls.Add(developerValueLabel);
+      aboutLayout.Controls.Add(developerValueLabel, 1, 1);
 
       Label githubLabel = new Label {
         Text = Program.localization.GetString("settings_form.about.github_label"),
-        Location = new Point(15, 90),
-        Size = new Size(80, 20),
-        Name = "githubLabel"
+        Name = "githubLabel",
+        Margin = new Padding(0, 3, 0, 3),
       };
-      aboutGroupBox.Controls.Add(githubLabel);
+      aboutLayout.Controls.Add(githubLabel, 0, 2);
 
       LinkLabel githubLinkLabel = new LinkLabel {
         Text = Program.localization.GetString("settings_form.about.github_link"),
-        Location = new Point(100, 90),
-        Size = new Size(300, 20),
-        Name = "githubLinkLabel"
+        Name = "githubLinkLabel",
+        Margin = new Padding(10, 3, 0, 3),
+        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
       };
       githubLinkLabel.LinkClicked += (s, e) => { System.Diagnostics.Process.Start(githubLinkLabel.Text); };
-      aboutGroupBox.Controls.Add(githubLinkLabel);
-
-      // Form Buttons
-      Button okButton = new Button {
-        Text = Program.localization.GetString("settings_form.buttons.ok"),
-        DialogResult = DialogResult.OK,
-        Location = new Point(310, 410),
-        Size = new Size(80, 30),
-        Name = "okButton"
-      };
-      okButton.Click += OkButton_Click;
-      Controls.Add(okButton);
-
-      Button cancelButton = new Button {
-        Text = Program.localization.GetString("settings_form.buttons.cancel"),
-        DialogResult = DialogResult.Cancel,
-        Location = new Point(400, 410),
-        Size = new Size(80, 30),
-        Name = "cancelButton"
-      };
-      Controls.Add(cancelButton);
-
-      AcceptButton = okButton;
-      CancelButton = cancelButton;
-
-      ResumeLayout(false);
+      aboutLayout.Controls.Add(githubLinkLabel, 1, 2);
     }
 
     private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
@@ -509,6 +698,7 @@ namespace bdmanager {
     private void SettingsForm_Load(object sender, EventArgs e) {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
+      _disableProxiFyreCheckBox.Checked = _settings.DisableProxiFyre;
       _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
       _proxiFyrePortNumBox.Value = _settings.ProxiFyrePort;
 
@@ -535,20 +725,15 @@ namespace bdmanager {
 
     private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
       if (_proxyTestManager.IsTesting) {
-        MessageBox.Show(
-          Program.localization.GetString("settings_form.proxy_test.warning"),
-          Program.localization.GetString("settings_form.title"),
-          MessageBoxButtons.OK,
-          MessageBoxIcon.Warning
-        );
-        e.Cancel = true;
-        return;
+        _proxyTestManager.StopTesting();
+        _proxyTestManager = null;
       }
     }
 
     private void OkButton_Click(object sender, EventArgs e) {
       _settings.ByeDpiPath = _byeDpiPathTextBox.Text;
       _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
+      _settings.DisableProxiFyre = _disableProxiFyreCheckBox.Checked;
       _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
       _settings.ProxiFyrePort = (int) _proxiFyrePortNumBox.Value;
       _settings.ProxifiedApps.Clear();
@@ -570,7 +755,7 @@ namespace bdmanager {
 
     private void BrowseForExe(TextBox targetTextBox, string title) {
       using (OpenFileDialog dialog = new OpenFileDialog()) {
-        dialog.Filter = "Исполняемые файлы (*.exe)|*.exe|Все файлы (*.*)|*.*";
+        dialog.Filter = "*.exe|*.exe|*.*|*.*";
         dialog.Title = title;
 
         if (dialog.ShowDialog() == DialogResult.OK) {

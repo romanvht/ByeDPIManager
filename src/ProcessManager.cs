@@ -8,15 +8,14 @@ namespace bdmanager {
     private Process _proxifyreProcess;
     private AppSettings _settings;
 
+    public bool IsRunning => _byeDpiProcess?.HasExited == false && (_settings.DisableProxiFyre || _proxifyreProcess?.HasExited == false);
     public event EventHandler<bool> StatusChanged;
-
-    public bool IsRunning => _byeDpiProcess?.HasExited == false && _proxifyreProcess?.HasExited == false;
 
     public ProcessManager() {
       _settings = Program.settings;
     }
 
-    public void Start() {
+    public void StartByeDpi(string arguments = null) {
       try {
         if (!File.Exists(_settings.ByeDpiPath)) {
           Program.logger.Log(string.Format(
@@ -26,6 +25,53 @@ namespace bdmanager {
           return;
         }
 
+        bool useCustomArgs = !string.IsNullOrWhiteSpace(arguments);
+        string args = useCustomArgs ? arguments : _settings.GetByeDpiArguments();
+
+        _byeDpiProcess = new Process {
+          StartInfo = new ProcessStartInfo {
+            FileName = _settings.ByeDpiPath,
+            WorkingDirectory = Path.GetDirectoryName(_settings.ByeDpiPath),
+            Arguments = args,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+          },
+          EnableRaisingEvents = true
+        };
+
+        if (!useCustomArgs) {
+          _byeDpiProcess.OutputDataReceived += ByeDpiOutputHandler;
+          _byeDpiProcess.ErrorDataReceived += ByeDpiOutputHandler;
+          _byeDpiProcess.Exited += ProcessStopHandler;
+        }
+
+        _byeDpiProcess.Start();
+        _byeDpiProcess.BeginOutputReadLine();
+        _byeDpiProcess.BeginErrorReadLine();
+
+        Program.logger.Log(string.Format(
+          Program.localization.GetString("process_manager.byedpi.started"),
+          args
+        ));
+      }
+      catch (Exception ex) {
+        Program.logger.Log(string.Format(
+          Program.localization.GetString("process_manager.byedpi.start_error"),
+          ex.Message
+        ));
+        StopByeDpi();
+        throw;
+      }
+    }
+
+    public void StartProxiFyre() {
+      if (_settings.DisableProxiFyre) {
+        return;
+      }
+
+      try {
         if (!File.Exists(_settings.ProxiFyrePath)) {
           Program.logger.Log(string.Format(
             Program.localization.GetString("settings_form.proxifyre.not_found"),
@@ -38,85 +84,90 @@ namespace bdmanager {
           return;
         }
 
+        _proxifyreProcess = new Process {
+          StartInfo = new ProcessStartInfo {
+            FileName = _settings.ProxiFyrePath,
+            WorkingDirectory = Path.GetDirectoryName(_settings.ProxiFyrePath),
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+          },
+          EnableRaisingEvents = true
+        };
+
+        _proxifyreProcess.OutputDataReceived += ProxifyreOutputHandler;
+        _proxifyreProcess.ErrorDataReceived += ProxifyreOutputHandler;
+        _proxifyreProcess.Exited += ProcessStopHandler;
+
+        _proxifyreProcess.Start();
+        _proxifyreProcess.BeginOutputReadLine();
+        _proxifyreProcess.BeginErrorReadLine();
+
+        Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.started"));
+      }
+      catch (Exception ex) {
+        Program.logger.Log(string.Format(
+          Program.localization.GetString("process_manager.proxifyre.start_error"),
+          ex.Message
+        ));
+        StopProxiFyre();
+        throw;
+      }
+    }
+
+    public void StopByeDpi() {
+      if (_byeDpiProcess?.HasExited == false) {
         try {
-          _byeDpiProcess = new Process {
-            StartInfo = new ProcessStartInfo {
-              FileName = _settings.ByeDpiPath,
-              WorkingDirectory = Path.GetDirectoryName(_settings.ByeDpiPath),
-              Arguments = _settings.GetByeDpiArguments(),
-              UseShellExecute = false,
-              CreateNoWindow = true,
-              RedirectStandardOutput = true,
-              RedirectStandardError = true
-            },
-            EnableRaisingEvents = true
-          };
-
-          _byeDpiProcess.OutputDataReceived += ByeDpiOutputHandler;
-          _byeDpiProcess.ErrorDataReceived += ByeDpiOutputHandler;
-          _byeDpiProcess.Exited += ProcessStopHandler;
-
-          _byeDpiProcess.Start();
-          _byeDpiProcess.BeginOutputReadLine();
-          _byeDpiProcess.BeginErrorReadLine();
-
-          Program.logger.Log(string.Format(
-            Program.localization.GetString("process_manager.byedpi.started"),
-            _settings.GetByeDpiArguments()
-          ));
-
-          if (_byeDpiProcess.HasExited) {
-            Stop();
-            return;
-          }
+          _byeDpiProcess.Kill();
+          _byeDpiProcess = null;
+          Program.logger.Log(Program.localization.GetString("process_manager.byedpi.stopped"));
         }
-        catch (Exception byeDpiEx) {
+        catch (Exception ex) {
           Program.logger.Log(string.Format(
-            Program.localization.GetString("process_manager.byedpi.start_error"),
-            byeDpiEx.Message
+            Program.localization.GetString("process_manager.byedpi.stop_error"),
+            ex.Message
           ));
-          Stop();
+        }
+      }
+    }
+
+    public void StopProxiFyre() {
+      if (_settings.DisableProxiFyre) {
+        return;
+      }
+
+      if (_proxifyreProcess?.HasExited == false) {
+        try {
+          _proxifyreProcess.Kill();
+          _proxifyreProcess = null;
+          Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.stopped"));
+        }
+        catch (Exception ex) {
+          Program.logger.Log(string.Format(
+            Program.localization.GetString("process_manager.proxifyre.stop_error"),
+            ex.Message
+          ));
+        }
+      }
+    }
+
+    public void Start() {
+      try {
+        StartByeDpi();
+
+        if (_byeDpiProcess?.HasExited != false) {
           return;
         }
 
-        try {
-          _proxifyreProcess = new Process {
-            StartInfo = new ProcessStartInfo {
-              FileName = _settings.ProxiFyrePath,
-              WorkingDirectory = Path.GetDirectoryName(_settings.ProxiFyrePath),
-              UseShellExecute = false,
-              CreateNoWindow = true,
-              RedirectStandardOutput = true,
-              RedirectStandardError = true
-            },
-            EnableRaisingEvents = true
-          };
+        StartProxiFyre();
 
-          _proxifyreProcess.OutputDataReceived += ProxifyreOutputHandler;
-          _proxifyreProcess.ErrorDataReceived += ProxifyreOutputHandler;
-          _proxifyreProcess.Exited += ProcessStopHandler;
-
-          _proxifyreProcess.Start();
-          _proxifyreProcess.BeginOutputReadLine();
-          _proxifyreProcess.BeginErrorReadLine();
-
-          Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.started"));
-
-          if (_proxifyreProcess.HasExited) {
-            Stop();
-            return;
-          }
+        if (IsRunning) {
+          RaiseStatusChanged(true);
         }
-        catch (Exception proxiFyreEx) {
-          Program.logger.Log(string.Format(
-            Program.localization.GetString("process_manager.proxifyre.start_error"),
-            proxiFyreEx.Message
-          ));
+        else {
           Stop();
-          return;
         }
-
-        RaiseStatusChanged(true);
       }
       catch (Exception ex) {
         Program.logger.Log(string.Format(
@@ -129,36 +180,8 @@ namespace bdmanager {
 
     public void Stop() {
       try {
-        if (_byeDpiProcess?.HasExited == false) {
-          try {
-            _byeDpiProcess.Kill();
-            _byeDpiProcess = null;
-
-            Program.logger.Log(Program.localization.GetString("process_manager.byedpi.stopped"));
-          }
-          catch (Exception ex) {
-            Program.logger.Log(string.Format(
-              Program.localization.GetString("process_manager.byedpi.stop_error"),
-              ex.Message
-            ));
-          }
-        }
-
-        if (_proxifyreProcess?.HasExited == false) {
-          try {
-            _proxifyreProcess.Kill();
-            _proxifyreProcess = null;
-
-            Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.stopped"));
-          }
-          catch (Exception ex) {
-            Program.logger.Log(string.Format(
-              Program.localization.GetString("process_manager.proxifyre.stop_error"),
-              ex.Message
-            ));
-          }
-        }
-
+        StopByeDpi();
+        StopProxiFyre();
         RaiseStatusChanged(false);
       }
       catch (Exception ex) {
@@ -237,8 +260,8 @@ namespace bdmanager {
       Stop();
     }
 
-    private void RaiseStatusChanged(bool isRunning) {
-      StatusChanged?.Invoke(this, isRunning);
+    private void RaiseStatusChanged(bool status) {
+      StatusChanged?.Invoke(this, status);
     }
   }
 }

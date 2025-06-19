@@ -2,7 +2,6 @@ using SocksSharp;
 using SocksSharp.Proxy;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -24,14 +23,15 @@ namespace bdmanager {
     public RichTextBox ProxyLogsRichBox { get; set; }
     public Label ProxyTestProgressLabel { get; set; }
 
-    private AppSettings _settings = Program.settings;
-    private Process _byeDpiProcess;
+    private AppSettings _settings;
+    private ProcessManager _processManager;
     private CancellationTokenSource _cancellationTokenSource;
 
     public event EventHandler<string> LogAdded;
 
     public ProxyTestManager() {
       _settings = Program.settings;
+      _processManager = Program.processManager;
     }
 
     public static string GetLatestLogs() {
@@ -208,7 +208,7 @@ namespace bdmanager {
         }
 
         try {
-          StopByeDpi();
+          _processManager.StopByeDpi();
         }
         catch (Exception ex) {
           AppendLogLine(string.Format(
@@ -253,58 +253,6 @@ namespace bdmanager {
       }
     }
 
-    private void StartByeDpi(string arguments) {
-      if (!File.Exists(_settings.ByeDpiPath)) {
-        MessageBox.Show(
-          string.Format(Program.localization.GetString("settings_form.byedpi.not_found"), _settings.ByeDpiPath),
-          Program.localization.GetString("settings_form.title"),
-          MessageBoxButtons.OK,
-          MessageBoxIcon.Error
-        );
-        StopTesting();
-        return;
-      }
-
-      try {
-        _byeDpiProcess = new Process {
-          StartInfo = new ProcessStartInfo {
-            FileName = _settings.ByeDpiPath,
-            WorkingDirectory = Path.GetDirectoryName(_settings.ByeDpiPath),
-            Arguments = arguments,
-            UseShellExecute = false,
-            CreateNoWindow = true
-          },
-          EnableRaisingEvents = true
-        };
-
-        _byeDpiProcess.Start();
-      }
-      catch (Exception byeDpiEx) {
-        MessageBox.Show(
-          string.Format(Program.localization.GetString("settings_form.byedpi.start_error"), byeDpiEx.Message),
-          Program.localization.GetString("settings_form.title"),
-          MessageBoxButtons.OK,
-          MessageBoxIcon.Error
-        );
-        StopByeDpi();
-      }
-    }
-
-    private void StopByeDpi() {
-      if (_byeDpiProcess?.HasExited == false) {
-        try {
-          _byeDpiProcess.Kill();
-          _byeDpiProcess = null;
-        }
-        catch (Exception ex) {
-          AppendLogLine(string.Format(
-            Program.localization.GetString("settings_form.byedpi.stop_error"),
-            ex.Message
-          ));
-        }
-      }
-    }
-
     private async Task<List<KeyValuePair<string, int>>> CheckDomainsAccessAsync(
       IEnumerable<string> commands,
       IEnumerable<string> domains,
@@ -343,7 +291,7 @@ namespace bdmanager {
         var filtered = AppSettings.FilterLinuxOnlyArgs(args);
         var f_command = string.Join(" ", filtered);
 
-        StartByeDpi(f_command);
+        _processManager.StartByeDpi(f_command);
         AppendLogLine(f_command);
 
         try {
@@ -411,7 +359,7 @@ namespace bdmanager {
           ));
         }
 
-        StopByeDpi();
+        _processManager.StopByeDpi();
 
         if (_settings.ProxyTestDelay > 0) {
           await Task.Delay(_settings.ProxyTestDelay * 1000, cancellationToken);

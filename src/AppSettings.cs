@@ -12,6 +12,7 @@ namespace bdmanager {
 
     public string ByeDpiArguments { get; set; } = "-Ku -a3 -An -Kt,h -d1 -s3+s -An";
 
+    public bool DisableProxiFyre { get; set; } = false;
     public string ProxiFyreIp { get; set; } = "127.0.0.1";
     public int ProxiFyrePort { get; set; } = 1080;
     public List<string> ProxifiedApps { get; set; } = new List<string>();
