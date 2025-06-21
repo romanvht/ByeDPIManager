@@ -16,7 +16,6 @@ namespace bdmanager {
       FlatAppearance.BorderSize = 0;
       BackColor = Color.FromArgb(50, 50, 50);
       ForeColor = Color.White;
-      Cursor = Cursors.Hand;
       Font = new Font("Segoe UI", 10F, FontStyle.Bold);
     }
 
