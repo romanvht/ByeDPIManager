@@ -35,6 +35,7 @@ namespace bdmanager {
       _autorunManager = Program.autorunManager;
       _proxyTestManager = new ProxyTestManager();
       InitializeComponent();
+      DpiScaler.ScaleForm(this);
     }
 
     private void InitializeComponent() {
@@ -69,11 +70,11 @@ namespace bdmanager {
 
       // Buttons
       FlowLayoutPanel formButtonsPanel = new FlowLayoutPanel {
-          FlowDirection = FlowDirection.RightToLeft,
-          Dock = DockStyle.Bottom,
-          AutoSize = true,
-          Padding = new Padding(0, 10, 0, 0),
-          Name = "formButtonsPanel"
+        FlowDirection = FlowDirection.RightToLeft,
+        Dock = DockStyle.Bottom,
+        AutoSize = true,
+        Padding = new Padding(0, 10, 0, 0),
+        Name = "formButtonsPanel"
       };
       Controls.Add(formButtonsPanel);
 
@@ -219,46 +220,37 @@ namespace bdmanager {
       proxiFyreTabLayout.Controls.Add(proxiFyreGroupBox, 0, 0);
 
       TableLayoutPanel proxiFyreLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 3,
-          RowCount = 3,
-          ColumnStyles = {
+        Dock = DockStyle.Fill,
+        ColumnCount = 3,
+        RowCount = 3,
+        ColumnStyles = {
               new ColumnStyle(SizeType.AutoSize),
               new ColumnStyle(SizeType.Percent, 100F),
               new ColumnStyle(SizeType.Absolute, 30)
           },
-          RowStyles = {
+        RowStyles = {
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize)
           },
-          Name = "proxiFyreLayout"
+        Name = "proxiFyreLayout"
       };
       proxiFyreGroupBox.Controls.Add(proxiFyreLayout);
-
-      _disableProxiFyreCheckBox = new CheckBox {
-        Text = Program.localization.GetString("settings_form.proxifyre.disable"),
-        Name = "disableProxiFyreCheckBox",
-        Margin = new Padding(3, 0, 3, 3),
-        AutoSize = true
-      };
-      proxiFyreLayout.SetColumnSpan(_disableProxiFyreCheckBox, 3);
-      proxiFyreLayout.Controls.Add(_disableProxiFyreCheckBox, 0, 0);
 
       Label proxiFyrePathLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxifyre.path_label"),
         TextAlign = ContentAlignment.MiddleLeft,
         Name = "proxiFyrePathLabel",
-        Margin = new Padding(0, 3, 0, 3),
+        Margin = new Padding(0),
       };
-      proxiFyreLayout.Controls.Add(proxiFyrePathLabel, 0, 1);
+      proxiFyreLayout.Controls.Add(proxiFyrePathLabel, 0, 0);
 
       _proxiFyrePathTextBox = new TextBox {
         Name = "proxiFyrePathTextBox",
         Anchor = AnchorStyles.Left | AnchorStyles.Right,
-        Margin = new Padding(0, 3, 0, 3)
+        Margin = new Padding(0)
       };
-      proxiFyreLayout.Controls.Add(_proxiFyrePathTextBox, 1, 1);
+      proxiFyreLayout.Controls.Add(_proxiFyrePathTextBox, 1, 0);
 
       Button proxiFyreBrowseButton = new Button {
         Text = "...",
@@ -267,7 +259,7 @@ namespace bdmanager {
         Margin = new Padding(0),
       };
       proxiFyreBrowseButton.Click += (s, e) => BrowseForExe(_proxiFyrePathTextBox, Program.localization.GetString("settings_form.proxifyre.browse_title"));
-      proxiFyreLayout.Controls.Add(proxiFyreBrowseButton, 2, 1);
+      proxiFyreLayout.Controls.Add(proxiFyreBrowseButton, 2, 0);
 
       Label proxiFyrePortLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxifyre.port_label"),
@@ -275,7 +267,7 @@ namespace bdmanager {
         Name = "proxiFyrePortLabel",
         Margin = new Padding(0, 3, 0, 3),
       };
-      proxiFyreLayout.Controls.Add(proxiFyrePortLabel, 0, 2);
+      proxiFyreLayout.Controls.Add(proxiFyrePortLabel, 0, 1);
 
       _proxiFyrePortNumBox = new NumericUpDown {
         Name = "proxiFyrePortNumBox",
@@ -285,7 +277,16 @@ namespace bdmanager {
         Margin = new Padding(0, 3, 0, 3),
         Width = 80
       };
-      proxiFyreLayout.Controls.Add(_proxiFyrePortNumBox, 1, 2);
+      proxiFyreLayout.Controls.Add(_proxiFyrePortNumBox, 1, 1);
+
+      _disableProxiFyreCheckBox = new CheckBox {
+        Text = Program.localization.GetString("settings_form.proxifyre.disable"),
+        Name = "disableProxiFyreCheckBox",
+        Margin = new Padding(3),
+        AutoSize = true
+      };
+      proxiFyreLayout.SetColumnSpan(_disableProxiFyreCheckBox, 3);
+      proxiFyreLayout.Controls.Add(_disableProxiFyreCheckBox, 0, 2);
 
       GroupBox appsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.apps.group"),
@@ -299,21 +300,21 @@ namespace bdmanager {
       proxiFyreTabLayout.Controls.Add(appsGroupBox, 0, 1);
 
       TableLayoutPanel appsLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 3,
-          RowCount = 4,
-          ColumnStyles = {
+        Dock = DockStyle.Fill,
+        ColumnCount = 3,
+        RowCount = 4,
+        ColumnStyles = {
               new ColumnStyle(SizeType.AutoSize),
               new ColumnStyle(SizeType.Percent, 100F),
               new ColumnStyle(SizeType.Absolute, 30)
           },
-          RowStyles = {
+        RowStyles = {
               new RowStyle(SizeType.Percent, 100F),
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize)
           },
-          Name = "appsLayout"
+        Name = "appsLayout"
       };
       appsGroupBox.Controls.Add(appsLayout);
 
@@ -358,11 +359,11 @@ namespace bdmanager {
       appsLayout.Controls.Add(appBrowseButton, 1, 2);
 
       FlowLayoutPanel appButtonsPanel = new FlowLayoutPanel {
-          FlowDirection = FlowDirection.RightToLeft,
-          Dock = DockStyle.Fill,
-          WrapContents = false,
-          AutoSize = true,
-          Name = "appButtonsPanel"
+        FlowDirection = FlowDirection.RightToLeft,
+        Dock = DockStyle.Fill,
+        WrapContents = false,
+        AutoSize = true,
+        Name = "appButtonsPanel"
       };
       appsLayout.SetColumnSpan(appButtonsPanel, 3);
       appsLayout.Controls.Add(appButtonsPanel, 0, 3);
@@ -404,11 +405,11 @@ namespace bdmanager {
       autorunTabPage.Controls.Add(autorunGroupBox);
 
       FlowLayoutPanel autorunLayout = new FlowLayoutPanel {
-          Dock = DockStyle.Fill,
-          FlowDirection = FlowDirection.TopDown,
-          AutoSize = true,
-          WrapContents = false,
-          Name = "autorunLayout"
+        Dock = DockStyle.Fill,
+        FlowDirection = FlowDirection.TopDown,
+        AutoSize = true,
+        WrapContents = false,
+        Name = "autorunLayout"
       };
       autorunGroupBox.Controls.Add(autorunLayout);
 
@@ -447,14 +448,14 @@ namespace bdmanager {
       _tabControl.TabPages.Add(proxyTestTabPage);
 
       TableLayoutPanel proxyTestTabLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 1,
-          RowCount = 2,
-          RowStyles = {
+        Dock = DockStyle.Fill,
+        ColumnCount = 1,
+        RowCount = 2,
+        RowStyles = {
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.Percent, 100F)
           },
-          Name = "proxyTestTabLayout"
+        Name = "proxyTestTabLayout"
       };
       proxyTestTabPage.Controls.Add(proxyTestTabLayout);
 
@@ -471,34 +472,35 @@ namespace bdmanager {
       proxyTestTabLayout.Controls.Add(proxySettingsGroupBox, 0, 0);
 
       TableLayoutPanel proxySettingsLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 2,
-          RowCount = 3,
-          ColumnStyles = {
-              new ColumnStyle(SizeType.Percent, 100F),
-              new ColumnStyle(SizeType.Absolute, 120)
+        Dock = DockStyle.Fill,
+        ColumnCount = 2,
+        RowCount = 3,
+        ColumnStyles = {
+              new ColumnStyle(SizeType.Percent, 80F),
+              new ColumnStyle(SizeType.Percent, 20F)
           },
-          RowStyles = {
+        RowStyles = {
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize)
           },
-          Name = "proxySettingsLayout"
+        Name = "proxySettingsLayout"
       };
       proxySettingsGroupBox.Controls.Add(proxySettingsLayout);
 
       Label delayLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.delay_label"),
         TextAlign = ContentAlignment.MiddleLeft,
-        Margin = new Padding(0, 3, 0, 3),
-        AutoSize = true
+        Margin = new Padding(0),
+        Dock = DockStyle.Fill
       };
       proxySettingsLayout.Controls.Add(delayLabel, 0, 0);
 
       _delayNumericUpDown = new NumericUpDown {
         Maximum = int.MaxValue,
         Anchor = AnchorStyles.Right,
-        Margin = new Padding(0, 3, 0, 3)
+        Margin = new Padding(0),
+        Width = 80
       };
       proxySettingsLayout.Controls.Add(_delayNumericUpDown, 1, 0);
 
@@ -506,7 +508,7 @@ namespace bdmanager {
         Text = Program.localization.GetString("settings_form.proxy_test.requests_label"),
         TextAlign = ContentAlignment.MiddleLeft,
         Margin = new Padding(0, 3, 0, 3),
-        AutoSize = true
+        Dock = DockStyle.Fill
       };
       proxySettingsLayout.Controls.Add(requestsCountLabel, 0, 1);
 
@@ -514,7 +516,8 @@ namespace bdmanager {
         Minimum = 1,
         Maximum = int.MaxValue,
         Anchor = AnchorStyles.Right,
-        Margin = new Padding(0, 3, 0, 3)
+        Margin = new Padding(0, 3, 0, 3),
+        Width = 80
       };
       proxySettingsLayout.Controls.Add(_requestsCountNumericUpDown, 1, 1);
 
@@ -538,18 +541,18 @@ namespace bdmanager {
       proxyTestTabLayout.Controls.Add(proxyLogsGroupBox, 0, 1);
 
       TableLayoutPanel proxyLogsLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 2,
-          RowCount = 2,
-          ColumnStyles = {
+        Dock = DockStyle.Fill,
+        ColumnCount = 2,
+        RowCount = 2,
+        ColumnStyles = {
               new ColumnStyle(SizeType.AutoSize),
               new ColumnStyle(SizeType.Percent, 100F)
           },
-          RowStyles = {
+        RowStyles = {
               new RowStyle(SizeType.Percent, 100F),
               new RowStyle(SizeType.AutoSize)
           },
-          Name = "proxyLogsLayout"
+        Name = "proxyLogsLayout"
       };
       proxyLogsGroupBox.Controls.Add(proxyLogsLayout);
 
@@ -605,20 +608,20 @@ namespace bdmanager {
       aboutTabPage.Controls.Add(aboutGroupBox);
 
       TableLayoutPanel aboutLayout = new TableLayoutPanel {
-          Dock = DockStyle.Fill,
-          ColumnCount = 2,
-          RowCount = 3,
-          ColumnStyles = {
+        Dock = DockStyle.Fill,
+        ColumnCount = 2,
+        RowCount = 3,
+        ColumnStyles = {
               new ColumnStyle(SizeType.AutoSize),
               new ColumnStyle(SizeType.Percent, 100F)
           },
-          RowStyles = {
+        RowStyles = {
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize),
               new RowStyle(SizeType.AutoSize)
           },
-          Name = "aboutLayout",
-          AutoSize = true
+        Name = "aboutLayout",
+        AutoSize = true
       };
       aboutGroupBox.Controls.Add(aboutLayout);
 
@@ -735,7 +738,7 @@ namespace bdmanager {
       _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
       _settings.DisableProxiFyre = _disableProxiFyreCheckBox.Checked;
       _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
-      _settings.ProxiFyrePort = (int) _proxiFyrePortNumBox.Value;
+      _settings.ProxiFyrePort = (int)_proxiFyrePortNumBox.Value;
       _settings.ProxifiedApps.Clear();
 
       foreach (string app in _appListBox.Items) {
@@ -770,7 +773,8 @@ namespace bdmanager {
       if (!_appListBox.Items.Contains(appName)) {
         _appListBox.Items.Add(appName);
         _appTextBox.Clear();
-      } else {
+      }
+      else {
         MessageBox.Show(
           Program.localization.GetString("settings_form.apps.already_added"),
           Program.localization.GetString("settings_form.title"),

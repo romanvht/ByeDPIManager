@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace bdmanager {
   static class Program {
@@ -19,6 +20,8 @@ namespace bdmanager {
 
     [STAThread]
     static void Main(string[] args) {
+      SetProcessDPIAware();
+
       appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
       isAutorun = args.Any(arg => arg.ToLower() == "--autorun");
 
@@ -57,6 +60,9 @@ namespace bdmanager {
         );
       }
     }
+
+    [DllImport("user32.dll")]
+    static extern bool SetProcessDPIAware();
 
     private static bool IsRunning() {
       _mutex = new Mutex(true, appName, out bool createdNew);

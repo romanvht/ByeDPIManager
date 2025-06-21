@@ -26,6 +26,7 @@ namespace bdmanager {
       InitializeComponent();
       InitializeLanguage();
       InitializeTray();
+      DpiScaler.ScaleForm(this);
     }
 
     private void InitializeApplication() {
@@ -56,46 +57,59 @@ namespace bdmanager {
       BackColor = Color.FromArgb(30, 30, 30);
       ForeColor = Color.White;
 
-      _notifyIcon = new NotifyIcon {
-        Icon = GetIconFromResources(),
-        Visible = true
+      TableLayoutPanel mainLayout = new TableLayoutPanel {
+        Dock = DockStyle.Fill,
+        ColumnCount = 1,
+        RowCount = 4,
+        ColumnStyles = {
+            new ColumnStyle(SizeType.Percent, 100F)
+        },
+        RowStyles = {
+            new RowStyle(SizeType.Percent, 30F),
+            new RowStyle(SizeType.Percent, 15F),
+            new RowStyle(SizeType.Percent, 50F),
+            new RowStyle(SizeType.Percent, 5F)
+        },
+        Padding = new Padding(10)
       };
+      Controls.Add(mainLayout);
 
       _toggleButton = new RoundButton {
         Text = Program.localization.GetString("main_form.connect"),
         Size = new Size(160, 80),
-        Location = new Point((ClientSize.Width - 160) / 2, 30),
         BackColor = Color.FromArgb(45, 45, 45),
         ForeColor = Color.White,
         Font = new Font("Segoe UI", 11, FontStyle.Bold),
         BorderRadius = 30,
         BorderSize = 1,
-        BorderColor = Color.FromArgb(100, 100, 100)
+        BorderColor = Color.FromArgb(100, 100, 100),
+        Anchor = AnchorStyles.None
       };
       _toggleButton.Click += ToggleButton_Click;
-      Controls.Add(_toggleButton);
+      mainLayout.Controls.Add(_toggleButton, 0, 0);
 
       _settingsButton = new RoundButton {
         Text = Program.localization.GetString("main_form.settings"),
         Size = new Size(120, 40),
-        Location = new Point((ClientSize.Width - 120) / 2, 120),
         BackColor = Color.FromArgb(60, 60, 60),
         ForeColor = Color.White,
         Font = new Font("Segoe UI", 9),
         BorderRadius = 20,
         BorderSize = 1,
-        BorderColor = Color.FromArgb(100, 100, 100)
+        BorderColor = Color.FromArgb(100, 100, 100),
+        Margin = new Padding(0, 0, 0, 5),
+        Anchor = AnchorStyles.None
       };
       _settingsButton.Click += SettingsButton_Click;
-      Controls.Add(_settingsButton);
+      mainLayout.Controls.Add(_settingsButton, 0, 1);
 
       Panel logPanel = new Panel {
-        Size = new Size(ClientSize.Width - 20, 140),
-        Location = new Point(10, ClientSize.Height - 180),
+        Dock = DockStyle.Fill,
         BackColor = Color.FromArgb(20, 20, 20),
-        BorderStyle = BorderStyle.FixedSingle
+        BorderStyle = BorderStyle.FixedSingle,
+        Margin = new Padding(0, 5, 0, 5)
       };
-      Controls.Add(logPanel);
+      mainLayout.Controls.Add(logPanel, 0, 2);
 
       _logBox = new RichTextBox {
         Dock = DockStyle.Fill,
@@ -108,74 +122,71 @@ namespace bdmanager {
       };
       logPanel.Controls.Add(_logBox);
 
-      _languagePanel = new Panel {
-        Size = new Size(ClientSize.Width - 20, 15),
-        Location = new Point(10, ClientSize.Height - 30),
-        BackColor = Color.FromArgb(30, 30, 30)
+      _languagePanel = new TableLayoutPanel {
+          Dock = DockStyle.Fill,
+          BackColor = Color.FromArgb(30, 30, 30),
+          ColumnCount = 1,
+          RowCount = 1,
+          Padding = new Padding(0),
+          Margin = new Padding(0),
+          ColumnStyles = { new ColumnStyle(SizeType.Percent, 100F) },
+          RowStyles = { new RowStyle(SizeType.Percent, 100F) }
       };
-      Controls.Add(_languagePanel);
+      mainLayout.Controls.Add(_languagePanel, 0, 3);
+
+      _notifyIcon = new NotifyIcon {
+        Icon = GetIconFromResources(),
+        Visible = true
+      };
 
       ResumeLayout(false);
     }
 
     private void InitializeLanguage() {
-      FlowLayoutPanel flowPanel = new FlowLayoutPanel
-      {
-          AutoSize = true,
-          AutoSizeMode = AutoSizeMode.GrowAndShrink,
-          FlowDirection = FlowDirection.LeftToRight,
-          Location = new Point(0, 0),
+      FlowLayoutPanel flowPanel = new FlowLayoutPanel {
+        AutoSize = true,
+        Anchor = AnchorStyles.None
       };
-      _languagePanel.Controls.Add(flowPanel);
 
-      foreach (string langCode in Localization.AvailableLanguages)
-      {
-          LinkLabel langLink = new LinkLabel
-          {
-              Text = Program.localization.GetLanguageName(langCode),
-              LinkColor = Color.White,
-              VisitedLinkColor = Color.White,
-              ActiveLinkColor = Color.LightGray,
-              AutoSize = true,
-              Font = new Font("Segoe UI", 8),
-              Tag = langCode,
-              Margin = new Padding(0, 5, 2, 0)
-          };
+      foreach (string langCode in Localization.AvailableLanguages) {
+        LinkLabel langLink = new LinkLabel {
+          Text = Program.localization.GetLanguageName(langCode),
+          LinkColor = Color.White,
+          VisitedLinkColor = Color.White,
+          ActiveLinkColor = Color.LightGray,
+          AutoSize = true,
+          Font = new Font("Segoe UI", 8),
+          Tag = langCode,
+          Margin = new Padding(0, 0, 2, 0)
+        };
 
-          langLink.Click += (s, e) =>
-          {
-              if (Program.localization.CurrentLanguage != langCode)
-              {
-                  Program.localization.ChangeLanguage(langCode);
-                  _settings.Language = langCode;
-                  _settings.Save();
-              }
-          };
+        langLink.Click += (s, e) => {
+          if (Program.localization.CurrentLanguage != langCode) {
+            Program.localization.ChangeLanguage(langCode);
+            _settings.Language = langCode;
+            _settings.Save();
+          }
+        };
 
-          langLink.LinkColor = Program.localization.CurrentLanguage == langCode ?
+        langLink.LinkColor = Program.localization.CurrentLanguage == langCode ?
             Color.LimeGreen :
             Color.White;
 
-          flowPanel.Controls.Add(langLink);
+        flowPanel.Controls.Add(langLink);
 
-          if (langCode != Localization.AvailableLanguages.Last())
-          {
-              Label separator = new Label
-              {
-                  Text = "|",
-                  ForeColor = Color.White,
-                  AutoSize = true,
-                  Font = new Font("Segoe UI", 8),
-                  Margin = new Padding(0, 5, 2, 0)
-              };
-              flowPanel.Controls.Add(separator);
-          }
+        if (langCode != Localization.AvailableLanguages.Last()) {
+          Label separator = new Label {
+            Text = "|",
+            ForeColor = Color.White,
+            AutoSize = true,
+            Font = new Font("Segoe UI", 8),
+            Margin = new Padding(0, 0, 2, 0)
+          };
+          flowPanel.Controls.Add(separator);
+        }
       }
 
-      flowPanel.Location = new Point(
-          (_languagePanel.Width - flowPanel.Width) / 2,
-          (_languagePanel.Height - flowPanel.Height) / 2
-      );
+      _languagePanel.Controls.Add(flowPanel);
     }
 
     private void UpdateLocale() {
@@ -203,19 +214,15 @@ namespace bdmanager {
         _notifyIcon.ContextMenu.MenuItems[2].Text = Program.localization.GetString("tray_menu.exit");
       }
 
-      foreach (Control control in _languagePanel.Controls)
-      {
-          if (control is FlowLayoutPanel flowPanel)
-          {
-              foreach (Control langControl in flowPanel.Controls)
-              {
-                  if (langControl is LinkLabel link)
-                  {
-                      string langCode = (string)link.Tag;
-                      link.LinkColor = Program.localization.CurrentLanguage == langCode ? Color.LimeGreen : Color.White;
-                  }
-              }
+      foreach (Control control in _languagePanel.Controls) {
+        if (control is FlowLayoutPanel flowPanel) {
+          foreach (Control langControl in flowPanel.Controls) {
+            if (langControl is LinkLabel link) {
+              string langCode = (string)link.Tag;
+              link.LinkColor = Program.localization.CurrentLanguage == langCode ? Color.LimeGreen : Color.White;
+            }
           }
+        }
       }
     }
 
