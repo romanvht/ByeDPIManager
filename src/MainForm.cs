@@ -26,7 +26,8 @@ namespace bdmanager {
       InitializeComponent();
       InitializeLanguage();
       InitializeTray();
-      DpiScaler.ScaleForm(this);
+
+      DpiScaler.Scale(this);
     }
 
     private void InitializeApplication() {

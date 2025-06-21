@@ -7,7 +7,7 @@ namespace bdmanager {
   public static class DpiScaler {
     private static readonly HashSet<string> _scaledForms = new HashSet<string>();
 
-    public static void ScaleForm(Form form) {
+    public static void Scale(Form form) {
       string formId = $"{form.Name}_{form.GetHashCode()}";
 
       if (_scaledForms.Contains(formId))
@@ -62,8 +62,8 @@ namespace bdmanager {
 
       if (!control.MinimumSize.IsEmpty) {
         control.MinimumSize = new Size(
-            (int)(control.MinimumSize.Width * scaleFactor),
-            (int)(control.MinimumSize.Height * scaleFactor)
+            (int)Math.Round(control.MinimumSize.Width * scaleFactor * 0.85f),
+            (int)Math.Round(control.MinimumSize.Height * scaleFactor * 0.85f)
         );
       }
 
@@ -71,12 +71,6 @@ namespace bdmanager {
         foreach (ColumnStyle columnStyle in tablePanel.ColumnStyles) {
           if (columnStyle.SizeType == SizeType.Absolute) {
             columnStyle.Width = columnStyle.Width * scaleFactor;
-          }
-        }
-
-        foreach (RowStyle rowStyle in tablePanel.RowStyles) {
-          if (rowStyle.SizeType == SizeType.Absolute) {
-            rowStyle.Height = rowStyle.Height * scaleFactor;
           }
         }
       }

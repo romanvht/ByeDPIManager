@@ -35,7 +35,8 @@ namespace bdmanager {
       _autorunManager = Program.autorunManager;
       _proxyTestManager = new ProxyTestManager();
       InitializeComponent();
-      DpiScaler.ScaleForm(this);
+
+      DpiScaler.Scale(this);
     }
 
     private void InitializeComponent() {
@@ -229,9 +230,9 @@ namespace bdmanager {
               new ColumnStyle(SizeType.Absolute, 30)
           },
         RowStyles = {
-              new RowStyle(SizeType.AutoSize),
-              new RowStyle(SizeType.AutoSize),
-              new RowStyle(SizeType.AutoSize)
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.Percent, 100F)
           },
         Name = "proxiFyreLayout"
       };
@@ -273,9 +274,9 @@ namespace bdmanager {
         Name = "proxiFyrePortNumBox",
         Minimum = 1,
         Maximum = 65535,
-        Anchor = AnchorStyles.Left | AnchorStyles.Top,
-        Margin = new Padding(0, 3, 0, 3),
-        Width = 80
+        Anchor = AnchorStyles.Left | AnchorStyles.None,
+        Margin = new Padding(0),
+        AutoSize = true
       };
       proxiFyreLayout.Controls.Add(_proxiFyrePortNumBox, 1, 1);
 
@@ -283,7 +284,7 @@ namespace bdmanager {
         Text = Program.localization.GetString("settings_form.proxifyre.disable"),
         Name = "disableProxiFyreCheckBox",
         Margin = new Padding(3),
-        AutoSize = true
+        Dock = DockStyle.Fill
       };
       proxiFyreLayout.SetColumnSpan(_disableProxiFyreCheckBox, 3);
       proxiFyreLayout.Controls.Add(_disableProxiFyreCheckBox, 0, 2);
@@ -476,13 +477,13 @@ namespace bdmanager {
         ColumnCount = 2,
         RowCount = 3,
         ColumnStyles = {
-              new ColumnStyle(SizeType.Percent, 80F),
-              new ColumnStyle(SizeType.Percent, 20F)
+              new ColumnStyle(SizeType.Percent, 100F),
+              new ColumnStyle(SizeType.AutoSize),
           },
         RowStyles = {
-              new RowStyle(SizeType.AutoSize),
-              new RowStyle(SizeType.AutoSize),
-              new RowStyle(SizeType.AutoSize)
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.Percent, 100F)
           },
         Name = "proxySettingsLayout"
       };
@@ -498,9 +499,9 @@ namespace bdmanager {
 
       _delayNumericUpDown = new NumericUpDown {
         Maximum = int.MaxValue,
-        Anchor = AnchorStyles.Right,
+        Anchor = AnchorStyles.Right | AnchorStyles.None,
         Margin = new Padding(0),
-        Width = 80
+        AutoSize = true
       };
       proxySettingsLayout.Controls.Add(_delayNumericUpDown, 1, 0);
 
@@ -515,16 +516,16 @@ namespace bdmanager {
       _requestsCountNumericUpDown = new NumericUpDown {
         Minimum = 1,
         Maximum = int.MaxValue,
-        Anchor = AnchorStyles.Right,
+        Anchor = AnchorStyles.Right | AnchorStyles.None,
         Margin = new Padding(0, 3, 0, 3),
-        Width = 80
+        AutoSize = true
       };
       proxySettingsLayout.Controls.Add(_requestsCountNumericUpDown, 1, 1);
 
       _fullLogCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
         Margin = new Padding(3),
-        AutoSize = true
+        Dock = DockStyle.Fill
       };
       proxySettingsLayout.SetColumnSpan(_fullLogCheckBox, 2);
       proxySettingsLayout.Controls.Add(_fullLogCheckBox, 0, 2);
