@@ -121,7 +121,7 @@ namespace bdmanager {
         Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Padding = new Padding(10)
+        Padding = new Padding(10, 5, 10, 10)
       };
       byeDpiTabPage.Controls.Add(byeDpiGroupBox);
 
@@ -147,14 +147,14 @@ namespace bdmanager {
         Text = Program.localization.GetString("settings_form.byedpi.path_label"),
         TextAlign = ContentAlignment.MiddleLeft,
         Name = "byeDpiPathLabel",
-        Margin = new Padding(0, 3, 0, 3),
+        Margin = new Padding(0),
       };
       byeDpiLayout.Controls.Add(byeDpiPathLabel, 0, 0);
 
       _byeDpiPathTextBox = new TextBox {
         Name = "byeDpiPathTextBox",
         Anchor = AnchorStyles.Left | AnchorStyles.Right,
-        Margin = new Padding(0, 3, 0, 3)
+        Margin = new Padding(0)
       };
       byeDpiLayout.Controls.Add(_byeDpiPathTextBox, 1, 0);
 
@@ -215,7 +215,7 @@ namespace bdmanager {
         MinimumSize = new Size(0, 110),
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Padding = new Padding(10),
+        Padding = new Padding(10, 5, 10, 10),
         Margin = new Padding(0)
       };
       proxiFyreTabLayout.Controls.Add(proxiFyreGroupBox, 0, 0);
@@ -283,7 +283,7 @@ namespace bdmanager {
       _disableProxiFyreCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxifyre.disable"),
         Name = "disableProxiFyreCheckBox",
-        Margin = new Padding(3),
+        Margin = new Padding(3, 3, 3, 0),
         Dock = DockStyle.Fill
       };
       proxiFyreLayout.SetColumnSpan(_disableProxiFyreCheckBox, 3);
@@ -296,7 +296,7 @@ namespace bdmanager {
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Padding = new Padding(10),
-        Margin = new Padding(0)
+        Margin = new Padding(0, 5, 0, 0),
       };
       proxiFyreTabLayout.Controls.Add(appsGroupBox, 0, 1);
 
@@ -401,7 +401,7 @@ namespace bdmanager {
         Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        Padding = new Padding(10)
+        Padding = new Padding(10, 5, 10, 10)
       };
       autorunTabPage.Controls.Add(autorunGroupBox);
 
@@ -467,7 +467,7 @@ namespace bdmanager {
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         MinimumSize = new Size(0, 110),
-        Padding = new Padding(10),
+        Padding = new Padding(10, 5, 10, 10),
         Margin = new Padding(0)
       };
       proxyTestTabLayout.Controls.Add(proxySettingsGroupBox, 0, 0);
@@ -524,7 +524,7 @@ namespace bdmanager {
 
       _fullLogCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
-        Margin = new Padding(3),
+        Margin = new Padding(3, 3, 3, 0),
         Dock = DockStyle.Fill
       };
       proxySettingsLayout.SetColumnSpan(_fullLogCheckBox, 2);
@@ -537,7 +537,7 @@ namespace bdmanager {
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Padding = new Padding(10),
-        Margin = new Padding(0)
+        Margin = new Padding(0, 5, 0, 0),
       };
       proxyTestTabLayout.Controls.Add(proxyLogsGroupBox, 0, 1);
 
