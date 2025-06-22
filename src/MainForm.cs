@@ -153,6 +153,7 @@ namespace bdmanager {
         LinkLabel langLink = new LinkLabel {
           Text = Program.localization.GetLanguageName(langCode),
           LinkColor = Color.White,
+          LinkBehavior = LinkBehavior.NeverUnderline,
           VisitedLinkColor = Color.White,
           ActiveLinkColor = Color.LightGray,
           AutoSize = true,
