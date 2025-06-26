@@ -19,7 +19,7 @@ namespace bdmanager {
     private NumericUpDown _proxiFyrePortNumBox;
     private ListBox _appListBox;
     private TextBox _appTextBox;
-    private RichTextBox _proxyLogsRichBox;
+    private TextBox _proxyTestLogsBox;
     private Label _proxyTestProgressLabel;
 
     private CheckBox _autoStartCheckBox;
@@ -557,17 +557,16 @@ namespace bdmanager {
       };
       proxyLogsGroupBox.Controls.Add(proxyLogsLayout);
 
-      _proxyLogsRichBox = new RichTextBox {
+      _proxyTestLogsBox = new TextBox {
         Text = ProxyTestManager.GetLatestLogs(),
         Name = "proxyLogsRichBox",
-        ShortcutsEnabled = true,
-        DetectUrls = false,
-        EnableAutoDragDrop = false,
+        Multiline = true,
+        ScrollBars = ScrollBars.Vertical,
         Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
         Margin = new Padding(0, 0, 0, 3)
       };
-      proxyLogsLayout.SetColumnSpan(_proxyLogsRichBox, 2);
-      proxyLogsLayout.Controls.Add(_proxyLogsRichBox, 0, 0);
+      proxyLogsLayout.SetColumnSpan(_proxyTestLogsBox, 2);
+      proxyLogsLayout.Controls.Add(_proxyTestLogsBox, 0, 0);
 
       Button proxyTestStartButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.start"),
@@ -689,7 +688,7 @@ namespace bdmanager {
         _settings.Save();
 
         _proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
-        _proxyTestManager.ProxyLogsRichBox = _proxyLogsRichBox;
+        _proxyTestManager.ProxyTestLogsBox = _proxyTestLogsBox;
         _proxyTestManager.ProxyTestProgressLabel = _proxyTestProgressLabel;
 
         await _proxyTestManager.StartTesting();

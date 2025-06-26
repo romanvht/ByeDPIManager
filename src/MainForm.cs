@@ -16,7 +16,7 @@ namespace bdmanager {
 
     private RoundButton _toggleButton;
     private RoundButton _settingsButton;
-    private RichTextBox _logBox;
+    private TextBox _logBox;
     private NotifyIcon _notifyIcon;
     private MenuItem _toggleMenuItem;
     private Panel _languagePanel;
@@ -112,9 +112,10 @@ namespace bdmanager {
       };
       mainLayout.Controls.Add(logPanel, 0, 2);
 
-      _logBox = new RichTextBox {
+      _logBox = new TextBox {
         Dock = DockStyle.Fill,
-        ReadOnly = true,
+        Multiline = true,
+        ScrollBars = ScrollBars.Vertical,
         Font = new Font("Consolas", 9),
         BackColor = Color.FromArgb(25, 25, 25),
         ForeColor = Color.LimeGreen,
@@ -349,10 +350,10 @@ namespace bdmanager {
       }
 
       string timestamp = DateTime.Now.ToString("HH:mm:ss");
-      string logLine = $"[{timestamp}] {message}\n";
+      string logLine = $"[{timestamp}] {message}\r\n";
 
       if (_logBox.Lines.Length > 500) {
-        _logBox.Text = string.Join("\n", _logBox.Lines.Skip(_logBox.Lines.Length - 500));
+        _logBox.Text = string.Join("\r\n", _logBox.Lines.Skip(_logBox.Lines.Length - 500));
       }
 
       _logBox.AppendText(logLine);

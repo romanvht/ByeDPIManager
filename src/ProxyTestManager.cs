@@ -20,7 +20,7 @@ namespace bdmanager {
     public bool IsTesting { get; private set; }
 
     public Button ProxyTestStartButton { get; set; }
-    public RichTextBox ProxyLogsRichBox { get; set; }
+    public TextBox ProxyTestLogsBox { get; set; }
     public Label ProxyTestProgressLabel { get; set; }
 
     private AppSettings _settings;
@@ -113,7 +113,7 @@ namespace bdmanager {
         Action updateUi = () => {
           try {
             ProxyTestStartButton.Text = "Стоп";
-            ProxyLogsRichBox.Clear();
+            ProxyTestLogsBox.Clear();
 
             if (ProxyTestProgressLabel != null) {
               ProxyTestProgressLabel.Text = "0/0";
@@ -420,21 +420,21 @@ namespace bdmanager {
 
         LogAdded?.Invoke(this, text);
 
-        if (ProxyLogsRichBox == null || ProxyLogsRichBox.IsDisposed) return;
+        if (ProxyTestLogsBox == null || ProxyTestLogsBox.IsDisposed) return;
 
         Action updateUi = () => {
           try {
             lock (_logLock) {
-              ProxyLogsRichBox.AppendText(text);
-              ProxyLogsRichBox.AppendText(Environment.NewLine);
-              ProxyLogsRichBox.ScrollToCaret();
+              ProxyTestLogsBox.AppendText(text);
+              ProxyTestLogsBox.AppendText(Environment.NewLine);
+              ProxyTestLogsBox.ScrollToCaret();
             }
           } catch (Exception) { }
         };
 
-        if (ProxyLogsRichBox.InvokeRequired) {
+        if (ProxyTestLogsBox.InvokeRequired) {
           try {
-            ProxyLogsRichBox.BeginInvoke(updateUi);
+            ProxyTestLogsBox.BeginInvoke(updateUi);
           } catch (Exception) { }
         } else {
           updateUi();
