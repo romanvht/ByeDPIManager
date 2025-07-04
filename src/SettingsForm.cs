@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Drawing;
 using System.Windows.Forms;
@@ -466,7 +467,7 @@ namespace bdmanager {
         Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        MinimumSize = new Size(0, 110),
+        MinimumSize = new Size(0, 130),
         Padding = new Padding(10, 5, 10, 10),
         Margin = new Padding(0)
       };
@@ -475,7 +476,7 @@ namespace bdmanager {
       TableLayoutPanel proxySettingsLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 2,
-        RowCount = 3,
+        RowCount = 4,
         ColumnStyles = {
               new ColumnStyle(SizeType.Percent, 100F),
               new ColumnStyle(SizeType.AutoSize),
@@ -483,7 +484,8 @@ namespace bdmanager {
         RowStyles = {
               new RowStyle(SizeType.Percent, 100F),
               new RowStyle(SizeType.Percent, 100F),
-              new RowStyle(SizeType.Percent, 100F)
+              new RowStyle(SizeType.Percent, 100F),
+              new RowStyle(SizeType.Percent, 100F),
           },
         Name = "proxySettingsLayout"
       };
@@ -529,6 +531,39 @@ namespace bdmanager {
       };
       proxySettingsLayout.SetColumnSpan(_fullLogCheckBox, 2);
       proxySettingsLayout.Controls.Add(_fullLogCheckBox, 0, 2);
+
+      TableLayoutPanel buttonsLayout = new TableLayoutPanel {
+        Dock = DockStyle.Fill,
+        ColumnCount = 2,
+        RowCount = 1,
+        ColumnStyles = {
+              new ColumnStyle(SizeType.Percent, 50F),
+              new ColumnStyle(SizeType.Percent, 50F)
+          },
+        RowStyles = {
+              new RowStyle(SizeType.AutoSize)
+          },
+        Margin = new Padding(0, 5, 0, 0),
+        Name = "buttonsLayout"
+      };
+      proxySettingsLayout.SetColumnSpan(buttonsLayout, 2);
+      proxySettingsLayout.Controls.Add(buttonsLayout, 0, 3);
+
+      Button editDomainsButton = new Button {
+        Text = Program.localization.GetString("settings_form.proxy_test.edit_domains"),
+        Dock = DockStyle.Fill,
+        Margin = new Padding(0, 0, 3, 0)
+      };
+      editDomainsButton.Click += EditDomainsButton_Click;
+      buttonsLayout.Controls.Add(editDomainsButton, 0, 0);
+
+      Button editCommandsButton = new Button {
+        Text = Program.localization.GetString("settings_form.proxy_test.edit_commands"),
+        Dock = DockStyle.Fill,
+        Margin = new Padding(3, 0, 0, 0)
+      };
+      editCommandsButton.Click += EditCommandsButton_Click;
+      buttonsLayout.Controls.Add(editCommandsButton, 1, 0);
 
       GroupBox proxyLogsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.proxy_test.logs_group"),
@@ -793,6 +828,42 @@ namespace bdmanager {
     private void RemoveAppButton_Click(object sender, EventArgs e) {
       if (_appListBox.SelectedIndex >= 0) {
         _appListBox.Items.RemoveAt(_appListBox.SelectedIndex);
+      }
+    }
+
+    private void EditDomainsButton_Click(object sender, EventArgs e) {
+      try {
+        Directory.CreateDirectory(ProxyTestManager.PROXY_TEST_FOLDER);
+
+        if (!File.Exists(ProxyTestManager.PROXY_TEST_SITES)) {
+          File.WriteAllText(ProxyTestManager.PROXY_TEST_SITES, "");
+        }
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+          FileName = ProxyTestManager.PROXY_TEST_SITES,
+          UseShellExecute = true
+        });
+      }
+      catch (Exception) {
+        Program.logger.Log(Program.localization.GetString("proxy_test.sites_file_read_error"));
+      }
+    }
+
+    private void EditCommandsButton_Click(object sender, EventArgs e) {
+      try {
+        Directory.CreateDirectory(ProxyTestManager.PROXY_TEST_FOLDER);
+
+        if (!File.Exists(ProxyTestManager.PROXY_TEST_CMDS)) {
+          File.WriteAllText(ProxyTestManager.PROXY_TEST_CMDS, "");
+        }
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+          FileName = ProxyTestManager.PROXY_TEST_CMDS,
+          UseShellExecute = true
+        });
+      }
+      catch (Exception) {
+        Program.logger.Log(Program.localization.GetString("proxy_test.cmds_file_not_found"));
       }
     }
   }

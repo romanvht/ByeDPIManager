@@ -29,6 +29,8 @@ namespace bdmanager {
 
     public event EventHandler<string> LogAdded;
 
+
+
     public ProxyTestManager() {
       _settings = Program.settings;
       _processManager = Program.processManager;
@@ -119,14 +121,17 @@ namespace bdmanager {
               ProxyTestProgressLabel.Text = "0/0";
               ProxyTestProgressLabel.Visible = true;
             }
-          } catch { }
+          }
+          catch { }
         };
 
         if (ProxyTestStartButton.InvokeRequired) {
           try {
             ProxyTestStartButton.BeginInvoke(updateUi);
-          } catch { }
-        } else {
+          }
+          catch { }
+        }
+        else {
           updateUi();
         }
 
@@ -147,14 +152,17 @@ namespace bdmanager {
             if (ProxyTestProgressLabel != null) {
               ProxyTestProgressLabel.Text = $"0/{totalTests}";
             }
-          } catch { }
+          }
+          catch { }
         };
 
         if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
           try {
             ProxyTestProgressLabel.BeginInvoke(updateProgress);
-          } catch { }
-        } else {
+          }
+          catch { }
+        }
+        else {
           updateProgress();
         }
 
@@ -162,7 +170,10 @@ namespace bdmanager {
 
         if (!IsTesting) return;
 
-        var sortedResults = commandsResults.OrderByDescending(key => key.Value).ToArray();
+        var sortedResults = commandsResults.OrderByDescending(r => r.Value.Item3).ToArray();
+
+        AppendLogLine("- - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+        AppendLogLine(string.Empty);
 
         AppendLogLine(Program.localization.GetString("proxy_test.commands_success_over_50"));
         AppendLogLine(string.Empty);
@@ -171,7 +182,7 @@ namespace bdmanager {
           var result = sortedResults[i];
           int orderNumber = i + 1;
           AppendLogLine($"{result.Key}");
-          AppendLogLine($"{result.Value}%");
+          AppendLogLine($"{result.Value.Item1}/{result.Value.Item2}");
           AppendLogLine(string.Empty);
         }
 
@@ -253,12 +264,11 @@ namespace bdmanager {
       }
     }
 
-    private async Task<List<KeyValuePair<string, int>>> CheckDomainsAccessAsync(
+    private async Task<List<KeyValuePair<string, Tuple<int, int, int>>>> CheckDomainsAccessAsync(
       IEnumerable<string> commands,
       IEnumerable<string> domains,
-      CancellationToken cancellationToken)
-    {
-      var commandsResults = new List<KeyValuePair<string, int>>();
+      CancellationToken cancellationToken) {
+      var commandsResults = new List<KeyValuePair<string, Tuple<int, int, int>>>();
       int requestsCount = _settings.ProxyTestRequestsCount;
       bool fullLog = _settings.ProxyTestFullLog;
       int totalTests = commands.Count();
@@ -276,14 +286,17 @@ namespace bdmanager {
             if (ProxyTestProgressLabel != null) {
               ProxyTestProgressLabel.Text = $"{completedTests}/{totalTests}";
             }
-          } catch { }
+          }
+          catch { }
         };
 
         if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
           try {
             ProxyTestProgressLabel.BeginInvoke(updateProgress);
-          } catch { }
-        } else {
+          }
+          catch { }
+        }
+        else {
           updateProgress();
         }
 
@@ -295,8 +308,7 @@ namespace bdmanager {
         AppendLogLine(f_command);
 
         try {
-          using (var semaphore = new SemaphoreSlim(20))
-          {
+          using (var semaphore = new SemaphoreSlim(20)) {
             int totalSuccess = 0;
             int totalProcessed = 0;
             int totalDomains = domainsList.Count;
@@ -344,7 +356,8 @@ namespace bdmanager {
             AppendLogLine($"{totalSuccess}/{totalRequests} ({successPct}%)");
 
             if (successPct > 50) {
-              commandsResults.Add(new KeyValuePair<string, int>(command, successPct));
+              commandsResults.Add(new KeyValuePair<string, Tuple<int, int, int>>(command,
+                new Tuple<int, int, int>(totalSuccess, totalRequests, successPct)));
             }
 
             AppendLogLine(string.Empty);
@@ -382,13 +395,11 @@ namespace bdmanager {
         using (var proxyClientHandler = new ProxyClientHandler<Socks5>(proxySettings))
         using (var httpClient = new HttpClient(proxyClientHandler) {
           Timeout = TimeSpan.FromSeconds(3)
-        })
-        {
+        }) {
           for (int i = 0; i < requestsCount && !cancellationToken.IsCancellationRequested; i++) {
             try {
               using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
-              using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
-              {
+              using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken)) {
                 var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
                 successRequests++;
               }
@@ -429,14 +440,17 @@ namespace bdmanager {
               ProxyTestLogsBox.AppendText(Environment.NewLine);
               ProxyTestLogsBox.ScrollToCaret();
             }
-          } catch (Exception) { }
+          }
+          catch (Exception) { }
         };
 
         if (ProxyTestLogsBox.InvokeRequired) {
           try {
             ProxyTestLogsBox.BeginInvoke(updateUi);
-          } catch (Exception) { }
-        } else {
+          }
+          catch (Exception) { }
+        }
+        else {
           updateUi();
         }
       }
