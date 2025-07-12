@@ -595,6 +595,8 @@ namespace bdmanager {
       _proxyTestLogsBox = new TextBox {
         Text = ProxyTestManager.GetLatestLogs(),
         Name = "proxyLogsRichBox",
+        BackColor = Color.White,
+        ForeColor = Color.Black,
         ReadOnly = true,
         Multiline = true,
         ScrollBars = ScrollBars.Vertical,
