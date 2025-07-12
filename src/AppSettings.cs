@@ -10,7 +10,7 @@ namespace bdmanager {
     public bool StartMinimized { get; set; } = false;
     public string Language { get; set; } = "ru";
 
-    public string ByeDpiArguments { get; set; } = "-Ku -a3 -An -Kt,h -d1 -s3+s -An";
+    public string ByeDpiArguments { get; set; } = "-Ku -a1 -An -o1 -At,r,s -d1";
 
     public bool DisableProxiFyre { get; set; } = false;
     public string ProxiFyreIp { get; set; } = "127.0.0.1";
