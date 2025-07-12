@@ -12,9 +12,9 @@ using System.Windows.Forms;
 namespace bdmanager {
   public class ProxyTestManager {
     public static readonly string PROXY_TEST_FOLDER = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "proxytest");
-    public static readonly string PROXY_TEST_CMDS = Path.Combine(PROXY_TEST_FOLDER, "cmds.txt");
-    public static readonly string PROXY_TEST_SITES = Path.Combine(PROXY_TEST_FOLDER, "sites.txt");
-    public static readonly string PROXY_TEST_LATEST_LOG = Path.Combine(PROXY_TEST_FOLDER, "test.log");
+    public static readonly string PROXY_TEST_CMDS = Path.Combine(PROXY_TEST_FOLDER, "strategies.txt");
+    public static readonly string PROXY_TEST_SITES = Path.Combine(PROXY_TEST_FOLDER, "domains.txt");
+    public static readonly string PROXY_TEST_LATEST_LOG = Path.Combine(PROXY_TEST_FOLDER, "proxytest.log");
 
     private readonly object _logLock = new object();
     public bool IsTesting { get; private set; }
@@ -28,8 +28,6 @@ namespace bdmanager {
     private CancellationTokenSource _cancellationTokenSource;
 
     public event EventHandler<string> LogAdded;
-
-
 
     public ProxyTestManager() {
       _settings = Program.settings;

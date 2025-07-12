@@ -1,10 +1,19 @@
+youtu.be
 youtube.com
-manifest.googlevideo.com
 i.ytimg.com
+i9.ytimg.com
 yt3.ggpht.com
 yt4.ggpht.com
-signaler-pa.youtube.com
+googleapis.com
+googlevideo.com
+nhacmp3youtube.com
 jnn-pa.googleapis.com
+googleusercontent.com
+signaler-pa.youtube.com
+youtubei.googleapis.com
+manifest.googlevideo.com
+wide-youtube.l.google.com
+yt3.googleusercontent.com
 rr1---sn-4axm-n8vs.googlevideo.com
 rr1---sn-gvnuxaxjvh-o8ge.googlevideo.com
 rr1---sn-ug5onuxaxjvh-p3ul.googlevideo.com
@@ -23,3 +32,4 @@ rr5---sn-gvnuxaxjvh-n8vk.googlevideo.com
 rr4---sn-jvhnu5g-c35d.googlevideo.com
 rr1---sn-q4fl6n6y.googlevideo.com
 rr2---sn-hgn7ynek.googlevideo.com
+rr1---sn-xguxaxjvh-gufl.googlevideo.com

@@ -115,6 +115,7 @@ namespace bdmanager {
       _logBox = new TextBox {
         Dock = DockStyle.Fill,
         Multiline = true,
+        ReadOnly = true,
         ScrollBars = ScrollBars.Vertical,
         Font = new Font("Consolas", 9),
         BackColor = Color.FromArgb(25, 25, 25),
