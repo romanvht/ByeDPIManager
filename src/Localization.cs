@@ -11,7 +11,7 @@ namespace bdmanager
         private Dictionary<string, string> _localeStrings;
 
         public event EventHandler LanguageChanged;
-        public static readonly string[] AvailableLanguages = { "ru", "en" };
+        public static readonly string[] AvailableLanguages = { "ru", "en", "tr" };
         public string CurrentLanguage { get; private set; } = "ru";
 
         public Localization()
@@ -59,7 +59,7 @@ namespace bdmanager
             {
                 string resourceName = $"bdmanager.locale.{languageCode}.json";
                 var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                
+
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream != null)
@@ -82,4 +82,4 @@ namespace bdmanager
             }
         }
     }
-} 
+}

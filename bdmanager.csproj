@@ -21,8 +21,7 @@
   <ItemGroup>
     <EmbeddedResource Include="tray-on.ico" />
     <EmbeddedResource Include="tray-off.ico" />
-    <EmbeddedResource Include="locale\ru.json" />
-    <EmbeddedResource Include="locale\en.json" />
+    <EmbeddedResource Include="locale\*.json" />
   </ItemGroup>
 
   <ItemGroup>
