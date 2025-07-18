@@ -92,5 +92,6 @@
     "program.error": "An error occurred: {0}",
     "program.settings_load_error": "Error loading settings: {0}",
     "language.ru": "RU",
-    "language.en": "EN"
+    "language.en": "EN",
+    "language.tr": "TR"
 }
