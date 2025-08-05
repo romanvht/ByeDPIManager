@@ -32,9 +32,17 @@ namespace bdmanager {
         return false;
 
       try {
-        var (modifiers, vk) = ParseHotkeyCombination(hotkeyCombination);
         _currentHotkeyId = GetHashCode();
-        return RegisterHotKey(_windowHandle, _currentHotkeyId, modifiers, vk);
+        var (modifiers, vk) = ParseHotkeyCombination(hotkeyCombination);
+        bool registered = RegisterHotKey(_windowHandle, _currentHotkeyId, modifiers, vk);
+
+        if (!registered) {
+          int error = Marshal.GetLastWin32Error();
+          Program.logger.Log(string.Format(Program.localization.GetString("hotkey.error"), $"{hotkeyCombination}, WinAPI {error}"));
+          return false;
+        }
+
+        return true;
       }
       catch (Exception ex) {
         Program.logger.Log(string.Format(Program.localization.GetString("hotkey.error"), ex.Message));
