@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Drawing;
-using System.Linq;
 
 namespace bdmanager {
   public class HotkeyTextBox : TextBox {
@@ -10,9 +8,20 @@ namespace bdmanager {
     public Keys Hotkey => _hotkey;
 
     public HotkeyTextBox() {
-      ReadOnly = true;
       KeyDown += HotkeyTextBox_KeyDown;
       KeyUp += HotkeyTextBox_KeyUp;
+      GotFocus += HotkeyTextBox_GotFocus;
+      LostFocus += HotkeyTextBox_LostFocus;
+    }
+
+    private void HotkeyTextBox_GotFocus(object sender, EventArgs e) {
+      Text = Program.localization.GetString("hotkey.wait_input");
+    }
+
+    private void HotkeyTextBox_LostFocus(object sender, EventArgs e) {
+      if (string.IsNullOrWhiteSpace(Text) || Text == Program.localization.GetString("hotkey.wait_input")) {
+        Text = Program.settings.Hotkey;
+      }
     }
 
     private void HotkeyTextBox_KeyDown(object sender, KeyEventArgs e) {
@@ -30,7 +39,6 @@ namespace bdmanager {
       }
 
       _hotkey = e.KeyData;
-
       Text = string.Join("+", modifiers);
     }
 

@@ -92,6 +92,7 @@
     "program.already_running": "Приложение уже запущено. Ищите его в трее.",
     "program.error": "Произошла ошибка: {0}",
     "program.settings_load_error": "Ошибка при загрузке настроек: {0}",
+    "hotkey.wait_input": "Нажмите комбинацию клавиш...",
     "hotkey.error": "Неверных хоткей: {0}",
     "language.ru": "RU",
     "language.en": "EN",

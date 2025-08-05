@@ -92,6 +92,7 @@
     "program.already_running": "Uygulama zaten çalışıyor. Sistem tepsisine göz atın.",
     "program.error": "Bir hata meydana geldi: {0}",
     "program.settings_load_error": "Ayarlar yüklenirken hata oluştu: {0}",
+    "hotkey.wait_input": "Kısayol tuşu kombinasyonuna basın...",
     "hotkey.error": "Geçersiz kısayol tuşları: {0}",
     "language.ru": "RU",
     "language.en": "EN",

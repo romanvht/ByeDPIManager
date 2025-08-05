@@ -92,6 +92,7 @@
     "program.already_running": "Application is already running. Look for it in the tray.",
     "program.error": "An error occurred: {0}",
     "program.settings_load_error": "Error loading settings: {0}",
+    "hotkey.wait_input": "Press the hotkey combination...",
     "hotkey.error": "Invalid hotkeys: {0}",
     "language.ru": "RU",
     "language.en": "EN",
