@@ -15,6 +15,7 @@
     "settings_form.byedpi.tab": "ByeDPI",
     "settings_form.byedpi.group": "ByeDPI Settings",
     "settings_form.byedpi.path_label": "ByeDPI path:",
+    "settings_form.byedpi.hotkey_label": "Hotkey:",
     "settings_form.byedpi.args_label": "Arguments:",
     "settings_form.byedpi.browse_title": "Select ByeDPI executable",
     "settings_form.byedpi.not_found": "ByeDPI file not found: {0}",
@@ -91,6 +92,7 @@
     "program.already_running": "Application is already running. Look for it in the tray.",
     "program.error": "An error occurred: {0}",
     "program.settings_load_error": "Error loading settings: {0}",
+    "hotkey.error": "Invalid hotkeys: {0}",
     "language.ru": "RU",
     "language.en": "EN",
     "language.tr": "TR"

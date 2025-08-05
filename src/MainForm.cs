@@ -13,6 +13,7 @@ namespace bdmanager {
     private SettingsForm _settingsForm;
     private ProcessManager _processManager;
     private Logger _logger;
+    private HotkeyManager _hotkeyManager;
 
     private RoundButton _toggleButton;
     private RoundButton _settingsButton;
@@ -266,6 +267,11 @@ namespace bdmanager {
       _logger.Log(Program.localization.GetString("main_form.app_started"));
       _processManager.CleanupOnStartup();
 
+      if (_settings.Hotkey != null && _settings.Hotkey != "") {
+        _hotkeyManager = new HotkeyManager(Handle, ToggleConnection);
+        _hotkeyManager.RegisterHotkey(_settings.Hotkey);
+      }
+
       if (_settings.AutoStart && Program.isAutorun) {
         if (_settings.StartMinimized) {
           _logger.Log(Program.localization.GetString("main_form.quiet_mode"));
@@ -339,6 +345,10 @@ namespace bdmanager {
       if (_settingsForm.ShowDialog() == DialogResult.OK) {
         _settings.Save();
         _logger.Log(Program.localization.GetString("main_form.settings_saved"));
+
+        if (_settings.Hotkey != null && _settings.Hotkey != "") {
+          _hotkeyManager.RegisterHotkey(_settings.Hotkey);
+        }
       }
     }
 
@@ -393,6 +403,11 @@ namespace bdmanager {
         _toggleButton.PressedColor = Color.FromArgb(30, 100, 40);
         _toggleButton.BorderColor = Color.FromArgb(60, 160, 70);
       }
+    }
+
+    protected override void WndProc(ref Message m) {
+      _hotkeyManager?.ProcessMessage(m);
+      base.WndProc(ref m);
     }
 
     private Icon GetIconFromResources(bool isConnected = false) {

@@ -15,6 +15,7 @@
     "settings_form.byedpi.tab": "ByeDPI",
     "settings_form.byedpi.group": "ByeDPI Ayarları",
     "settings_form.byedpi.path_label": "ByeDPI yolu:",
+    "settings_form.byedpi.hotkey_label": "Kısayol:",
     "settings_form.byedpi.args_label": "Parametreler:",
     "settings_form.byedpi.browse_title": "ByeDPI çalıştırılabilirini seçin",
     "settings_form.byedpi.not_found": "ByeDPI dosyası bulunamadı: {0}",
@@ -91,6 +92,7 @@
     "program.already_running": "Uygulama zaten çalışıyor. Sistem tepsisine göz atın.",
     "program.error": "Bir hata meydana geldi: {0}",
     "program.settings_load_error": "Ayarlar yüklenirken hata oluştu: {0}",
+    "hotkey.error": "Geçersiz kısayol tuşları: {0}",
     "language.ru": "RU",
     "language.en": "EN",
     "language.tr": "TR"

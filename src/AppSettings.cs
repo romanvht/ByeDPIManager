@@ -9,6 +9,7 @@ namespace bdmanager {
     public bool AutoConnect { get; set; } = false;
     public bool StartMinimized { get; set; } = false;
     public string Language { get; set; } = "ru";
+    public string Hotkey { get; set; } = "Ctrl+Alt+B";
 
     public string ByeDpiArguments { get; set; } = "-Ku -a1 -An -o1 -At,r,s -d1";
 

@@ -13,6 +13,7 @@ namespace bdmanager {
     private TabControl _tabControl;
 
     private TextBox _byeDpiPathTextBox;
+    private HotkeyTextBox _hotkeyTextBox;
     private TextBox _byeDpiArgsTextBox;
 
     private CheckBox _disableProxiFyreCheckBox;
@@ -129,13 +130,14 @@ namespace bdmanager {
       TableLayoutPanel byeDpiLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 3,
-        RowCount = 3,
+        RowCount = 4,
         ColumnStyles = {
           new ColumnStyle(SizeType.AutoSize),
           new ColumnStyle(SizeType.Percent, 100F),
           new ColumnStyle(SizeType.Absolute, 30)
         },
         RowStyles = {
+          new RowStyle(SizeType.AutoSize),
           new RowStyle(SizeType.AutoSize),
           new RowStyle(SizeType.AutoSize),
           new RowStyle(SizeType.Percent, 100F)
@@ -168,6 +170,21 @@ namespace bdmanager {
       byeDpiBrowseButton.Click += (s, e) => BrowseForExe(_byeDpiPathTextBox, Program.localization.GetString("settings_form.byedpi.browse_title"));
       byeDpiLayout.Controls.Add(byeDpiBrowseButton, 2, 0);
 
+      Label hotkeyLabel = new Label {
+        Text = Program.localization.GetString("settings_form.byedpi.hotkey_label"),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Name = "hotkeyLabel",
+        Margin = new Padding(0, 3, 0, 3),
+      };
+      byeDpiLayout.Controls.Add(hotkeyLabel, 0, 1);
+
+      _hotkeyTextBox = new HotkeyTextBox {
+        Name = "hotkeyTextBox",
+        Anchor = AnchorStyles.Left | AnchorStyles.Right,
+        Margin = new Padding(0, 3, 0, 3)
+      };
+      byeDpiLayout.Controls.Add(_hotkeyTextBox, 1, 1);
+
       Label byeDpiArgsLabel = new Label {
         Text = Program.localization.GetString("settings_form.byedpi.args_label"),
         TextAlign = ContentAlignment.MiddleLeft,
@@ -175,7 +192,7 @@ namespace bdmanager {
         Margin = new Padding(0, 3, 0, 3),
       };
       byeDpiLayout.SetColumnSpan(byeDpiArgsLabel, 3);
-      byeDpiLayout.Controls.Add(byeDpiArgsLabel, 0, 1);
+      byeDpiLayout.Controls.Add(byeDpiArgsLabel, 0, 2);
 
       _byeDpiArgsTextBox = new TextBox {
         Name = "byeDpiArgsTextBox",
@@ -185,7 +202,7 @@ namespace bdmanager {
         Margin = new Padding(0, 3, 0, 3)
       };
       byeDpiLayout.SetColumnSpan(_byeDpiArgsTextBox, 3);
-      byeDpiLayout.Controls.Add(_byeDpiArgsTextBox, 0, 2);
+      byeDpiLayout.Controls.Add(_byeDpiArgsTextBox, 0, 3);
     }
 
     private void AddProxiFyre() {
@@ -738,6 +755,7 @@ namespace bdmanager {
 
     private void SettingsForm_Load(object sender, EventArgs e) {
       _byeDpiPathTextBox.Text = _settings.ByeDpiPath;
+      _hotkeyTextBox.Text = _settings.Hotkey;
       _byeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
       _disableProxiFyreCheckBox.Checked = _settings.DisableProxiFyre;
       _proxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
@@ -773,6 +791,7 @@ namespace bdmanager {
 
     private void OkButton_Click(object sender, EventArgs e) {
       _settings.ByeDpiPath = _byeDpiPathTextBox.Text;
+      _settings.Hotkey = _hotkeyTextBox.Text;
       _settings.ByeDpiArguments = _byeDpiArgsTextBox.Text;
       _settings.DisableProxiFyre = _disableProxiFyreCheckBox.Checked;
       _settings.ProxiFyrePath = _proxiFyrePathTextBox.Text;
