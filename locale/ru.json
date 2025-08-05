@@ -15,7 +15,7 @@
     "settings_form.byedpi.tab": "ByeDPI",
     "settings_form.byedpi.group": "Настройки ByeDPI",
     "settings_form.byedpi.path_label": "Путь к ByeDPI:",
-    "settings_form.byedpi.hotkey_label": "Быстрый запуск:",
+    "settings_form.byedpi.hotkey_label": "Хоткей:",
     "settings_form.byedpi.args_label": "Аргументы:",
     "settings_form.byedpi.browse_title": "Выберите исполняемый файл ByeDPI",
     "settings_form.byedpi.not_found": "Файл ByeDPI не найден: {0}",
