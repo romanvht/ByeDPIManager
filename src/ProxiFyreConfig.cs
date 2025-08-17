@@ -9,7 +9,7 @@ namespace bdmanager {
   }
 
   public class ProxiFyreConfig {
-    public string logLevel { get; set; } = "None";
+    public string logLevel { get; set; } = "error";
     public List<ProxyConfig> proxies { get; set; } = new List<ProxyConfig>();
 
     public static ProxiFyreConfig Load(string filePath) {
