@@ -11,6 +11,7 @@ namespace bdmanager {
   public class ProxiFyreConfig {
     public string logLevel { get; set; } = "error";
     public List<ProxyConfig> proxies { get; set; } = new List<ProxyConfig>();
+    public List<string> excludes { get; set; } = new List<string>();
 
     public static ProxiFyreConfig Load(string filePath) {
       if (File.Exists(filePath)) {

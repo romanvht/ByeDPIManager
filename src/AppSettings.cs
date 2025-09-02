@@ -62,12 +62,15 @@ namespace bdmanager {
 
         ProxiFyreConfig config = new ProxiFyreConfig();
         ProxyConfig proxyConfig = new ProxyConfig {
-          appNames = ProxifiedApps,
+          appNames = ProxifiedApps.Count > 0 ? ProxifiedApps : new List<string> { "" },
           socks5ProxyEndpoint = $"{ProxiFyreIp}:{ProxiFyrePort}",
           supportedProtocols = new List<string> { "TCP", "UDP" }
         };
 
+        string byeDpi = Path.GetFileNameWithoutExtension(ByeDpiPath);
+
         config.proxies.Add(proxyConfig);
+        config.excludes.Add(byeDpi);
         config.Save(ConfigPath);
 
         return true;
