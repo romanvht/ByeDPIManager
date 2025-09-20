@@ -83,7 +83,6 @@ namespace bdmanager {
 
     public static List<string> ShellSplit(string input) {
       var tokens = new List<string>();
-      var escaping = false;
       var quoteChar = ' ';
       var quoting = false;
       var lastCloseQuoteIndex = int.MinValue;
@@ -92,22 +91,13 @@ namespace bdmanager {
       for (int i = 0; i < input.Length; i++) {
         var c = input[i];
 
-        if (escaping) {
-          current.Append(c);
-          escaping = false;
-        }
-        else if (c == '\\' && quoting) {
-          if (i + 1 < input.Length && input[i + 1] == quoteChar) {
-            escaping = true;
-          } else {
-            current.Append(c);
-          }
-        }
-        else if (quoting && c == quoteChar) {
+        if (quoting && c == quoteChar) {
+          current.Append('"');
           quoting = false;
           lastCloseQuoteIndex = i;
         }
         else if (!quoting && (c == '\'' || c == '"')) {
+          current.Append('"');
           quoting = true;
           quoteChar = c;
         }
