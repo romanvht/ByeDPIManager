@@ -12,7 +12,9 @@
 2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
-## Установка
+## Инструкции
+
+* Комплексная инструкция от комьюнити [ByeDPI Manager Manual](https://github.com/BDManual/ByeDPIManager-Manual)
 
 ### Вариант 1: All-in-One (Рекомендуется для начинающих)
 Этот вариант включает все необходимые компоненты в одном архиве.

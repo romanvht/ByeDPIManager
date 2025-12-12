@@ -14,6 +14,8 @@ A mini utility for running ByeDPI and ProxiFyre.
 
 ## Installation
 
+* Instructions from the community [ByeDPI Manager Manual](https://github.com/BDManual/ByeDPIManager-Manual)
+
 ### Option 1: All-in-One (Recommended for beginners)
 
 This option includes all necessary components in a single archive.
