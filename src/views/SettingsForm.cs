@@ -64,7 +64,7 @@ namespace bdmanager.Views {
       _autorunTab = new AutorunTab(_settings);
       _tabControl.TabPages.Add(_autorunTab);
 
-      _proxyTestTab = new ProxyTestTab(_settings);
+      _proxyTestTab = new ProxyTestTab(_settings, _byeDpiTab);
       _tabControl.TabPages.Add(_proxyTestTab);
 
       _aboutTab = new AboutTab();

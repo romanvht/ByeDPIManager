@@ -7,16 +7,18 @@ namespace bdmanager.Views.Tabs {
   public class ProxyTestTab : TabPage {
     private AppSettings _settings;
     private ProxyTestManager _proxyTestManager;
+    private ByeDpiTab _byeDpiTab;
 
     public NumericUpDown DelayNumericUpDown { get; private set; }
     public NumericUpDown RequestsCountNumericUpDown { get; private set; }
-    public CheckBox FullLogCheckBox { get; private set; }
     public TextBox ProxyTestLogsBox { get; private set; }
+    public DataGridView ResultsDataGridView { get; private set; }
     public Label ProxyTestProgressLabel { get; private set; }
 
-    public ProxyTestTab(AppSettings settings) {
+    public ProxyTestTab(AppSettings settings, ByeDpiTab byeDpiTab) {
       _settings = settings;
-      _proxyTestManager = new ProxyTestManager();
+      _byeDpiTab = byeDpiTab;
+      _proxyTestManager = new ProxyTestManager(byeDpiTab);
       InitializeTab();
     }
 
@@ -54,13 +56,12 @@ namespace bdmanager.Views.Tabs {
       TableLayoutPanel proxySettingsLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 2,
-        RowCount = 4,
+        RowCount = 3,
         ColumnStyles = {
           new ColumnStyle(SizeType.Percent, 100F),
           new ColumnStyle(SizeType.AutoSize),
         },
         RowStyles = {
-          new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F),
@@ -102,14 +103,6 @@ namespace bdmanager.Views.Tabs {
       };
       proxySettingsLayout.Controls.Add(RequestsCountNumericUpDown, 1, 1);
 
-      FullLogCheckBox = new CheckBox {
-        Text = Program.localization.GetString("settings_form.proxy_test.full_log"),
-        Margin = new Padding(3, 3, 3, 0),
-        Dock = DockStyle.Fill
-      };
-      proxySettingsLayout.SetColumnSpan(FullLogCheckBox, 2);
-      proxySettingsLayout.Controls.Add(FullLogCheckBox, 0, 2);
-
       TableLayoutPanel buttonsLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 2,
@@ -125,7 +118,7 @@ namespace bdmanager.Views.Tabs {
         Name = "buttonsLayout"
       };
       proxySettingsLayout.SetColumnSpan(buttonsLayout, 2);
-      proxySettingsLayout.Controls.Add(buttonsLayout, 0, 3);
+      proxySettingsLayout.Controls.Add(buttonsLayout, 0, 2);
 
       Button editDomainsButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.edit_domains"),
@@ -143,7 +136,7 @@ namespace bdmanager.Views.Tabs {
       editCommandsButton.Click += EditCommandsButton_Click;
       buttonsLayout.Controls.Add(editCommandsButton, 1, 0);
 
-      // Proxy Logs Group
+      // Proxy Logs
       GroupBox proxyLogsGroupBox = new GroupBox {
         Text = Program.localization.GetString("settings_form.proxy_test.logs_group"),
         Name = "proxyLogsGroupBox",
@@ -171,6 +164,91 @@ namespace bdmanager.Views.Tabs {
       };
       proxyLogsGroupBox.Controls.Add(proxyLogsLayout);
 
+      // Results and Progress
+      TabControl resultsTabControl = new TabControl {
+        Dock = DockStyle.Fill,
+        Margin = new Padding(0, 0, 0, 3)
+      };
+      proxyLogsLayout.SetColumnSpan(resultsTabControl, 2);
+      proxyLogsLayout.Controls.Add(resultsTabControl, 0, 0);
+
+      // Results Tab
+      TabPage resultsTab = new TabPage {
+        Text = Program.localization.GetString("settings_form.proxy_test.results_tab"),
+        Name = "resultsTabPage",
+        Padding = new Padding(0)
+      };
+      resultsTabControl.TabPages.Add(resultsTab);
+
+      ResultsDataGridView = new DataGridView {
+        Dock = DockStyle.Fill,
+        Name = "resultsDataGridView",
+        AllowUserToAddRows = false,
+        AllowUserToDeleteRows = false,
+        AllowUserToResizeRows = false,
+        ReadOnly = true,
+        RowHeadersVisible = false,
+        SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+        MultiSelect = false,
+        AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+        ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+        BackgroundColor = SystemColors.Window,
+        BorderStyle = BorderStyle.Fixed3D
+      };
+
+      ResultsDataGridView.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+      ResultsDataGridView.DefaultCellStyle.Padding = new Padding(5);
+
+      DataGridViewTextBoxColumn strategyColumn = new DataGridViewTextBoxColumn {
+        Name = "Strategy",
+        HeaderText = Program.localization.GetString("settings_form.proxy_test.strategy_column"),
+        AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+        FillWeight = 85,
+        DefaultCellStyle = new DataGridViewCellStyle { WrapMode = DataGridViewTriState.True }
+      };
+      ResultsDataGridView.Columns.Add(strategyColumn);
+
+      DataGridViewTextBoxColumn resultColumn = new DataGridViewTextBoxColumn {
+        Name = "Result",
+        HeaderText = Program.localization.GetString("settings_form.proxy_test.result_column"),
+        AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+        FillWeight = 15,
+        DefaultCellStyle = new DataGridViewCellStyle {
+          WrapMode = DataGridViewTriState.False,
+          Alignment = DataGridViewContentAlignment.MiddleCenter
+        }
+      };
+      resultColumn.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+      ResultsDataGridView.Columns.Add(resultColumn);
+
+      ResultsDataGridView.MouseClick += ResultsDataGridView_MouseClick;
+      ResultsDataGridView.CellDoubleClick += ResultsDataGridView_CellDoubleClick;
+      resultsTab.Controls.Add(ResultsDataGridView);
+
+      // Context menu
+      ContextMenuStrip resultsContextMenu = new ContextMenuStrip();
+      ToolStripMenuItem applyMenuItem = new ToolStripMenuItem {
+        Text = Program.localization.GetString("settings_form.proxy_test.apply_menu")
+      };
+      applyMenuItem.Click += ApplyStrategy_Click;
+      resultsContextMenu.Items.Add(applyMenuItem);
+
+      ToolStripMenuItem copyMenuItem = new ToolStripMenuItem {
+        Text = Program.localization.GetString("settings_form.proxy_test.copy_menu")
+      };
+      copyMenuItem.Click += CopyStrategy_Click;
+      resultsContextMenu.Items.Add(copyMenuItem);
+
+      ResultsDataGridView.ContextMenuStrip = resultsContextMenu;
+
+      // Progress Tab
+      TabPage progressTab = new TabPage {
+        Text = Program.localization.GetString("settings_form.proxy_test.progress_tab"),
+        Name = "progressTabPage",
+        Padding = new Padding(0)
+      };
+      resultsTabControl.TabPages.Add(progressTab);
+
       ProxyTestLogsBox = new TextBox {
         Text = ProxyTestManager.GetLatestLogs(),
         Name = "proxyLogsRichBox",
@@ -179,11 +257,9 @@ namespace bdmanager.Views.Tabs {
         ReadOnly = true,
         Multiline = true,
         ScrollBars = ScrollBars.Vertical,
-        Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
-        Margin = new Padding(0, 0, 0, 3)
+        Dock = DockStyle.Fill
       };
-      proxyLogsLayout.SetColumnSpan(ProxyTestLogsBox, 2);
-      proxyLogsLayout.Controls.Add(ProxyTestLogsBox, 0, 0);
+      progressTab.Controls.Add(ProxyTestLogsBox);
 
       Button proxyTestStartButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.start"),
@@ -208,20 +284,20 @@ namespace bdmanager.Views.Tabs {
     public void LoadSettings() {
       DelayNumericUpDown.Value = _settings.ProxyTestDelay;
       RequestsCountNumericUpDown.Value = _settings.ProxyTestRequestsCount;
-      FullLogCheckBox.Checked = _settings.ProxyTestFullLog;
+
+      _proxyTestManager.LoadResults(ResultsDataGridView);
     }
 
     public void SaveSettings() {
       _settings.ProxyTestDelay = (int)DelayNumericUpDown.Value;
       _settings.ProxyTestRequestsCount = (int)RequestsCountNumericUpDown.Value;
-      _settings.ProxyTestFullLog = FullLogCheckBox.Checked;
     }
 
     public void Cleanup() {
       if (_proxyTestManager.IsTesting) {
         _proxyTestManager.StopTesting();
-        _proxyTestManager = null;
       }
+      _proxyTestManager.SaveResults(ResultsDataGridView);
     }
 
     private async void ProxyTestStartButton_Click(object sender, EventArgs e) {
@@ -233,6 +309,7 @@ namespace bdmanager.Views.Tabs {
         _proxyTestManager.ProxyTestStartButton = proxyTestStartButton;
         _proxyTestManager.ProxyTestLogsBox = ProxyTestLogsBox;
         _proxyTestManager.ProxyTestProgressLabel = ProxyTestProgressLabel;
+        _proxyTestManager.ResultsDataGridView = ResultsDataGridView;
 
         await _proxyTestManager.StartTesting();
       }
@@ -274,6 +351,51 @@ namespace bdmanager.Views.Tabs {
       }
       catch (Exception) {
         Program.logger.Log(Program.localization.GetString("proxy_test.cmds_file_not_found"));
+      }
+    }
+
+    private void ResultsDataGridView_MouseClick(object sender, MouseEventArgs e) {
+      if (e.Button == MouseButtons.Right) {
+        var hit = ResultsDataGridView.HitTest(e.X, e.Y);
+        if (hit.RowIndex >= 0) {
+          ResultsDataGridView.ClearSelection();
+          ResultsDataGridView.Rows[hit.RowIndex].Selected = true;
+        }
+      }
+    }
+
+    private void ResultsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
+      if (e.RowIndex >= 0) {
+        ApplyStrategy_Click(sender, e);
+      }
+    }
+
+    private void ApplyStrategy_Click(object sender, EventArgs e) {
+      if (ResultsDataGridView.SelectedRows.Count == 0) return;
+
+      DataGridViewRow selectedRow = ResultsDataGridView.SelectedRows[0];
+      if (selectedRow.Tag != null && selectedRow.Tag is string) {
+        string strategy = (string)selectedRow.Tag;
+        _settings.ByeDpiArguments = strategy;
+        _settings.Save();
+
+        if (_byeDpiTab != null) {
+          _byeDpiTab.UpdateArguments(strategy);
+        }
+      }
+    }
+
+    private void CopyStrategy_Click(object sender, EventArgs e) {
+      if (ResultsDataGridView.SelectedRows.Count == 0) return;
+
+      DataGridViewRow selectedRow = ResultsDataGridView.SelectedRows[0];
+      if (selectedRow.Tag != null && selectedRow.Tag is string) {
+        string strategy = (string)selectedRow.Tag;
+        try {
+          Clipboard.SetText(strategy);
+        }
+        catch (Exception) {
+        }
       }
     }
   }

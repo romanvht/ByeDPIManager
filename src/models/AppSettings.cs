@@ -20,7 +20,6 @@ namespace bdmanager {
 
     public int ProxyTestDelay { get; set; } = 0;
     public int ProxyTestRequestsCount { get; set; } = 1;
-    public bool ProxyTestFullLog { get; set; } = false;
 
     public string ByeDpiPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "byedpi", "ciadpi.exe");
     public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");

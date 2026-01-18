@@ -127,6 +127,22 @@ namespace bdmanager.Views.Tabs {
       _settings.ByeDpiArguments = ByeDpiArgsTextBox.Text;
     }
 
+    public void UpdateArguments(string arguments) {
+      if (ByeDpiArgsTextBox != null && !ByeDpiArgsTextBox.IsDisposed) {
+        if (ByeDpiArgsTextBox.InvokeRequired) {
+          try {
+            ByeDpiArgsTextBox.Invoke(new Action(() => {
+              ByeDpiArgsTextBox.Text = arguments;
+            }));
+          }
+          catch { }
+        }
+        else {
+          ByeDpiArgsTextBox.Text = arguments;
+        }
+      }
+    }
+
     private void BrowseForExe(TextBox targetTextBox, string title) {
       using (OpenFileDialog dialog = new OpenFileDialog()) {
         dialog.Filter = "*.exe|*.exe|*.*|*.*";
