@@ -221,7 +221,7 @@ namespace bdmanager.Views.Tabs {
       resultColumn.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
       ResultsDataGridView.Columns.Add(resultColumn);
 
-      ResultsDataGridView.MouseClick += ResultsDataGridView_MouseClick;
+      ResultsDataGridView.MouseDown += ResultsDataGridView_MouseClick;
       ResultsDataGridView.CellDoubleClick += ResultsDataGridView_CellDoubleClick;
       resultsTab.Controls.Add(ResultsDataGridView);
 
