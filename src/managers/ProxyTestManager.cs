@@ -392,14 +392,49 @@ namespace bdmanager {
       try {
         using (var proxyClientHandler = new ProxyClientHandler<Socks5>(proxySettings))
         using (var httpClient = new HttpClient(proxyClientHandler) {
-          Timeout = TimeSpan.FromSeconds(3)
+          Timeout = TimeSpan.FromSeconds(5)
         }) {
+          httpClient.DefaultRequestHeaders.ConnectionClose = true;
+
           for (int i = 0; i < requestsCount && !cancellationToken.IsCancellationRequested; i++) {
             try {
-              using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)))
+              using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
               using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken)) {
                 var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
-                successRequests++;
+
+                int responseCode = (int)response.StatusCode;
+                long? declaredLength = response.Content.Headers.ContentLength;
+                long actualLength = 0;
+
+                try {
+                  using (var stream = await response.Content.ReadAsStreamAsync()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+
+                    long limit = declaredLength ?? (1024 * 1024);
+
+                    while (actualLength < limit) {
+                      long remaining = limit - actualLength;
+                      int toRead = (int)Math.Min(remaining, buffer.Length);
+
+                      bytesRead = await stream.ReadAsync(buffer, 0, toRead, linkedCts.Token);
+                      if (bytesRead == 0) break;
+
+                      actualLength += bytesRead;
+                    }
+                  }
+                }
+                catch (IOException) {
+                }
+                catch (OperationCanceledException) {
+                  if (cancellationToken.IsCancellationRequested) throw;
+                }
+
+                bool isSuccessful = responseCode >= 200 && responseCode <= 299;
+
+                if (isSuccessful || !declaredLength.HasValue || actualLength >= declaredLength.Value) {
+                  successRequests++;
+                }
               }
             }
             catch (TaskCanceledException) { }
