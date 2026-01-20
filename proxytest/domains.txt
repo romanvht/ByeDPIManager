@@ -1,3 +1,4 @@
+# Google and Youtube
 youtu.be
 youtube.com
 i.ytimg.com
@@ -11,6 +12,8 @@ signaler-pa.youtube.com
 youtubei.googleapis.com
 manifest.googlevideo.com
 yt3.googleusercontent.com
+
+# Googlevideo
 rr1---sn-4axm-n8vs.googlevideo.com
 rr1---sn-gvnuxaxjvh-o8ge.googlevideo.com
 rr1---sn-ug5onuxaxjvh-p3ul.googlevideo.com

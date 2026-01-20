@@ -138,7 +138,7 @@ namespace bdmanager {
           return Array.Empty<string>();
         }
 
-        return File.ReadAllLines(PROXY_TEST_SITES);
+        return FormatUtils.ReadLines(PROXY_TEST_SITES);
       }
       catch (Exception) {
         MessageBox.Show(
@@ -167,7 +167,7 @@ namespace bdmanager {
           return Array.Empty<string>();
         }
 
-        return File.ReadAllLines(PROXY_TEST_CMDS);
+        return FormatUtils.ReadLines(PROXY_TEST_CMDS);
       }
       catch (Exception) {
         MessageBox.Show(
@@ -584,9 +584,7 @@ namespace bdmanager {
                   if (cancellationToken.IsCancellationRequested) throw;
                 }
 
-                bool isSuccessful = responseCode >= 200 && responseCode <= 299;
-
-                if (isSuccessful || !declaredLength.HasValue || actualLength >= declaredLength.Value) {
+                if (!declaredLength.HasValue || actualLength >= declaredLength.Value) {
                   successRequests++;
                 }
               }
