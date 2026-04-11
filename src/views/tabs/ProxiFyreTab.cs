@@ -6,6 +6,7 @@ namespace bdmanager.Views.Tabs {
   public class ProxiFyreTab : TabPage {
     private AppSettings _settings;
 
+    public CheckBox ProxyLanCheckBox  { get; private set; }
     public CheckBox DisableProxiFyreCheckBox { get; private set; }
     public TextBox ProxiFyrePathTextBox { get; private set; }
     public NumericUpDown ProxiFyrePortNumBox { get; private set; }
@@ -40,7 +41,7 @@ namespace bdmanager.Views.Tabs {
         Text = Program.localization.GetString("settings_form.proxifyre.group"),
         Name = "proxiFyreGroupBox",
         Dock = DockStyle.Fill,
-        MinimumSize = new Size(0, 110),
+        MinimumSize = new Size(0, 130),
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Padding = new Padding(10, 5, 10, 10),
@@ -51,13 +52,14 @@ namespace bdmanager.Views.Tabs {
       TableLayoutPanel proxiFyreLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
         ColumnCount = 3,
-        RowCount = 3,
+        RowCount = 4,
         ColumnStyles = {
           new ColumnStyle(SizeType.AutoSize),
           new ColumnStyle(SizeType.Percent, 100F),
           new ColumnStyle(SizeType.Absolute, 30)
         },
         RowStyles = {
+          new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F),
           new RowStyle(SizeType.Percent, 100F)
@@ -111,6 +113,15 @@ namespace bdmanager.Views.Tabs {
       };
       proxiFyreLayout.Controls.Add(ProxiFyrePortNumBox, 1, 1);
 
+      ProxyLanCheckBox = new CheckBox {
+        Text = Program.localization.GetString("settings_form.proxifyre.proxy_lan"),
+        Name = "proxyLanCheckBox",
+        Margin = new Padding(3, 0, 3, 0),
+        Dock = DockStyle.Fill
+      };
+      proxiFyreLayout.SetColumnSpan(ProxyLanCheckBox, 3);
+      proxiFyreLayout.Controls.Add(ProxyLanCheckBox, 0, 2);
+
       DisableProxiFyreCheckBox = new CheckBox {
         Text = Program.localization.GetString("settings_form.proxifyre.disable"),
         Name = "disableProxiFyreCheckBox",
@@ -118,7 +129,7 @@ namespace bdmanager.Views.Tabs {
         Dock = DockStyle.Fill
       };
       proxiFyreLayout.SetColumnSpan(DisableProxiFyreCheckBox, 3);
-      proxiFyreLayout.Controls.Add(DisableProxiFyreCheckBox, 0, 2);
+      proxiFyreLayout.Controls.Add(DisableProxiFyreCheckBox, 0, 3);
 
       // Apps Group
       GroupBox appsGroupBox = new GroupBox {
@@ -219,6 +230,7 @@ namespace bdmanager.Views.Tabs {
     }
 
     public void LoadSettings() {
+      ProxyLanCheckBox.Checked = _settings.ProxiFyreLan;
       DisableProxiFyreCheckBox.Checked = _settings.DisableProxiFyre;
       ProxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
       ProxiFyrePortNumBox.Value = _settings.ProxiFyrePort;
@@ -232,6 +244,7 @@ namespace bdmanager.Views.Tabs {
     }
 
     public void SaveSettings() {
+      _settings.ProxiFyreLan = ProxyLanCheckBox.Checked;
       _settings.DisableProxiFyre = DisableProxiFyreCheckBox.Checked;
       _settings.ProxiFyrePath = ProxiFyrePathTextBox.Text;
       _settings.ProxiFyrePort = (int)ProxiFyrePortNumBox.Value;

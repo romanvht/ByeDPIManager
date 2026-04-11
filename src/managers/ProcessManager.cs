@@ -80,7 +80,7 @@ namespace bdmanager {
           return;
         }
 
-        if (!_settings.UpdateProxiFyreConfig()) {
+        if (!ProxiFyreConfig.UpdateConfig(_settings)) {
           return;
         }
 

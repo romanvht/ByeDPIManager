@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,6 +12,7 @@ namespace bdmanager {
 
   public class ProxiFyreConfig {
     public string logLevel { get; set; } = "error";
+    public bool bypassLan { get; set; } = true;
     public List<ProxyConfig> proxies { get; set; } = new List<ProxyConfig>();
     public List<string> excludes { get; set; } = new List<string>();
 
@@ -24,6 +27,31 @@ namespace bdmanager {
     public void Save(string filePath) {
       string json = JsonSerializer.Serialize(this);
       File.WriteAllText(filePath, json);
+    }
+
+    public static bool UpdateConfig(AppSettings settings) {
+      try {
+        string configPath = Path.Combine(Path.GetDirectoryName(settings.ProxiFyrePath), "app-config.json");
+
+        var config = new ProxiFyreConfig();
+        var appNames = settings.ProxifiedApps.Select(a => a.Trim().Trim('"').Trim('\'')).ToList();
+
+        config.proxies.Add(new ProxyConfig {
+          appNames = appNames.Count > 0 ? appNames : new List<string> { "" },
+          socks5ProxyEndpoint = $"{settings.ProxiFyreIp}:{settings.ProxiFyrePort}",
+          supportedProtocols = new List<string> { "TCP", "UDP" }
+        });
+
+        config.bypassLan = !settings.ProxiFyreLan;
+        config.excludes.Add(Path.GetFileNameWithoutExtension(settings.ByeDpiPath));
+        config.Save(configPath);
+
+        return true;
+      }
+      catch (Exception ex) {
+        Program.logger.Log($"ProxiFyre: {ex.Message}");
+        return false;
+      }
     }
   }
 }

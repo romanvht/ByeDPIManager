@@ -95,18 +95,18 @@ namespace bdmanager {
             Hide();
           }));
         }
+      }
 
-        if (_settings.AutoConnect) {
-          _logger.Log(Program.localization.GetString("main_form.auto_connect"));
-          ToggleConnection();
-        }
+      if (_settings.AutoConnect) {
+        _logger.Log(Program.localization.GetString("main_form.auto_connect"));
+        ToggleConnection();
       }
 
       UpdateStatus(_processManager.IsRunning);
     }
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
-      if (e.CloseReason == CloseReason.UserClosing) {
+      if (e.CloseReason == CloseReason.UserClosing && _settings.MinimizeToTray) {
         e.Cancel = true;
         WindowState = FormWindowState.Minimized;
         Hide();

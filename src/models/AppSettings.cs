@@ -8,6 +8,9 @@ namespace bdmanager {
     public bool AutoStart { get; set; } = false;
     public bool AutoConnect { get; set; } = false;
     public bool StartMinimized { get; set; } = false;
+
+    public bool MinimizeToTray { get; set; } = true;
+
     public string Language { get; set; } = "ru";
     public string Hotkey { get; set; } = "Ctrl+Alt+B";
 
@@ -16,6 +19,7 @@ namespace bdmanager {
     public bool DisableProxiFyre { get; set; } = false;
     public string ProxiFyreIp { get; set; } = "127.0.0.1";
     public int ProxiFyrePort { get; set; } = 1080;
+    public bool ProxiFyreLan { get; set; } = false;
     public List<string> ProxifiedApps { get; set; } = new List<string>();
 
     public int ProxyTestDelay { get; set; } = 0;
@@ -52,31 +56,6 @@ namespace bdmanager {
       }
       catch (Exception ex) {
         Program.logger.Log($"{ex.Message}");
-      }
-    }
-
-    public bool UpdateProxiFyreConfig() {
-      try {
-        string ConfigPath = Path.Combine(Path.GetDirectoryName(ProxiFyrePath), "app-config.json");
-
-        ProxiFyreConfig config = new ProxiFyreConfig();
-        ProxyConfig proxyConfig = new ProxyConfig {
-          appNames = ProxifiedApps.Count > 0 ? ProxifiedApps : new List<string> { "" },
-          socks5ProxyEndpoint = $"{ProxiFyreIp}:{ProxiFyrePort}",
-          supportedProtocols = new List<string> { "TCP", "UDP" }
-        };
-
-        string byeDpi = Path.GetFileNameWithoutExtension(ByeDpiPath);
-
-        config.proxies.Add(proxyConfig);
-        config.excludes.Add(byeDpi);
-        config.Save(ConfigPath);
-
-        return true;
-      }
-      catch (Exception ex) {
-        Program.logger.Log($"ProxiFyre: {ex.Message}");
-        return false;
       }
     }
 
@@ -140,7 +119,15 @@ namespace bdmanager {
         }
 
         var args = ShellSplit(ByeDpiArguments);
-        var result = FilterLinuxOnlyArgs(args);
+        var result = FilterLinuxOnlyArgs(args).ToList();
+
+        if (!DisableProxiFyre) {
+          bool hasPort = result.Any(arg => arg == "-p" || arg == "--port") || result.Any(arg => arg.StartsWith("-p") && arg.Length > 2 && char.IsDigit(arg[2]));
+
+          if (!hasPort) {
+            result.AddRange(new[] { "--port", ProxiFyrePort.ToString() });
+          }
+        }
 
         return string.Join(" ", result);
       }

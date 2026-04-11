@@ -12,7 +12,7 @@ namespace bdmanager.Views {
 
     private ByeDpiTab _byeDpiTab;
     private ProxiFyreTab _proxiFyreTab;
-    private AutorunTab _autorunTab;
+    private OtherTab _otherTab;
     private ProxyTestTab _proxyTestTab;
     private AboutTab _aboutTab;
 
@@ -61,8 +61,8 @@ namespace bdmanager.Views {
       _proxiFyreTab = new ProxiFyreTab(_settings);
       _tabControl.TabPages.Add(_proxiFyreTab);
 
-      _autorunTab = new AutorunTab(_settings);
-      _tabControl.TabPages.Add(_autorunTab);
+      _otherTab = new OtherTab(_settings);
+      _tabControl.TabPages.Add(_otherTab);
 
       _proxyTestTab = new ProxyTestTab(_settings, _byeDpiTab);
       _tabControl.TabPages.Add(_proxyTestTab);
@@ -107,7 +107,7 @@ namespace bdmanager.Views {
     private void SettingsForm_Load(object sender, EventArgs e) {
       _byeDpiTab.LoadSettings();
       _proxiFyreTab.LoadSettings();
-      _autorunTab.LoadSettings(_autorunManager);
+      _otherTab.LoadSettings(_autorunManager);
       _proxyTestTab.LoadSettings();
     }
 
@@ -118,7 +118,7 @@ namespace bdmanager.Views {
     private void OkButton_Click(object sender, EventArgs e) {
       _byeDpiTab.SaveSettings();
       _proxiFyreTab.SaveSettings();
-      _autorunTab.SaveSettings(_autorunManager);
+      _otherTab.SaveSettings(_autorunManager);
       _proxyTestTab.SaveSettings();
 
       _settings.Save();
