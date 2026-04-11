@@ -10,7 +10,7 @@
     <Authors>romanvht</Authors>
     <Description>Менеджер для ByeDPI и ProxiFyre</Description>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>0.3.10</Version>
+    <Version>0.3.11</Version>
     <Copyright>romanvht</Copyright>
   </PropertyGroup>
 
