@@ -45,6 +45,7 @@
     "settings_form.apps.add": "Add",
     "settings_form.apps.remove": "Remove",
     "settings_form.apps.already_added": "This application is already in the list.",
+    "settings_form.path_self_error": "Select the ByeDPI or ProxiFyre executable, not ByeDPI Manager itself.",
     "settings_form.autorun.tab": "Autorun",
     "settings_form.autorun.group": "Autorun Settings",
     "settings_form.autorun.auto_start": "Start with Windows",

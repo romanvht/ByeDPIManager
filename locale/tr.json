@@ -45,6 +45,7 @@
     "settings_form.apps.add": "Ekle",
     "settings_form.apps.remove": "Kaldır",
     "settings_form.apps.already_added": "Bu uygulama listede mevcut.",
+    "settings_form.path_self_error": "ByeDPI Manager'ın kendisini değil, ByeDPI veya ProxiFyre çalıştırılabilirini seçin.",
     "settings_form.autorun.tab": "Otomatik Başlatma",
     "settings_form.autorun.group": "Otomatik Başlatma Ayarları",
     "settings_form.autorun.auto_start": "Başlangıçta Çalıştır",

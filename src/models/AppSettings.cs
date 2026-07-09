@@ -26,16 +26,19 @@ namespace bdmanager {
     public int ProxyTestDelay { get; set; } = 0;
     public int ProxyTestRequestsCount { get; set; } = 1;
 
-    public string ByeDpiPath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "byedpi", "ciadpi.exe");
-    public string ProxiFyrePath { get; set; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", "proxifyre", "proxifyre.exe");
+    public string ByeDpiPath { get; set; } = Path.Combine("libs", "byedpi", "ciadpi.exe");
+    public string ProxiFyrePath { get; set; } = Path.Combine("libs", "proxifyre", "proxifyre.exe");
 
     private static readonly string SettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config", "settings.json");
+    private static readonly string DefaultByeDpiPath = Path.Combine("libs", "byedpi", "ciadpi.exe");
+    private static readonly string DefaultProxiFyrePath = Path.Combine("libs", "proxifyre", "proxifyre.exe");
 
     public static AppSettings Load() {
       try {
         if (File.Exists(SettingsPath)) {
           string json = File.ReadAllText(SettingsPath);
           var settings = JsonSerializer.Deserialize<AppSettings>(json);
+          settings.NormalizePaths();
           settings.ByeDpiHistory = HistoryManager.Ensure(settings.ByeDpiHistory);
           return settings;
         }
@@ -45,6 +48,52 @@ namespace bdmanager {
       }
 
       return new AppSettings();
+    }
+
+    public string GetByeDpiExecutablePath() {
+      return ResolveAppPath(ByeDpiPath);
+    }
+
+    public string GetProxiFyreExecutablePath() {
+      return ResolveAppPath(ProxiFyrePath);
+    }
+
+    private void NormalizePaths() {
+      ByeDpiPath = NormalizeDefaultPath(ByeDpiPath, DefaultByeDpiPath);
+      ProxiFyrePath = NormalizeDefaultPath(ProxiFyrePath, DefaultProxiFyrePath);
+    }
+
+    private static string ResolveAppPath(string path) {
+      if (string.IsNullOrWhiteSpace(path)) {
+        return path;
+      }
+
+      if (Path.IsPathRooted(path)) {
+        return path;
+      }
+
+      return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path));
+    }
+
+    private static string NormalizeDefaultPath(string path, string defaultPath) {
+      if (string.IsNullOrWhiteSpace(path)) {
+        return defaultPath;
+      }
+
+      string trimmedPath = path.Trim();
+      if (!Path.IsPathRooted(trimmedPath)) {
+        return trimmedPath;
+      }
+
+      string relativeSuffix = Path.DirectorySeparatorChar + defaultPath;
+      string alternateSuffix = Path.AltDirectorySeparatorChar + defaultPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+      if (trimmedPath.EndsWith(relativeSuffix, StringComparison.OrdinalIgnoreCase) ||
+          trimmedPath.EndsWith(alternateSuffix, StringComparison.OrdinalIgnoreCase)) {
+        return defaultPath;
+      }
+
+      return trimmedPath;
     }
 
     public void Save() {

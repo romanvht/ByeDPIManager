@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace bdmanager.Views.Tabs {
@@ -195,8 +196,8 @@ namespace bdmanager.Views.Tabs {
         Margin = new Padding(0)
       };
       appBrowseButton.Click += (s, e) => {
-        BrowseForExe(AppTextBox, Program.localization.GetString("settings_form.apps.browse_title"));
-        if (!string.IsNullOrWhiteSpace(AppTextBox.Text)) {
+        if (BrowseForExe(AppTextBox, Program.localization.GetString("settings_form.apps.browse_title")) &&
+            !string.IsNullOrWhiteSpace(AppTextBox.Text)) {
           AddAppToList(AppTextBox.Text);
         }
       };
@@ -255,14 +256,40 @@ namespace bdmanager.Views.Tabs {
       }
     }
 
-    private void BrowseForExe(TextBox targetTextBox, string title) {
+    private bool BrowseForExe(TextBox targetTextBox, string title) {
       using (OpenFileDialog dialog = new OpenFileDialog()) {
         dialog.Filter = "*.exe|*.exe|*.*|*.*";
         dialog.Title = title;
 
         if (dialog.ShowDialog() == DialogResult.OK) {
+          if (IsCurrentApplication(dialog.FileName)) {
+            MessageBox.Show(
+              Program.localization.GetString("settings_form.path_self_error"),
+              Program.localization.GetString("settings_form.title"),
+              MessageBoxButtons.OK,
+              MessageBoxIcon.Error
+            );
+            return false;
+          }
+
           targetTextBox.Text = dialog.FileName;
+          return true;
         }
+      }
+
+      return false;
+    }
+
+    private bool IsCurrentApplication(string path) {
+      try {
+        return string.Equals(
+          Path.GetFullPath(path),
+          Path.GetFullPath(Application.ExecutablePath),
+          StringComparison.OrdinalIgnoreCase
+        );
+      }
+      catch {
+        return false;
       }
     }
 

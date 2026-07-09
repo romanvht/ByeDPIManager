@@ -31,7 +31,9 @@ namespace bdmanager {
 
     public static bool UpdateConfig(AppSettings settings) {
       try {
-        string configPath = Path.Combine(Path.GetDirectoryName(settings.ProxiFyrePath), "app-config.json");
+        string byeDpiPath = settings.GetByeDpiExecutablePath();
+        string proxiFyrePath = settings.GetProxiFyreExecutablePath();
+        string configPath = Path.Combine(Path.GetDirectoryName(proxiFyrePath), "app-config.json");
 
         var config = new ProxiFyreConfig();
         var appNames = settings.ProxifiedApps.Select(a => a.Trim().Trim('"').Trim('\'')).ToList();
@@ -43,7 +45,7 @@ namespace bdmanager {
         });
 
         config.bypassLan = !settings.ProxiFyreLan;
-        config.excludes.Add(Path.GetFileNameWithoutExtension(settings.ByeDpiPath));
+        config.excludes.Add(Path.GetFileNameWithoutExtension(byeDpiPath));
         config.Save(configPath);
 
         return true;

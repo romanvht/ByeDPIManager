@@ -45,6 +45,7 @@
     "settings_form.apps.add": "Добавить",
     "settings_form.apps.remove": "Удалить",
     "settings_form.apps.already_added": "Это приложение уже добавлено в список.",
+    "settings_form.path_self_error": "Выберите исполняемый файл ByeDPI или ProxiFyre, а не сам ByeDPI Manager.",
     "settings_form.autorun.tab": "Автозапуск",
     "settings_form.autorun.group": "Настройки автозапуска",
     "settings_form.autorun.auto_start": "Автозапуск при старте устройства",

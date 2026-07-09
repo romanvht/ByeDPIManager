@@ -19,10 +19,12 @@ namespace bdmanager {
 
     public void StartByeDpi(string arguments = null, bool logStatus = true) {
       try {
-        if (!File.Exists(_settings.ByeDpiPath)) {
+        string byeDpiPath = _settings.GetByeDpiExecutablePath();
+
+        if (!File.Exists(byeDpiPath)) {
           Program.logger.Log(string.Format(
             Program.localization.GetString("settings_form.byedpi.not_found"),
-            _settings.ByeDpiPath
+            byeDpiPath
           ));
           return;
         }
@@ -32,8 +34,8 @@ namespace bdmanager {
 
         _byeDpiProcess = new Process {
           StartInfo = new ProcessStartInfo {
-            FileName = _settings.ByeDpiPath,
-            WorkingDirectory = Path.GetDirectoryName(_settings.ByeDpiPath),
+            FileName = byeDpiPath,
+            WorkingDirectory = Path.GetDirectoryName(byeDpiPath),
             Arguments = args,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -76,10 +78,12 @@ namespace bdmanager {
       }
 
       try {
-        if (!File.Exists(_settings.ProxiFyrePath)) {
+        string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
+
+        if (!File.Exists(proxiFyrePath)) {
           Program.logger.Log(string.Format(
             Program.localization.GetString("settings_form.proxifyre.not_found"),
-            _settings.ProxiFyrePath
+            proxiFyrePath
           ));
           return;
         }
@@ -90,8 +94,8 @@ namespace bdmanager {
 
         _proxifyreProcess = new Process {
           StartInfo = new ProcessStartInfo {
-            FileName = _settings.ProxiFyrePath,
-            WorkingDirectory = Path.GetDirectoryName(_settings.ProxiFyrePath),
+            FileName = proxiFyrePath,
+            WorkingDirectory = Path.GetDirectoryName(proxiFyrePath),
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
