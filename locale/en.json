@@ -13,7 +13,7 @@
     "main_form.settings_saved": "Settings saved",
     "main_form.proxifyre_dependency_title": "ProxiFyre stopped",
     "main_form.proxifyre_dependency_tray": "ProxiFyre stopped unexpectedly. Check the required components.",
-    "main_form.proxifyre_dependency_warning": "ProxiFyre stopped unexpectedly or could not start.\n\nPlease check that the required components are installed:\n\n.NET Framework 4.8:\nhttps://dotnet.microsoft.com/ru-ru/download/dotnet-framework/thank-you/net48-offline-installer\n\nWindows Packet Filter:\nhttps://github.com/wiresock/ndisapi/releases\n\nVisual C++ Redistributable 2022:\nhttps://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version",
+    "main_form.proxifyre_dependency_warning": "ProxiFyre stopped unexpectedly or could not start.\n\nPlease check that the components from the redist folder are installed.\n\nDependency links are also listed in the project's GitHub README.",
     "settings_form.title": "Settings",
     "settings_form.byedpi.tab": "ByeDPI",
     "settings_form.byedpi.group": "ByeDPI Settings",

@@ -1,16 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace bdmanager.Views {
   public class DependencyDialog : Form {
-    private readonly List<DependencyLink> _links = new List<DependencyLink> {
+    private readonly DependencyLink[] _links = {
       new DependencyLink(".NET Framework 4.8", "https://dotnet.microsoft.com/ru-ru/download/dotnet-framework/thank-you/net48-offline-installer"),
       new DependencyLink("Windows Packet Filter", "https://github.com/wiresock/ndisapi/releases"),
       new DependencyLink("Visual C++ Redistributable 2022", "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version"),
+      new DependencyLink("Github Readme", "https://github.com/romanvht/ByeDPIManager")
     };
 
     public DependencyDialog() {
@@ -42,7 +41,7 @@ namespace bdmanager.Views {
       Controls.Add(layout);
 
       Label messageLabel = new Label {
-        Text = BuildMessageText(),
+        Text = Program.localization.GetString("main_form.proxifyre_dependency_warning"),
         AutoSize = true,
         MaximumSize = new Size(470, 0),
         Margin = new Padding(0, 0, 0, 12)
@@ -79,21 +78,6 @@ namespace bdmanager.Views {
 
       AcceptButton = okButton;
       CancelButton = okButton;
-    }
-
-    private string BuildMessageText() {
-      string message = Program.localization.GetString("main_form.proxifyre_dependency_warning");
-      string[] lines = message
-        .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
-        .Where(line => !IsUrlLine(line) && !_links.Any(link => line.StartsWith(link.Name, StringComparison.OrdinalIgnoreCase)))
-        .ToArray();
-
-      return string.Join(Environment.NewLine, lines).Trim();
-    }
-
-    private bool IsUrlLine(string line) {
-      return line.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-        line.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
     }
 
     private void DependencyLinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
