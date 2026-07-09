@@ -59,6 +59,15 @@ namespace bdmanager {
             (int)(control.Size.Height * scaleFactor)
         );
       }
+      else if (!(control is Form) && !control.AutoSize && (control.Dock == DockStyle.Top || control.Dock == DockStyle.Bottom)) {
+        control.Height = (int)Math.Round(control.Height * scaleFactor);
+      }
+      else if (!(control is Form) && !control.AutoSize && (control.Dock == DockStyle.Left || control.Dock == DockStyle.Right)) {
+        control.Width = (int)Math.Round(control.Width * scaleFactor);
+      }
+
+      control.Padding = ScalePadding(control.Padding, scaleFactor);
+      control.Margin = ScalePadding(control.Margin, scaleFactor);
 
       if (!control.MinimumSize.IsEmpty) {
         control.MinimumSize = new Size(
@@ -67,10 +76,23 @@ namespace bdmanager {
         );
       }
 
+      if (!control.MaximumSize.IsEmpty) {
+        control.MaximumSize = new Size(
+            (int)Math.Round(control.MaximumSize.Width * scaleFactor),
+            (int)Math.Round(control.MaximumSize.Height * scaleFactor)
+        );
+      }
+
       if (control is TableLayoutPanel tablePanel) {
         foreach (ColumnStyle columnStyle in tablePanel.ColumnStyles) {
           if (columnStyle.SizeType == SizeType.Absolute) {
             columnStyle.Width = columnStyle.Width * scaleFactor;
+          }
+        }
+
+        foreach (RowStyle rowStyle in tablePanel.RowStyles) {
+          if (rowStyle.SizeType == SizeType.Absolute) {
+            rowStyle.Height = rowStyle.Height * scaleFactor;
           }
         }
       }
@@ -89,6 +111,15 @@ namespace bdmanager {
       foreach (Control child in control.Controls) {
         ScaleControlAndChildren(child, scaleFactor);
       }
+    }
+
+    private static Padding ScalePadding(Padding padding, float scaleFactor) {
+      return new Padding(
+          (int)Math.Round(padding.Left * scaleFactor),
+          (int)Math.Round(padding.Top * scaleFactor),
+          (int)Math.Round(padding.Right * scaleFactor),
+          (int)Math.Round(padding.Bottom * scaleFactor)
+      );
     }
   }
 }
