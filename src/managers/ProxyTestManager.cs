@@ -13,6 +13,10 @@ using bdmanager.Views.Tabs;
 
 namespace bdmanager {
   public class ProxyTestManager {
+    private const int MaxParallelDomainChecks = 20;
+    private const int RequestTimeoutSeconds = 5;
+    private const int DomainTimeoutBufferSeconds = 2;
+
     public static readonly string PROXY_TEST_FOLDER = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "proxytest");
     public static readonly string PROXY_TEST_CMDS = Path.Combine(PROXY_TEST_FOLDER, "strategies.txt");
     public static readonly string PROXY_TEST_SITES = Path.Combine(PROXY_TEST_FOLDER, "domains.txt");
@@ -321,7 +325,7 @@ namespace bdmanager {
         }
 
         try {
-          _processManager.StopByeDpi();
+          _processManager.StopByeDpi(false);
         }
         catch (Exception ex) {
           AppendLogLine(string.Format(
@@ -404,11 +408,11 @@ namespace bdmanager {
         var filtered = AppSettings.FilterLinuxOnlyArgs(args);
         var f_command = string.Join(" ", filtered);
 
-        _processManager.StartByeDpi(f_command);
+        _processManager.StartByeDpi(f_command, false);
         AppendLogLine(f_command);
 
         try {
-          using (var semaphore = new SemaphoreSlim(20)) {
+          using (var semaphore = new SemaphoreSlim(MaxParallelDomainChecks)) {
             int totalSuccess = 0;
             int totalRequests = 0;
 
@@ -421,7 +425,7 @@ namespace bdmanager {
                 try {
                   cancellationToken.ThrowIfCancellationRequested();
                   string trimmedDomain = domain.Trim();
-                  int successCount = await CheckDomainAccessAsync(trimmedDomain, requestsCount, cancellationToken);
+                  int successCount = await CheckDomainAccess(trimmedDomain, requestsCount, cancellationToken);
 
                   AppendLogLine($"{trimmedDomain} - {successCount}/{requestsCount}");
 
@@ -461,7 +465,7 @@ namespace bdmanager {
           ));
         }
 
-        _processManager.StopByeDpi();
+        _processManager.StopByeDpi(false);
 
         if (_settings.ProxyTestDelay > 0) {
           await Task.Delay(_settings.ProxyTestDelay * 1000, cancellationToken);
@@ -534,7 +538,26 @@ namespace bdmanager {
       }
     }
 
-    private async Task<int> CheckDomainAccessAsync(string domain, int requestsCount, CancellationToken cancellationToken) {
+    private async Task<int> CheckDomainAccess(string domain, int requestsCount, CancellationToken cancellationToken) {
+      int domainTimeoutSeconds = RequestTimeoutSeconds * Math.Max(1, requestsCount) + DomainTimeoutBufferSeconds;
+      Task<int> checkTask = CheckDomain(domain, requestsCount, cancellationToken);
+      Task timeoutTask = Task.Delay(TimeSpan.FromSeconds(domainTimeoutSeconds), cancellationToken);
+
+      Task completedTask = await Task.WhenAny(checkTask, timeoutTask);
+      if (completedTask == checkTask) {
+        return await checkTask;
+      }
+
+      cancellationToken.ThrowIfCancellationRequested();
+
+      Task observeFaultTask = checkTask.ContinueWith(task => {
+        Exception ignored = task.Exception;
+      }, TaskContinuationOptions.OnlyOnFaulted);
+
+      return 0;
+    }
+
+    private async Task<int> CheckDomain(string domain, int requestsCount, CancellationToken cancellationToken) {
       Uri websiteUrl = GetValidUrl(domain);
       int successRequests = 0;
 
@@ -546,46 +569,47 @@ namespace bdmanager {
       try {
         using (var proxyClientHandler = new ProxyClientHandler<Socks5>(proxySettings))
         using (var httpClient = new HttpClient(proxyClientHandler) {
-          Timeout = TimeSpan.FromSeconds(5)
+          Timeout = TimeSpan.FromSeconds(RequestTimeoutSeconds)
         }) {
           httpClient.DefaultRequestHeaders.ConnectionClose = true;
 
           for (int i = 0; i < requestsCount && !cancellationToken.IsCancellationRequested; i++) {
             try {
-              using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+              using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds)))
               using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken)) {
-                var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
+                using (var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token)) {
 
-                int responseCode = (int)response.StatusCode;
-                long? declaredLength = response.Content.Headers.ContentLength;
-                long actualLength = 0;
+                  int responseCode = (int)response.StatusCode;
+                  long? declaredLength = response.Content.Headers.ContentLength;
+                  long actualLength = 0;
 
-                try {
-                  using (var stream = await response.Content.ReadAsStreamAsync()) {
-                    byte[] buffer = new byte[8192];
-                    int bytesRead;
+                  try {
+                    using (var stream = await response.Content.ReadAsStreamAsync()) {
+                      byte[] buffer = new byte[8192];
+                      int bytesRead;
 
-                    long limit = declaredLength ?? (1024 * 1024);
+                      long limit = declaredLength ?? (1024 * 1024);
 
-                    while (actualLength < limit) {
-                      long remaining = limit - actualLength;
-                      int toRead = (int)Math.Min(remaining, buffer.Length);
+                      while (actualLength < limit) {
+                        long remaining = limit - actualLength;
+                        int toRead = (int)Math.Min(remaining, buffer.Length);
 
-                      bytesRead = await stream.ReadAsync(buffer, 0, toRead, linkedCts.Token);
-                      if (bytesRead == 0) break;
+                        bytesRead = await stream.ReadAsync(buffer, 0, toRead, linkedCts.Token);
+                        if (bytesRead == 0) break;
 
-                      actualLength += bytesRead;
+                        actualLength += bytesRead;
+                      }
                     }
                   }
-                }
-                catch (IOException) {
-                }
-                catch (OperationCanceledException) {
-                  if (cancellationToken.IsCancellationRequested) throw;
-                }
+                  catch (IOException) {
+                  }
+                  catch (OperationCanceledException) {
+                    if (cancellationToken.IsCancellationRequested) throw;
+                  }
 
-                if (!declaredLength.HasValue || actualLength >= declaredLength.Value) {
-                  successRequests++;
+                  if (!declaredLength.HasValue || actualLength >= declaredLength.Value) {
+                    successRequests++;
+                  }
                 }
               }
             }

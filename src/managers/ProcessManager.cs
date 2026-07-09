@@ -17,7 +17,7 @@ namespace bdmanager {
       _settings = Program.settings;
     }
 
-    public void StartByeDpi(string arguments = null) {
+    public void StartByeDpi(string arguments = null, bool logStatus = true) {
       try {
         if (!File.Exists(_settings.ByeDpiPath)) {
           Program.logger.Log(string.Format(
@@ -53,10 +53,12 @@ namespace bdmanager {
         _byeDpiProcess.BeginOutputReadLine();
         _byeDpiProcess.BeginErrorReadLine();
 
-        Program.logger.Log(string.Format(
-          Program.localization.GetString("process_manager.byedpi.started"),
-          args
-        ));
+        if (logStatus) {
+          Program.logger.Log(string.Format(
+            Program.localization.GetString("process_manager.byedpi.started"),
+            args
+          ));
+        }
       }
       catch (Exception ex) {
         Program.logger.Log(string.Format(
@@ -119,13 +121,15 @@ namespace bdmanager {
       }
     }
 
-    public void StopByeDpi() {
+    public void StopByeDpi(bool logStatus = true) {
       if (_byeDpiProcess?.HasExited == false) {
         try {
           _byeDpiProcess.Exited -= ProcessStopHandler;
           _byeDpiProcess.Kill();
           _byeDpiProcess = null;
-          Program.logger.Log(Program.localization.GetString("process_manager.byedpi.stopped"));
+          if (logStatus) {
+            Program.logger.Log(Program.localization.GetString("process_manager.byedpi.stopped"));
+          }
         }
         catch (Exception ex) {
           Program.logger.Log(string.Format(

@@ -46,7 +46,7 @@
     "settings_form.behavior.auto_connect": "Автоматическое подключение при запуске",
     "settings_form.behavior.minimize_to_tray": "Сворачивать в трей при закрытии",
     "settings_form.autorun.start_minimized": "Запускать свернутым в трей",
-    "settings_form.proxy_test.tab": "Подбор стратегий (Beta)",
+    "settings_form.proxy_test.tab": "Подбор стратегий",
     "settings_form.proxy_test.settings_group": "Настройки теста",
     "settings_form.proxy_test.delay_label": "Ожидание между командами в секундах:",
     "settings_form.proxy_test.requests_label": "Количество запросов к домену:",
