@@ -41,6 +41,7 @@ namespace bdmanager {
 
       _processManager = Program.processManager;
       _processManager.StatusChanged += (s, isRunning) => UpdateStatus(isRunning);
+      _processManager.ProxiFyreUnexpectedStopped += (s, e) => ShowDependencyWarning();
 
       Program.localization.LanguageChanged += (s, e) => UpdateLocale();
     }
@@ -215,6 +216,21 @@ namespace bdmanager {
         _toggleButton.HoverColor = Color.FromArgb(50, 140, 60);
         _toggleButton.PressedColor = Color.FromArgb(30, 100, 40);
         _toggleButton.BorderColor = Color.FromArgb(60, 160, 70);
+      }
+    }
+
+    private void ShowDependencyWarning() {
+      if (IsDisposed) return;
+
+      if (InvokeRequired) {
+        BeginInvoke(new Action(ShowDependencyWarning));
+        return;
+      }
+
+      System.Media.SystemSounds.Exclamation.Play();
+
+      using (DependencyDialog dialog = new DependencyDialog()) {
+        dialog.ShowDialog(this);
       }
     }
 

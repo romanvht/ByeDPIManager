@@ -7,9 +7,11 @@ namespace bdmanager {
     private Process _byeDpiProcess;
     private Process _proxifyreProcess;
     private AppSettings _settings;
+    private bool _isStopping;
 
     public bool IsRunning => _byeDpiProcess?.HasExited == false && (_settings.DisableProxiFyre || _proxifyreProcess?.HasExited == false);
     public event EventHandler<bool> StatusChanged;
+    public event EventHandler ProxiFyreUnexpectedStopped;
 
     public ProcessManager() {
       _settings = Program.settings;
@@ -111,6 +113,7 @@ namespace bdmanager {
           Program.localization.GetString("process_manager.proxifyre.start_error"),
           ex.Message
         ));
+        RaiseProxiFyreUnexpectedStopped();
         StopProxiFyre();
         throw;
       }
@@ -119,6 +122,7 @@ namespace bdmanager {
     public void StopByeDpi() {
       if (_byeDpiProcess?.HasExited == false) {
         try {
+          _byeDpiProcess.Exited -= ProcessStopHandler;
           _byeDpiProcess.Kill();
           _byeDpiProcess = null;
           Program.logger.Log(Program.localization.GetString("process_manager.byedpi.stopped"));
@@ -139,6 +143,7 @@ namespace bdmanager {
 
       if (_proxifyreProcess?.HasExited == false) {
         try {
+          _proxifyreProcess.Exited -= ProcessStopHandler;
           _proxifyreProcess.Kill();
           _proxifyreProcess = null;
           Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.stopped"));
@@ -180,12 +185,16 @@ namespace bdmanager {
 
     public void Stop() {
       try {
+        _isStopping = true;
         StopByeDpi();
         StopProxiFyre();
         RaiseStatusChanged(false);
       }
       catch (Exception ex) {
         Program.logger.Log($"{ex.Message}");
+      }
+      finally {
+        _isStopping = false;
       }
     }
 
@@ -257,11 +266,20 @@ namespace bdmanager {
       }
     }
     private void ProcessStopHandler(object sender, EventArgs e) {
+      if (sender == _proxifyreProcess && !_isStopping && !_settings.DisableProxiFyre) {
+        Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.unexpected_stop"));
+        RaiseProxiFyreUnexpectedStopped();
+      }
+
       Stop();
     }
 
     private void RaiseStatusChanged(bool status) {
       StatusChanged?.Invoke(this, status);
+    }
+
+    private void RaiseProxiFyreUnexpectedStopped() {
+      ProxiFyreUnexpectedStopped?.Invoke(this, EventArgs.Empty);
     }
   }
 }
