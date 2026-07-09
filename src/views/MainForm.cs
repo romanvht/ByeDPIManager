@@ -4,10 +4,14 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using bdmanager.Views;
 
 namespace bdmanager {
   public partial class MainForm : Form {
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     private bool _trayShow = false;
 
     private AppSettings _settings;
@@ -51,8 +55,7 @@ namespace bdmanager {
 
       MenuItem openMenuItem = new MenuItem(Program.localization.GetString("tray_menu.open"));
       openMenuItem.Click += (s, e) => {
-        Show();
-        WindowState = FormWindowState.Normal;
+        ShowMainWindow();
       };
 
       _toggleMenuItem = new MenuItem(Program.localization.GetString("main_form.connect"));
@@ -72,10 +75,22 @@ namespace bdmanager {
 
       _notifyIcon.ContextMenu = trayMenu;
       _notifyIcon.DoubleClick += (s, e) => {
-        Show();
-        Activate();
-        WindowState = FormWindowState.Normal;
+        ShowMainWindow();
       };
+    }
+
+    public void ShowMainWindow() {
+      if (IsDisposed) return;
+
+      if (InvokeRequired) {
+        BeginInvoke(new Action(ShowMainWindow));
+        return;
+      }
+
+      Show();
+      WindowState = FormWindowState.Normal;
+      SetForegroundWindow(Handle);
+      Activate();
     }
 
     private void MainForm_Load(object sender, EventArgs e) {
