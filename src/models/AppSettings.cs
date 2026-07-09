@@ -15,6 +15,7 @@ namespace bdmanager {
     public string Hotkey { get; set; } = "Ctrl+Alt+B";
 
     public string ByeDpiArguments { get; set; } = "-Ku -a1 -An -o1 -At,r,s -d1";
+    public List<HistoryItem> ByeDpiHistory { get; set; } = new List<HistoryItem>();
 
     public bool DisableProxiFyre { get; set; } = false;
     public string ProxiFyreIp { get; set; } = "127.0.0.1";
@@ -34,7 +35,9 @@ namespace bdmanager {
       try {
         if (File.Exists(SettingsPath)) {
           string json = File.ReadAllText(SettingsPath);
-          return JsonSerializer.Deserialize<AppSettings>(json);
+          var settings = JsonSerializer.Deserialize<AppSettings>(json);
+          settings.ByeDpiHistory = HistoryManager.Ensure(settings.ByeDpiHistory);
+          return settings;
         }
       }
       catch (Exception ex) {

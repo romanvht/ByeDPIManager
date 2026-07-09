@@ -377,6 +377,8 @@ namespace bdmanager.Views.Tabs {
       if (selectedRow.Tag != null && selectedRow.Tag is string) {
         string strategy = (string)selectedRow.Tag;
         _settings.ByeDpiArguments = strategy;
+        _settings.ByeDpiHistory = HistoryManager.Ensure(_settings.ByeDpiHistory);
+        HistoryManager.AddOrUpdate(_settings.ByeDpiHistory, strategy);
         _settings.Save();
 
         if (_byeDpiTab != null) {
