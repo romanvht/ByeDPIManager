@@ -17,7 +17,7 @@ namespace bdmanager {
       _settings = Program.settings;
     }
 
-    public void StartByeDpi(string arguments = null, bool logStatus = true) {
+    public bool StartByeDpi(string arguments = null, bool logStatus = true) {
       try {
         string byeDpiPath = _settings.GetByeDpiExecutablePath();
 
@@ -26,7 +26,7 @@ namespace bdmanager {
             Program.localization.GetString("settings_form.byedpi.not_found"),
             byeDpiPath
           ));
-          return;
+          return false;
         }
 
         bool useCustomArgs = !string.IsNullOrWhiteSpace(arguments);
@@ -61,6 +61,8 @@ namespace bdmanager {
             args
           ));
         }
+
+        return true;
       }
       catch (Exception ex) {
         Program.logger.Log(string.Format(
@@ -72,9 +74,9 @@ namespace bdmanager {
       }
     }
 
-    public void StartProxiFyre() {
+    public bool StartProxiFyre() {
       if (_settings.DisableProxiFyre) {
-        return;
+        return true;
       }
 
       try {
@@ -85,11 +87,11 @@ namespace bdmanager {
             Program.localization.GetString("settings_form.proxifyre.not_found"),
             proxiFyrePath
           ));
-          return;
+          return false;
         }
 
         if (!ProxiFyreConfig.UpdateConfig(_settings)) {
-          return;
+          return false;
         }
 
         _proxifyreProcess = new Process {
@@ -113,6 +115,7 @@ namespace bdmanager {
         _proxifyreProcess.BeginErrorReadLine();
 
         Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.started"));
+        return true;
       }
       catch (Exception ex) {
         Program.logger.Log(string.Format(
@@ -167,9 +170,7 @@ namespace bdmanager {
 
     public void Start() {
       try {
-        StartByeDpi();
-
-        if (_byeDpiProcess?.HasExited != false) {
+        if (!StartByeDpi() || _byeDpiProcess?.HasExited != false) {
           return;
         }
 

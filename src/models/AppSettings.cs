@@ -25,6 +25,7 @@ namespace bdmanager {
 
     public int ProxyTestDelay { get; set; } = 0;
     public int ProxyTestRequestsCount { get; set; } = 1;
+    public string ProxyTestSni { get; set; } = "google.com";
 
     public string ByeDpiPath { get; set; } = Path.Combine("libs", "byedpi", "ciadpi.exe");
     public string ProxiFyrePath { get; set; } = Path.Combine("libs", "proxifyre", "proxifyre.exe");
@@ -85,11 +86,9 @@ namespace bdmanager {
         return trimmedPath;
       }
 
-      string relativeSuffix = Path.DirectorySeparatorChar + defaultPath;
-      string alternateSuffix = Path.AltDirectorySeparatorChar + defaultPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+      string defaultFullPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, defaultPath));
 
-      if (trimmedPath.EndsWith(relativeSuffix, StringComparison.OrdinalIgnoreCase) ||
-          trimmedPath.EndsWith(alternateSuffix, StringComparison.OrdinalIgnoreCase)) {
+      if (string.Equals(trimmedPath, defaultFullPath, StringComparison.OrdinalIgnoreCase)) {
         return defaultPath;
       }
 

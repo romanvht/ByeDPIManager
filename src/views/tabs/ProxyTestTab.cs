@@ -11,6 +11,7 @@ namespace bdmanager.Views.Tabs {
 
     public NumericUpDown DelayNumericUpDown { get; private set; }
     public NumericUpDown RequestsCountNumericUpDown { get; private set; }
+    public TextBox SniTextBox { get; private set; }
     public TextBox ProxyTestLogsBox { get; private set; }
     public DataGridView ResultsDataGridView { get; private set; }
     public Label ProxyTestProgressLabel { get; private set; }
@@ -47,24 +48,27 @@ namespace bdmanager.Views.Tabs {
         Dock = DockStyle.Fill,
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
-        MinimumSize = new Size(0, 130),
+        MinimumSize = new Size(0, 140),
         Padding = new Padding(10, 5, 10, 10),
         Margin = new Padding(0)
       };
       proxyTestTabLayout.Controls.Add(proxySettingsGroupBox, 0, 0);
 
       TableLayoutPanel proxySettingsLayout = new TableLayoutPanel {
-        Dock = DockStyle.Fill,
+        Dock = DockStyle.Top,
+        AutoSize = true,
+        AutoSizeMode = AutoSizeMode.GrowAndShrink,
         ColumnCount = 2,
-        RowCount = 3,
+        RowCount = 4,
         ColumnStyles = {
           new ColumnStyle(SizeType.Percent, 100F),
           new ColumnStyle(SizeType.AutoSize),
         },
         RowStyles = {
-          new RowStyle(SizeType.Percent, 100F),
-          new RowStyle(SizeType.Percent, 100F),
-          new RowStyle(SizeType.Percent, 100F),
+          new RowStyle(SizeType.AutoSize),
+          new RowStyle(SizeType.AutoSize),
+          new RowStyle(SizeType.AutoSize),
+          new RowStyle(SizeType.Absolute, 30F),
         },
         Name = "proxySettingsLayout"
       };
@@ -89,7 +93,7 @@ namespace bdmanager.Views.Tabs {
       Label requestsCountLabel = new Label {
         Text = Program.localization.GetString("settings_form.proxy_test.requests_label"),
         TextAlign = ContentAlignment.MiddleLeft,
-        Margin = new Padding(0, 3, 0, 3),
+        Margin = new Padding(0, 2, 0, 2),
         Dock = DockStyle.Fill
       };
       proxySettingsLayout.Controls.Add(requestsCountLabel, 0, 1);
@@ -98,10 +102,25 @@ namespace bdmanager.Views.Tabs {
         Minimum = 1,
         Maximum = int.MaxValue,
         Anchor = AnchorStyles.Right | AnchorStyles.None,
-        Margin = new Padding(0, 3, 0, 3),
+        Margin = new Padding(0, 2, 0, 2),
         AutoSize = true
       };
       proxySettingsLayout.Controls.Add(RequestsCountNumericUpDown, 1, 1);
+
+      Label sniLabel = new Label {
+        Text = Program.localization.GetString("settings_form.proxy_test.sni_label"),
+        TextAlign = ContentAlignment.MiddleLeft,
+        Margin = new Padding(0, 2, 0, 2),
+        Dock = DockStyle.Fill
+      };
+      proxySettingsLayout.Controls.Add(sniLabel, 0, 2);
+
+      SniTextBox = new TextBox {
+        Anchor = AnchorStyles.Right | AnchorStyles.None,
+        Margin = new Padding(0, 2, 0, 2),
+        Width = 180
+      };
+      proxySettingsLayout.Controls.Add(SniTextBox, 1, 2);
 
       TableLayoutPanel buttonsLayout = new TableLayoutPanel {
         Dock = DockStyle.Fill,
@@ -112,18 +131,20 @@ namespace bdmanager.Views.Tabs {
           new ColumnStyle(SizeType.Percent, 50F)
         },
         RowStyles = {
-          new RowStyle(SizeType.AutoSize)
+          new RowStyle(SizeType.Percent, 100F)
         },
-        Margin = new Padding(0, 5, 0, 0),
+        Margin = new Padding(0, 3, 0, 0),
+        Height = 30,
         Name = "buttonsLayout"
       };
       proxySettingsLayout.SetColumnSpan(buttonsLayout, 2);
-      proxySettingsLayout.Controls.Add(buttonsLayout, 0, 2);
+      proxySettingsLayout.Controls.Add(buttonsLayout, 0, 3);
 
       Button editDomainsButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.edit_domains"),
         Dock = DockStyle.Fill,
-        Margin = new Padding(0, 0, 3, 0)
+        Margin = new Padding(0, 0, 3, 0),
+        MinimumSize = new Size(0, 23)
       };
       editDomainsButton.Click += EditDomainsButton_Click;
       buttonsLayout.Controls.Add(editDomainsButton, 0, 0);
@@ -131,7 +152,8 @@ namespace bdmanager.Views.Tabs {
       Button editCommandsButton = new Button {
         Text = Program.localization.GetString("settings_form.proxy_test.edit_commands"),
         Dock = DockStyle.Fill,
-        Margin = new Padding(3, 0, 0, 0)
+        Margin = new Padding(3, 0, 0, 0),
+        MinimumSize = new Size(0, 23)
       };
       editCommandsButton.Click += EditCommandsButton_Click;
       buttonsLayout.Controls.Add(editCommandsButton, 1, 0);
@@ -144,7 +166,7 @@ namespace bdmanager.Views.Tabs {
         ForeColor = SystemColors.ControlText,
         BackColor = SystemColors.Control,
         Padding = new Padding(10),
-        Margin = new Padding(0, 5, 0, 0),
+        Margin = new Padding(0, 3, 0, 0),
       };
       proxyTestTabLayout.Controls.Add(proxyLogsGroupBox, 0, 1);
 
@@ -284,6 +306,7 @@ namespace bdmanager.Views.Tabs {
     public void LoadSettings() {
       DelayNumericUpDown.Value = _settings.ProxyTestDelay;
       RequestsCountNumericUpDown.Value = _settings.ProxyTestRequestsCount;
+      SniTextBox.Text = string.IsNullOrWhiteSpace(_settings.ProxyTestSni) ? "google.com" : _settings.ProxyTestSni;
 
       _proxyTestManager.LoadResults(ResultsDataGridView);
     }
@@ -291,6 +314,7 @@ namespace bdmanager.Views.Tabs {
     public void SaveSettings() {
       _settings.ProxyTestDelay = (int)DelayNumericUpDown.Value;
       _settings.ProxyTestRequestsCount = (int)RequestsCountNumericUpDown.Value;
+      _settings.ProxyTestSni = string.IsNullOrWhiteSpace(SniTextBox.Text) ? "google.com" : SniTextBox.Text.Trim();
     }
 
     public void Cleanup() {

@@ -58,6 +58,7 @@
     "settings_form.proxy_test.settings_group": "Test Settings",
     "settings_form.proxy_test.delay_label": "Delay between commands in seconds:",
     "settings_form.proxy_test.requests_label": "Number of domain requests:",
+    "settings_form.proxy_test.sni_label": "SNI fake packets:",
     "settings_form.proxy_test.files_group": "Files",
     "settings_form.proxy_test.edit_domains": "Edit domains",
     "settings_form.proxy_test.edit_commands": "Edit strategies",

@@ -32,10 +32,10 @@ namespace bdmanager {
     public DataGridView ResultsDataGridView { get; set; }
     public Label ProxyTestProgressLabel { get; set; }
 
-    private AppSettings _settings;
-    private ProcessManager _processManager;
+    private readonly AppSettings _settings;
+    private readonly ProcessManager _processManager;
+    private readonly ByeDpiTab _byeDpiTab;
     private CancellationTokenSource _cancellationTokenSource;
-    private ByeDpiTab _byeDpiTab;
 
     public event EventHandler<string> LogAdded;
 
@@ -187,6 +187,60 @@ namespace bdmanager {
 
     private Task<string[]> GetCommandsAsync() => Task.Run(() => GetCommands());
 
+    private bool ValidateRequiredExecutables() {
+      string byeDpiPath = _settings.GetByeDpiExecutablePath();
+      if (!File.Exists(byeDpiPath)) {
+        ShowLocalizedError("settings_form.byedpi.not_found", byeDpiPath);
+        return false;
+      }
+
+      if (!_settings.DisableProxiFyre) {
+        string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
+        if (!File.Exists(proxiFyrePath)) {
+          ShowLocalizedError("settings_form.proxifyre.not_found", proxiFyrePath);
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    private void ShowLocalizedError(string localizationKey, params object[] args) {
+      string message = Program.localization.GetString(localizationKey);
+      if (args != null && args.Length > 0) {
+        message = string.Format(message, args);
+      }
+
+      Control owner = _byeDpiTab?.FindForm();
+      Action showMessage = () => MessageBox.Show(
+        owner,
+        message,
+        Program.localization.GetString("settings_form.title"),
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error
+      );
+
+      if (owner != null && !owner.IsDisposed && owner.InvokeRequired) {
+        try {
+          owner.Invoke(showMessage);
+        }
+        catch {
+        }
+      }
+      else {
+        showMessage();
+      }
+    }
+
+    private string ApplyPlaceholders(string command) {
+      if (string.IsNullOrEmpty(command)) {
+        return command;
+      }
+
+      string sni = string.IsNullOrWhiteSpace(_settings.ProxyTestSni) ? "google.com" : _settings.ProxyTestSni.Trim();
+      return command.Replace("{sni}", sni);
+    }
+
     private static Uri GetValidUrl(string domain) {
       domain = domain.Trim();
       if (domain.StartsWith("http://") || domain.StartsWith("https://"))
@@ -240,15 +294,20 @@ namespace bdmanager {
         ClearLatestLogs();
         _cancellationTokenSource = new CancellationTokenSource();
 
-        IEnumerable<string> commands = await GetCommandsAsync();
-        IEnumerable<string> domains = await GetDomainsAsync();
-
-        if (!commands.Any() || !domains.Any()) {
+        if (!ValidateRequiredExecutables()) {
           StopTesting();
           return;
         }
 
-        int totalTests = commands.Count();
+        string[] commands = await GetCommandsAsync();
+        string[] domains = await GetDomainsAsync();
+
+        if (commands.Length == 0 || domains.Length == 0) {
+          StopTesting();
+          return;
+        }
+
+        int totalTests = commands.Length;
         Action updateProgress = () => {
           try {
             if (ProxyTestProgressLabel != null) {
@@ -371,14 +430,12 @@ namespace bdmanager {
     }
 
     private async Task CheckDomainsAccessAsync(
-      IEnumerable<string> commands,
-      IEnumerable<string> domains,
+      IReadOnlyList<string> commands,
+      IReadOnlyList<string> domains,
       CancellationToken cancellationToken) {
       int requestsCount = _settings.ProxyTestRequestsCount;
-      int totalTests = commands.Count();
+      int totalTests = commands.Count;
       int completedTests = 0;
-
-      var domainsList = domains.ToList();
 
       foreach (string command in commands) {
         cancellationToken.ThrowIfCancellationRequested();
@@ -404,11 +461,20 @@ namespace bdmanager {
           updateProgress();
         }
 
-        var args = AppSettings.ShellSplit(command);
+        string commandWithSni = ApplyPlaceholders(command);
+        var args = AppSettings.ShellSplit(commandWithSni);
         var filtered = AppSettings.FilterLinuxOnlyArgs(args);
         var f_command = string.Join(" ", filtered);
 
-        _processManager.StartByeDpi(f_command, false);
+        if (!_processManager.StartByeDpi(f_command, false)) {
+          string byeDpiPath = _settings.GetByeDpiExecutablePath();
+          ShowLocalizedError("settings_form.byedpi.not_found", byeDpiPath);
+          throw new FileNotFoundException(
+            string.Format(Program.localization.GetString("settings_form.byedpi.not_found"), byeDpiPath),
+            byeDpiPath
+          );
+        }
+
         AppendLogLine(f_command);
 
         try {
@@ -418,7 +484,7 @@ namespace bdmanager {
 
             var allTasks = new List<Task>();
 
-            foreach (string domain in domainsList) {
+            foreach (string domain in domains) {
               await semaphore.WaitAsync(cancellationToken);
 
               allTasks.Add(Task.Run(async () => {
@@ -453,14 +519,14 @@ namespace bdmanager {
             AppendLogLine(result);
             AppendLogLine(string.Empty);
 
-            AddResult(command, totalSuccess, totalRequests);
+            AddResult(f_command, totalSuccess, totalRequests);
           }
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex) {
           AppendLogLine(string.Format(
             Program.localization.GetString("proxy_test.command_test_error"),
-            command,
+            f_command,
             ex.Message
           ));
         }

@@ -58,6 +58,7 @@
     "settings_form.proxy_test.settings_group": "Test Ayarları",
     "settings_form.proxy_test.delay_label": "Komutlar arasındaki saniye cinsinden gecikme:",
     "settings_form.proxy_test.requests_label": "Etki alanı isteklerinin sayısı:",
+    "settings_form.proxy_test.sni_label": "SNI fake packets:",
     "settings_form.proxy_test.files_group": "Dosyalar",
     "settings_form.proxy_test.edit_domains": "Alan adlarını düzenle",
     "settings_form.proxy_test.edit_commands": "Denemeleri düzenle",

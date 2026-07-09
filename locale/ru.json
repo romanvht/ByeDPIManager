@@ -58,6 +58,7 @@
     "settings_form.proxy_test.settings_group": "Настройки теста",
     "settings_form.proxy_test.delay_label": "Ожидание между командами в секундах:",
     "settings_form.proxy_test.requests_label": "Количество запросов к домену:",
+    "settings_form.proxy_test.sni_label": "SNI фейк пакетов:",
     "settings_form.proxy_test.files_group": "Файлы",
     "settings_form.proxy_test.edit_domains": "Изменить домены",
     "settings_form.proxy_test.edit_commands": "Изменить стратегии",
