@@ -1,6 +1,6 @@
 # ByeDPI Manager
 
-[Русский](README.md) | English
+[Русский](README.md) | English | [Türkçe](README.tr.md)
 
 A mini utility for running ByeDPI and ProxiFyre.
 
