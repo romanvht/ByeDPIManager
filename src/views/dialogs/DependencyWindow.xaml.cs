@@ -7,6 +7,7 @@ namespace bdmanager.Views {
   public partial class DependencyWindow : Window {
     public DependencyWindow() {
       InitializeComponent();
+      DarkTitleBar.Apply(this);
       Title = L("main_form.proxifyre_dependency_title");
       HeadingText.Text = L("main_form.proxifyre_dependency_heading");
       SummaryText.Text = L("main_form.proxifyre_dependency_summary");

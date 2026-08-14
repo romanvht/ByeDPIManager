@@ -6,6 +6,7 @@ namespace bdmanager.Views {
 
     public RenameWindow(string currentValue) {
       InitializeComponent();
+      DarkTitleBar.Apply(this);
       NameTextBox.Text = currentValue ?? string.Empty;
       Loaded += (sender, args) => {
         NameTextBox.Focus();

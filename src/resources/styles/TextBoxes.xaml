@@ -3,5 +3,36 @@
   <Style TargetType="TextBox">
     <Setter Property="Padding" Value="4,3" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{StaticResource DarkInputBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource DarkTextBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource DarkBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CaretBrush" Value="{StaticResource DarkTextBrush}" />
+    <Setter Property="SelectionBrush" Value="{StaticResource DarkSelectionBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="InputBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4">
+            <ScrollViewer x:Name="PART_ContentHost"
+                          Margin="{TemplateBinding Padding}"
+                          Focusable="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="InputBorder" Property="BorderBrush" Value="{StaticResource DarkAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Foreground" Value="{StaticResource DarkDisabledTextBrush}" />
+      </Trigger>
+    </Style.Triggers>
   </Style>
 </ResourceDictionary>

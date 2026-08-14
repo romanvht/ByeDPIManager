@@ -3,6 +3,48 @@
   <Style TargetType="Button">
     <Setter Property="Padding" Value="12,5" />
     <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Foreground" Value="{StaticResource DarkTextBrush}" />
+    <Setter Property="Background" Value="{StaticResource DarkButtonBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource DarkBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="ButtonBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource DarkAccentBrush}" />
+            </Trigger>
+            <Trigger Property="IsDefaulted" Value="True">
+              <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource DarkAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="{StaticResource DarkButtonHoverBrush}" />
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Background" Value="{StaticResource DarkButtonPressedBrush}" />
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Foreground" Value="{StaticResource DarkDisabledTextBrush}" />
+        <Setter Property="Opacity" Value="0.65" />
+      </Trigger>
+    </Style.Triggers>
   </Style>
 
   <Style x:Key="RoundedGrayButton" TargetType="Button">
@@ -19,7 +61,9 @@
                   BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
                   CornerRadius="16">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              RecognizesAccessKey="True" />
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">

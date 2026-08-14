@@ -8,6 +8,8 @@
         MinWidth="600" MinHeight="580"
         WindowStartupLocation="CenterOwner"
         Icon="/src/resources/icons/icon.ico"
+        Background="{StaticResource DarkWindowBrush}"
+        Foreground="{StaticResource DarkTextBrush}"
         Loaded="SettingsWindow_Loaded"
         Closing="SettingsWindow_Closing">
   <Grid Margin="10">

@@ -7,6 +7,7 @@ namespace bdmanager.Views {
 
     public SettingsWindow() {
       InitializeComponent();
+      DarkTitleBar.Apply(this);
       ProxyTestSettingsTab.TargetByeDpiTab = ByeDpiSettingsTab;
     }
 

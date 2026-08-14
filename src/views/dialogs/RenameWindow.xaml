@@ -4,6 +4,8 @@
         xmlns:local="clr-namespace:bdmanager"
         Title="{local:Loc settings_form.byedpi.rename_title}"
         Width="440" Height="125" ResizeMode="NoResize"
+        Background="{StaticResource DarkWindowBrush}"
+        Foreground="{StaticResource DarkTextBrush}"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
   <Grid Margin="10">
     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>

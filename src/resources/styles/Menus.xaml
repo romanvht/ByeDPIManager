@@ -1,0 +1,60 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style TargetType="ContextMenu">
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="Background" Value="{StaticResource DarkMenuBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource DarkTextBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource DarkMenuBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Padding="{TemplateBinding Padding}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4">
+            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="MenuItem">
+    <Setter Property="Padding" Value="10,5" />
+    <Setter Property="Background" Value="{StaticResource DarkMenuBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource DarkTextBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="MenuItemBorder"
+                  Padding="{TemplateBinding Padding}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="Transparent"
+                  BorderThickness="1"
+                  CornerRadius="3">
+            <ContentPresenter VerticalAlignment="Center"
+                              ContentSource="Header"
+                              RecognizesAccessKey="True" />
+          </Border>
+
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="MenuItemBorder"
+                      Property="Background"
+                      Value="{StaticResource DarkMenuHoverBrush}" />
+              <Setter TargetName="MenuItemBorder"
+                      Property="BorderBrush"
+                      Value="{StaticResource DarkMenuBorderBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{StaticResource DarkDisabledTextBrush}" />
+              <Setter TargetName="MenuItemBorder" Property="Opacity" Value="0.65" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

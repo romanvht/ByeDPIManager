@@ -28,6 +28,7 @@ namespace bdmanager.Views {
 
     public MainWindow() {
       InitializeComponent();
+      DarkTitleBar.Apply(this);
       _settings = Program.settings;
       _processManager = Program.processManager;
       _logger = Program.logger;
@@ -194,12 +195,12 @@ namespace bdmanager.Views {
       _notifyIcon.Icon = GetTrayIcon(isRunning);
       previousIcon?.Dispose();
 
-      ToggleButton.Background = new SolidColorBrush(isRunning
-        ? Color.FromRgb(200, 50, 50)
-        : Color.FromRgb(40, 120, 50));
-      ToggleButton.BorderBrush = new SolidColorBrush(isRunning
-        ? Color.FromRgb(240, 70, 70)
-        : Color.FromRgb(60, 160, 70));
+      ToggleButton.Background = (Brush)FindResource(isRunning
+        ? "DisconnectButtonBrush"
+        : "ConnectButtonBrush");
+      ToggleButton.BorderBrush = (Brush)FindResource(isRunning
+        ? "DisconnectButtonBorderBrush"
+        : "ConnectButtonBorderBrush");
     }
 
     private void ProcessManager_ProxiFyreUnexpectedStopped(object sender, EventArgs e) {
@@ -230,11 +231,9 @@ namespace bdmanager.Views {
       }
 
       foreach (Button button in new[] { RuButton, EnButton, TrButton }) {
-        button.Foreground = new SolidColorBrush(
-          string.Equals(button.Tag as string, Program.localization.CurrentLanguage, StringComparison.OrdinalIgnoreCase)
-            ? Colors.LimeGreen
-            : Colors.White
-        );
+        string brushKey = string.Equals(button.Tag as string, Program.localization.CurrentLanguage,
+          StringComparison.OrdinalIgnoreCase) ? "DarkAccentBrush" : "DarkTextBrush";
+        button.Foreground = (Brush)FindResource(brushKey);
       }
     }
 

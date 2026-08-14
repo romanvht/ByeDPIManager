@@ -4,40 +4,43 @@
         Title="ByeDPI Manager"
         Width="480" Height="400"
         MinWidth="420" MinHeight="340"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Icon="/src/resources/icons/icon.ico"
         Background="{StaticResource DarkWindowBrush}"
-        Foreground="White"
+        Foreground="{StaticResource DarkTextBrush}"
         SourceInitialized="MainWindow_SourceInitialized"
         Loaded="MainWindow_Loaded"
         Closing="MainWindow_Closing">
   <Window.Resources>
     <Style x:Key="RoundedButton" TargetType="Button">
       <Setter Property="Foreground" Value="White" />
-      <Setter Property="Background" Value="#287832" />
-      <Setter Property="BorderBrush" Value="#3CA046" />
+      <Setter Property="Background" Value="{StaticResource ConnectButtonBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource ConnectButtonBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="Border"
+            <Border x:Name="ButtonBorder"
                     Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     CornerRadius="28">
-              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True" />
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="Border" Property="Opacity" Value="0.88" />
+                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.88" />
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="Border" Property="Opacity" Value="0.7" />
+                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.7" />
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
-                <Setter TargetName="Border" Property="Opacity" Value="0.45" />
+                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -76,7 +79,11 @@
             Style="{StaticResource RoundedGrayButton}"
             Click="SettingsButton_Click" />
 
-    <Border Grid.Row="2" Background="{StaticResource DarkLogBrush}" BorderBrush="#555" BorderThickness="1">
+    <Border Grid.Row="2"
+            Background="{StaticResource DarkLogBrush}"
+            BorderBrush="{StaticResource DarkBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
       <TextBox x:Name="LogTextBox"
                IsReadOnly="True"
                AcceptsReturn="True"
@@ -85,18 +92,33 @@
                VerticalScrollBarVisibility="Auto"
                HorizontalScrollBarVisibility="Disabled"
                Background="{StaticResource DarkLogBrush}"
-               Foreground="LimeGreen"
+               Foreground="{StaticResource DarkLogTextBrush}"
                BorderThickness="0"
                FontFamily="Consolas"
                FontSize="12" />
     </Border>
 
-    <StackPanel Grid.Row="3" Margin="0,6,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-      <Button x:Name="RuButton" Content="RU" Tag="ru" Style="{StaticResource LanguageButton}" Click="LanguageButton_Click" />
+    <StackPanel Grid.Row="3"
+                Margin="0,6,0,0"
+                HorizontalAlignment="Center"
+                Orientation="Horizontal">
+      <Button x:Name="RuButton"
+              Content="RU"
+              Tag="ru"
+              Style="{StaticResource LanguageButton}"
+              Click="LanguageButton_Click" />
       <TextBlock Text=" | " VerticalAlignment="Center" />
-      <Button x:Name="EnButton" Content="EN" Tag="en" Style="{StaticResource LanguageButton}" Click="LanguageButton_Click" />
+      <Button x:Name="EnButton"
+              Content="EN"
+              Tag="en"
+              Style="{StaticResource LanguageButton}"
+              Click="LanguageButton_Click" />
       <TextBlock Text=" | " VerticalAlignment="Center" />
-      <Button x:Name="TrButton" Content="TR" Tag="tr" Style="{StaticResource LanguageButton}" Click="LanguageButton_Click" />
+      <Button x:Name="TrButton"
+              Content="TR"
+              Tag="tr"
+              Style="{StaticResource LanguageButton}"
+              Click="LanguageButton_Click" />
     </StackPanel>
   </Grid>
 </Window>

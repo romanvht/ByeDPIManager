@@ -21,7 +21,7 @@
             Background="{StaticResource DarkPanelBrush}" BorderBrush="{StaticResource DarkBorderBrush}" BorderThickness="1" CornerRadius="8">
       <Grid>
         <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" Text="!" Foreground="#FFC107" FontSize="32" FontWeight="Bold"
+        <TextBlock Grid.Column="0" Text="!" Foreground="{StaticResource DarkWarningBrush}" FontSize="32" FontWeight="Bold"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
         <StackPanel Grid.Column="1" Margin="10,0,0,0">
           <TextBlock x:Name="HeadingText" FontSize="18" FontWeight="Bold" Margin="0,0,0,6" />
