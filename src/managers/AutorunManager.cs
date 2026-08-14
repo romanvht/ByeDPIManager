@@ -1,4 +1,4 @@
-using System.Windows.Forms;
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace bdmanager {
@@ -9,7 +9,7 @@ namespace bdmanager {
 
     public AutorunManager() {
       _appName = Program.appName;
-      _appPath = Application.ExecutablePath;
+      _appPath = Assembly.GetEntryAssembly().Location;
     }
 
     public bool IsAutorunEnabled() {

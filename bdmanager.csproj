@@ -2,26 +2,40 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>bdmanager</RootNamespace>
     <Product>ByeDPI Manager</Product>
     <AssemblyName>ByeDPI Manager</AssemblyName>
     <Authors>romanvht</Authors>
     <Description>Менеджер для ByeDPI и ProxiFyre</Description>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>0.4.0</Version>
+    <ApplicationIcon>src\resources\icons\icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
     <Copyright>romanvht</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="tray-on.ico" />
-    <EmbeddedResource Include="tray-off.ico" />
+    <None Remove="src\resources\icons\icon.ico" />
+    <Resource Include="src\resources\icons\icon.ico" />
+    <EmbeddedResource Include="src\resources\icons\tray-on.ico">
+      <LogicalName>bdmanager.tray-on.ico</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\resources\icons\tray-off.ico">
+      <LogicalName>bdmanager.tray-off.ico</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="locale\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="src\App.xaml" />
+    <ApplicationDefinition Include="src\App.xaml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,11 +8,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using bdmanager.Views.Tabs;
 
 namespace bdmanager {
-  public class ProxyTestManager {
+  public sealed class ProxyTestManager {
     private const int MaxParallelDomainChecks = 20;
     private const int RequestTimeoutSeconds = 5;
     private const int DomainTimeoutBufferSeconds = 2;
@@ -23,375 +21,137 @@ namespace bdmanager {
     public static readonly string PROXY_TEST_LATEST_LOG = Path.Combine(PROXY_TEST_FOLDER, "proxytest.log");
     public static readonly string PROXY_TEST_RESULTS = Path.Combine(PROXY_TEST_FOLDER, "proxytest.results");
 
-    private readonly object _logLock = new object();
-    private readonly object _dataGridLock = new object();
-    public bool IsTesting { get; private set; }
-
-    public Button ProxyTestStartButton { get; set; }
-    public TextBox ProxyTestLogsBox { get; set; }
-    public DataGridView ResultsDataGridView { get; set; }
-    public Label ProxyTestProgressLabel { get; set; }
-
     private readonly AppSettings _settings;
     private readonly ProcessManager _processManager;
-    private readonly ByeDpiTab _byeDpiTab;
+    private readonly object _resultLock = new object();
+    private readonly List<ProxyTestResult> _results = new List<ProxyTestResult>();
     private CancellationTokenSource _cancellationTokenSource;
 
+    public bool IsTesting { get; private set; }
     public event EventHandler<string> LogAdded;
+    public event EventHandler<ProxyTestResult> ResultUpdated;
+    public event EventHandler<ProxyTestProgress> ProgressChanged;
+    public event EventHandler<bool> TestingStateChanged;
+    public event EventHandler<string> ErrorOccurred;
 
-    public ProxyTestManager(ByeDpiTab byeDpiTab) {
+    public ProxyTestManager() {
       _settings = Program.settings;
       _processManager = Program.processManager;
-      _byeDpiTab = byeDpiTab;
     }
 
     public static string GetLatestLogs() {
       try {
-        if (!File.Exists(PROXY_TEST_LATEST_LOG))
-          return string.Empty;
-
-        return File.ReadAllText(PROXY_TEST_LATEST_LOG);
+        return File.Exists(PROXY_TEST_LATEST_LOG)
+          ? File.ReadAllText(PROXY_TEST_LATEST_LOG)
+          : string.Empty;
       }
-      catch (Exception) {
+      catch {
         return string.Empty;
       }
     }
 
-    private static void ClearLatestLogs() {
+    public IReadOnlyList<ProxyTestResult> LoadResults() {
+      List<ProxyTestResult> loaded = new List<ProxyTestResult>();
       try {
-        if (File.Exists(PROXY_TEST_LATEST_LOG))
-          File.Delete(PROXY_TEST_LATEST_LOG);
+        if (File.Exists(PROXY_TEST_RESULTS)) {
+          foreach (string line in File.ReadAllLines(PROXY_TEST_RESULTS, Encoding.UTF8)) {
+            int separator = line.LastIndexOf('|');
+            if (separator <= 0 || separator >= line.Length - 1) continue;
+
+            string strategy = line.Substring(0, separator);
+            string result = line.Substring(separator + 1);
+            loaded.Add(ProxyTestResult.FromText(strategy, result));
+          }
+        }
       }
-      catch (Exception) { }
+      catch {
+      }
+
+      lock (_resultLock) {
+        _results.Clear();
+        _results.AddRange(loaded.OrderByDescending(item => item.SuccessRate));
+        return _results.ToList();
+      }
     }
 
-    public void SaveResults(DataGridView dataGridView) {
+    public void SaveResults() {
       try {
-        if (dataGridView == null || dataGridView.IsDisposed) return;
-
         Directory.CreateDirectory(PROXY_TEST_FOLDER);
-
-        using (StreamWriter writer = new StreamWriter(PROXY_TEST_RESULTS, false, Encoding.UTF8)) {
-          foreach (DataGridViewRow row in dataGridView.Rows) {
-            if (row.Tag == null || !(row.Tag is string)) continue;
-
-            string strategy = (string)row.Tag;
-            string result = row.Cells[1].Value?.ToString() ?? "";
-            writer.WriteLine($"{strategy}|{result}");
-          }
+        List<string> lines;
+        lock (_resultLock) {
+          lines = _results
+            .OrderByDescending(item => item.SuccessRate)
+            .Select(item => item.Strategy + "|" + item.Result)
+            .ToList();
         }
+        File.WriteAllLines(PROXY_TEST_RESULTS, lines, Encoding.UTF8);
       }
-      catch (Exception) {
+      catch {
       }
-    }
-
-    public void LoadResults(DataGridView dataGridView) {
-      try {
-        if (dataGridView == null || dataGridView.IsDisposed) return;
-        if (!File.Exists(PROXY_TEST_RESULTS)) return;
-
-        dataGridView.SuspendLayout();
-        dataGridView.Rows.Clear();
-
-        var rowsToAdd = new List<Tuple<string, string, double>>();
-
-        using (StreamReader reader = new StreamReader(PROXY_TEST_RESULTS, Encoding.UTF8)) {
-          string line;
-          while ((line = reader.ReadLine()) != null) {
-            var parts = line.Split('|');
-            if (parts.Length == 2) {
-              string strategy = parts[0];
-              string result = parts[1];
-
-              double percent = 0;
-              var resultParts = result.Split('/');
-              if (resultParts.Length == 2) {
-                int.TryParse(resultParts[0], out int success);
-                int.TryParse(resultParts[1], out int total);
-                percent = total > 0 ? (double)success / total : 0;
-              }
-
-              rowsToAdd.Add(Tuple.Create(strategy, result, percent));
-            }
-          }
-        }
-
-        rowsToAdd = rowsToAdd.OrderByDescending(x => x.Item3).ToList();
-
-        foreach (var item in rowsToAdd) {
-          int rowIndex = dataGridView.Rows.Add(item.Item1, item.Item2);
-          dataGridView.Rows[rowIndex].Tag = item.Item1;
-        }
-
-        dataGridView.ResumeLayout();
-      }
-      catch (Exception) {
-      }
-    }
-
-    private string[] GetDomains() {
-      try {
-        if (!File.Exists(PROXY_TEST_SITES)) {
-          MessageBox.Show(
-            _byeDpiTab?.FindForm(),
-            Program.localization.GetString("proxy_test.sites_file_not_found"),
-            Program.localization.GetString("settings_form.title"),
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error
-          );
-          return Array.Empty<string>();
-        }
-
-        return FormatUtils.ReadLines(PROXY_TEST_SITES);
-      }
-      catch (Exception) {
-        MessageBox.Show(
-          _byeDpiTab?.FindForm(),
-          Program.localization.GetString("proxy_test.sites_file_read_error"),
-          Program.localization.GetString("settings_form.title"),
-          MessageBoxButtons.OK,
-          MessageBoxIcon.Error
-        );
-        return Array.Empty<string>();
-      }
-    }
-
-    private Task<string[]> GetDomainsAsync() => Task.Run(() => GetDomains());
-
-    private string[] GetCommands() {
-      try {
-        if (!File.Exists(PROXY_TEST_CMDS)) {
-          MessageBox.Show(
-            _byeDpiTab?.FindForm(),
-            Program.localization.GetString("proxy_test.cmds_file_not_found"),
-            Program.localization.GetString("settings_form.title"),
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error
-          );
-          return Array.Empty<string>();
-        }
-
-        return FormatUtils.ReadLines(PROXY_TEST_CMDS);
-      }
-      catch (Exception) {
-        MessageBox.Show(
-          _byeDpiTab?.FindForm(),
-          Program.localization.GetString("proxy_test.cmds_file_read_error"),
-          Program.localization.GetString("settings_form.title"),
-          MessageBoxButtons.OK,
-          MessageBoxIcon.Error
-        );
-        return Array.Empty<string>();
-      }
-    }
-
-    private Task<string[]> GetCommandsAsync() => Task.Run(() => GetCommands());
-
-    private bool ValidateRequiredExecutables() {
-      string byeDpiPath = _settings.GetByeDpiExecutablePath();
-      if (!File.Exists(byeDpiPath)) {
-        ShowLocalizedError("settings_form.byedpi.not_found", byeDpiPath);
-        return false;
-      }
-
-      if (!_settings.DisableProxiFyre) {
-        string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
-        if (!File.Exists(proxiFyrePath)) {
-          ShowLocalizedError("settings_form.proxifyre.not_found", proxiFyrePath);
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    private void ShowLocalizedError(string localizationKey, params object[] args) {
-      string message = Program.localization.GetString(localizationKey);
-      if (args != null && args.Length > 0) {
-        message = string.Format(message, args);
-      }
-
-      Control owner = _byeDpiTab?.FindForm();
-      Action showMessage = () => MessageBox.Show(
-        owner,
-        message,
-        Program.localization.GetString("settings_form.title"),
-        MessageBoxButtons.OK,
-        MessageBoxIcon.Error
-      );
-
-      if (owner != null && !owner.IsDisposed && owner.InvokeRequired) {
-        try {
-          owner.Invoke(showMessage);
-        }
-        catch {
-        }
-      }
-      else {
-        showMessage();
-      }
-    }
-
-    private string ApplyPlaceholders(string command) {
-      if (string.IsNullOrEmpty(command)) {
-        return command;
-      }
-
-      string sni = string.IsNullOrWhiteSpace(_settings.ProxyTestSni) ? "google.com" : _settings.ProxyTestSni.Trim();
-      return command.Replace("{sni}", sni);
-    }
-
-    private static Uri GetValidUrl(string domain) {
-      domain = domain.Trim();
-      if (domain.StartsWith("http://") || domain.StartsWith("https://"))
-        return new Uri(domain);
-
-      return new Uri($"https://{domain}");
     }
 
     public async Task StartTesting() {
+      if (IsTesting) {
+        RaiseError(Program.localization.GetString("proxy_test.already_running"));
+        return;
+      }
+
+      IsTesting = true;
+      TestingStateChanged?.Invoke(this, true);
+      ClearLatestLogs();
+      lock (_resultLock) _results.Clear();
+      _cancellationTokenSource = new CancellationTokenSource();
+
       try {
-        if (IsTesting) {
-          MessageBox.Show(
-            _byeDpiTab?.FindForm(),
-            Program.localization.GetString("proxy_test.already_running"),
-            Program.localization.GetString("settings_form.title"),
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information
-          );
-          return;
-        }
+        if (!ValidateRequiredExecutables()) return;
 
-        IsTesting = true;
+        string[] commands = await ReadRequiredLinesAsync(
+          PROXY_TEST_CMDS,
+          "proxy_test.cmds_file_not_found",
+          "proxy_test.cmds_file_read_error"
+        );
+        string[] domains = await ReadRequiredLinesAsync(
+          PROXY_TEST_SITES,
+          "proxy_test.sites_file_not_found",
+          "proxy_test.sites_file_read_error"
+        );
 
-        Action updateUi = () => {
-          try {
-            ProxyTestStartButton.Text = Program.localization.GetString("settings_form.proxy_test.stop");
-            ProxyTestLogsBox.Clear();
+        if (commands.Length == 0 || domains.Length == 0) return;
 
-            if (ResultsDataGridView != null && !ResultsDataGridView.IsDisposed) {
-              ResultsDataGridView.Rows.Clear();
-            }
-
-            if (ProxyTestProgressLabel != null) {
-              ProxyTestProgressLabel.Text = "0/0";
-              ProxyTestProgressLabel.Visible = true;
-            }
-          }
-          catch { }
-        };
-
-        if (ProxyTestStartButton.InvokeRequired) {
-          try {
-            ProxyTestStartButton.BeginInvoke(updateUi);
-          }
-          catch { }
-        }
-        else {
-          updateUi();
-        }
-
-        ClearLatestLogs();
-        _cancellationTokenSource = new CancellationTokenSource();
-
-        if (!ValidateRequiredExecutables()) {
-          StopTesting();
-          return;
-        }
-
-        string[] commands = await GetCommandsAsync();
-        string[] domains = await GetDomainsAsync();
-
-        if (commands.Length == 0 || domains.Length == 0) {
-          StopTesting();
-          return;
-        }
-
-        int totalTests = commands.Length;
-        Action updateProgress = () => {
-          try {
-            if (ProxyTestProgressLabel != null) {
-              ProxyTestProgressLabel.Text = $"0/{totalTests}";
-            }
-          }
-          catch { }
-        };
-
-        if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
-          try {
-            ProxyTestProgressLabel.BeginInvoke(updateProgress);
-          }
-          catch { }
-        }
-        else {
-          updateProgress();
-        }
-
+        ProgressChanged?.Invoke(this, new ProxyTestProgress(0, commands.Length));
         await CheckDomainsAccessAsync(commands, domains, _cancellationTokenSource.Token);
 
-        if (!IsTesting) return;
-
-        AppendLogLine(string.Empty);
-        AppendLogLine(Program.localization.GetString("proxy_test.completed"));
-
-        Action saveResults = () => {
-          try {
-            if (ResultsDataGridView != null && !ResultsDataGridView.IsDisposed) {
-              SaveResults(ResultsDataGridView);
-            }
-          }
-          catch { }
-        };
-
-        if (ResultsDataGridView != null && !ResultsDataGridView.IsDisposed) {
-          if (ResultsDataGridView.InvokeRequired) {
-            try {
-              ResultsDataGridView.Invoke(saveResults);
-            }
-            catch { }
-          }
-          else {
-            saveResults();
-          }
+        if (!_cancellationTokenSource.IsCancellationRequested) {
+          AppendLogLine(string.Empty);
+          AppendLogLine(Program.localization.GetString("proxy_test.completed"));
+          SaveResults();
         }
       }
       catch (OperationCanceledException) {
         AppendLogLine(Program.localization.GetString("proxy_test.stopped"));
       }
       catch (Exception ex) {
-        AppendLogLine(string.Format(
-          Program.localization.GetString("proxy_test.error_occurred"),
-          ex.Message
-        ));
+        string message = string.Format(Program.localization.GetString("proxy_test.error_occurred"), ex.Message);
+        AppendLogLine(message);
+        RaiseError(message);
       }
       finally {
-        StopTesting();
+        try {
+          _processManager.StopByeDpi(false);
+        }
+        catch {
+        }
+        IsTesting = false;
+        TestingStateChanged?.Invoke(this, false);
       }
     }
 
     public void StopTesting() {
+      if (!IsTesting) return;
+
       try {
-        if (!IsTesting) return;
-
-        try {
-          _cancellationTokenSource?.Cancel();
-        }
-        catch (Exception ex) {
-          AppendLogLine(string.Format(
-            Program.localization.GetString("settings_form.proxy_test.cancel_error"),
-            ex.Message
-          ));
-        }
-
-        try {
-          _processManager.StopByeDpi(false);
-        }
-        catch (Exception ex) {
-          AppendLogLine(string.Format(
-            Program.localization.GetString("settings_form.byedpi.stop_error"),
-            ex.Message
-          ));
-        }
+        _cancellationTokenSource?.Cancel();
+        _processManager.StopByeDpi(false);
       }
       catch (Exception ex) {
         AppendLogLine(string.Format(
@@ -399,108 +159,126 @@ namespace bdmanager {
           ex.Message
         ));
       }
-      finally {
-        IsTesting = false;
+    }
 
-        Action updateButtons = () => {
-          try {
-            if (ProxyTestStartButton != null && !ProxyTestStartButton.IsDisposed) {
-              ProxyTestStartButton.Text = Program.localization.GetString("settings_form.proxy_test.start");
-            }
+    private static void ClearLatestLogs() {
+      try {
+        if (File.Exists(PROXY_TEST_LATEST_LOG)) File.Delete(PROXY_TEST_LATEST_LOG);
+      }
+      catch {
+      }
+    }
 
-            if (ProxyTestProgressLabel != null && !ProxyTestProgressLabel.IsDisposed) {
-              ProxyTestProgressLabel.Visible = false;
-            }
-          }
-          catch { }
-        };
+    private async Task<string[]> ReadRequiredLinesAsync(string path, string missingKey, string readErrorKey) {
+      return await Task.Run(() => {
+        if (!File.Exists(path)) {
+          string message = Program.localization.GetString(missingKey);
+          RaiseError(message);
+          return new string[0];
+        }
 
-        if (ProxyTestStartButton != null && !ProxyTestStartButton.IsDisposed) {
-          if (ProxyTestStartButton.InvokeRequired) {
-            try {
-              ProxyTestStartButton.BeginInvoke(updateButtons);
-            }
-            catch { }
-          }
-          else {
-            updateButtons();
-          }
+        try {
+          return FormatUtils.ReadLines(path);
+        }
+        catch {
+          string message = Program.localization.GetString(readErrorKey);
+          RaiseError(message);
+          return new string[0];
+        }
+      });
+    }
+
+    private bool ValidateRequiredExecutables() {
+      string byeDpiPath = _settings.GetByeDpiExecutablePath();
+      if (!File.Exists(byeDpiPath)) {
+        RaiseLocalizedError("settings_form.byedpi.not_found", byeDpiPath);
+        return false;
+      }
+
+      if (!_settings.DisableProxiFyre) {
+        string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
+        if (!File.Exists(proxiFyrePath)) {
+          RaiseLocalizedError("settings_form.proxifyre.not_found", proxiFyrePath);
+          return false;
         }
       }
+
+      return true;
+    }
+
+    private void RaiseLocalizedError(string key, params object[] args) {
+      RaiseError(string.Format(Program.localization.GetString(key), args));
+    }
+
+    private void RaiseError(string message) {
+      ErrorOccurred?.Invoke(this, message);
+    }
+
+    private string ApplyPlaceholders(string command) {
+      string sni = string.IsNullOrWhiteSpace(_settings.ProxyTestSni)
+        ? "google.com"
+        : _settings.ProxyTestSni.Trim();
+      return string.IsNullOrEmpty(command) ? command : command.Replace("{sni}", sni);
+    }
+
+    private static Uri GetValidUrl(string domain) {
+      domain = domain.Trim();
+      return domain.StartsWith("http://") || domain.StartsWith("https://")
+        ? new Uri(domain)
+        : new Uri("https://" + domain);
     }
 
     private async Task CheckDomainsAccessAsync(
       IReadOnlyList<string> commands,
       IReadOnlyList<string> domains,
       CancellationToken cancellationToken) {
-      int requestsCount = _settings.ProxyTestRequestsCount;
-      int totalTests = commands.Count;
       int completedTests = 0;
 
       foreach (string command in commands) {
         cancellationToken.ThrowIfCancellationRequested();
-
         completedTests++;
-
-        Action updateProgress = () => {
-          try {
-            if (ProxyTestProgressLabel != null) {
-              ProxyTestProgressLabel.Text = $"{completedTests}/{totalTests}";
-            }
-          }
-          catch { }
-        };
-
-        if (ProxyTestProgressLabel != null && ProxyTestProgressLabel.InvokeRequired) {
-          try {
-            ProxyTestProgressLabel.BeginInvoke(updateProgress);
-          }
-          catch { }
-        }
-        else {
-          updateProgress();
-        }
+        ProgressChanged?.Invoke(this, new ProxyTestProgress(completedTests, commands.Count));
 
         string commandWithSni = ApplyPlaceholders(command);
-        var args = AppSettings.ShellSplit(commandWithSni);
-        var filtered = AppSettings.FilterLinuxOnlyArgs(args);
-        var f_command = string.Join(" ", filtered);
+        string filteredCommand = string.Join(" ", AppSettings.FilterLinuxOnlyArgs(AppSettings.ShellSplit(commandWithSni)));
 
-        if (!_processManager.StartByeDpi(f_command, false)) {
-          string byeDpiPath = _settings.GetByeDpiExecutablePath();
-          ShowLocalizedError("settings_form.byedpi.not_found", byeDpiPath);
+        if (!_processManager.StartByeDpi(filteredCommand, false)) {
+          string path = _settings.GetByeDpiExecutablePath();
+          RaiseLocalizedError("settings_form.byedpi.not_found", path);
           throw new FileNotFoundException(
-            string.Format(Program.localization.GetString("settings_form.byedpi.not_found"), byeDpiPath),
-            byeDpiPath
+            string.Format(Program.localization.GetString("settings_form.byedpi.not_found"), path),
+            path
           );
         }
 
-        AppendLogLine(f_command);
+        AppendLogLine(filteredCommand);
 
         try {
-          using (var semaphore = new SemaphoreSlim(MaxParallelDomainChecks)) {
-            int totalSuccess = 0;
-            int totalRequests = 0;
+          int totalSuccess = 0;
+          int totalRequests = 0;
+          object totalsLock = new object();
 
-            var allTasks = new List<Task>();
-
+          using (SemaphoreSlim semaphore = new SemaphoreSlim(MaxParallelDomainChecks)) {
+            List<Task> tasks = new List<Task>();
             foreach (string domain in domains) {
               await semaphore.WaitAsync(cancellationToken);
-
-              allTasks.Add(Task.Run(async () => {
+              tasks.Add(Task.Run(async () => {
                 try {
-                  cancellationToken.ThrowIfCancellationRequested();
                   string trimmedDomain = domain.Trim();
-                  int successCount = await CheckDomainAccess(trimmedDomain, requestsCount, cancellationToken);
-
-                  AppendLogLine($"{trimmedDomain} - {successCount}/{requestsCount}");
-
-                  lock (this) {
+                  int successCount = await CheckDomainAccess(
+                    trimmedDomain,
+                    _settings.ProxyTestRequestsCount,
+                    cancellationToken
+                  );
+                  AppendLogLine(trimmedDomain + " - " + successCount + "/" + _settings.ProxyTestRequestsCount);
+                  lock (totalsLock) {
                     totalSuccess += successCount;
-                    totalRequests += requestsCount;
+                    totalRequests += _settings.ProxyTestRequestsCount;
                   }
                 }
-                catch (OperationCanceledException) { throw; }
+                catch (OperationCanceledException) {
+                  throw;
+                }
                 catch (Exception ex) {
                   AppendLogLine(string.Format(
                     Program.localization.GetString("proxy_test.domain_check_error"),
@@ -513,223 +291,128 @@ namespace bdmanager {
               }, cancellationToken));
             }
 
-            await Task.WhenAll(allTasks);
-
-            string result = $"{totalSuccess}/{totalRequests}";
-            AppendLogLine(result);
-            AppendLogLine(string.Empty);
-
-            AddResult(f_command, totalSuccess, totalRequests);
+            await Task.WhenAll(tasks);
           }
+
+          AppendLogLine(totalSuccess + "/" + totalRequests);
+          AppendLogLine(string.Empty);
+          AddResult(filteredCommand, totalSuccess, totalRequests);
         }
-        catch (OperationCanceledException) { throw; }
+        catch (OperationCanceledException) {
+          throw;
+        }
         catch (Exception ex) {
           AppendLogLine(string.Format(
             Program.localization.GetString("proxy_test.command_test_error"),
-            f_command,
+            filteredCommand,
             ex.Message
           ));
         }
 
         _processManager.StopByeDpi(false);
-
         if (_settings.ProxyTestDelay > 0) {
           await Task.Delay(_settings.ProxyTestDelay * 1000, cancellationToken);
         }
       }
     }
 
-    private void AddResult(string command, int totalSuccess, int totalRequests) {
-      Action updateDataGrid = () => {
-        try {
-          if (ResultsDataGridView == null || ResultsDataGridView.IsDisposed) return;
-
-          lock (_dataGridLock) {
-            ResultsDataGridView.SuspendLayout();
-
-            DataGridViewRow existingRow = null;
-            foreach (DataGridViewRow row in ResultsDataGridView.Rows) {
-              if (row.Tag != null && row.Tag is string && (string)row.Tag == command) {
-                existingRow = row;
-                break;
-              }
-            }
-
-            string result = $"{totalSuccess}/{totalRequests}";
-
-            if (existingRow != null) {
-              existingRow.Cells[1].Value = result;
-            }
-            else {
-              int rowIndex = ResultsDataGridView.Rows.Add(command, result);
-              ResultsDataGridView.Rows[rowIndex].Tag = command;
-            }
-
-            var rows = new List<Tuple<DataGridViewRow, double>>();
-            foreach (DataGridViewRow row in ResultsDataGridView.Rows) {
-              string res = row.Cells[1].Value?.ToString() ?? "";
-              double percent = 0;
-              var parts = res.Split('/');
-              if (parts.Length == 2) {
-                int.TryParse(parts[0], out int success);
-                int.TryParse(parts[1], out int total);
-                percent = total > 0 ? (double)success / total : 0;
-              }
-              rows.Add(Tuple.Create(row, percent));
-            }
-
-            var sortedRows = rows.OrderByDescending(x => x.Item2).ToList();
-
-            ResultsDataGridView.Rows.Clear();
-            foreach (var item in sortedRows) {
-              ResultsDataGridView.Rows.Add(item.Item1);
-            }
-
-            ResultsDataGridView.ResumeLayout();
-          }
-        }
-        catch { }
-      };
-
-      if (ResultsDataGridView != null && !ResultsDataGridView.IsDisposed) {
-        if (ResultsDataGridView.InvokeRequired) {
-          try {
-            ResultsDataGridView.BeginInvoke(updateDataGrid);
-          }
-          catch { }
-        }
-        else {
-          updateDataGrid();
-        }
+    private void AddResult(string strategy, int success, int total) {
+      ProxyTestResult result = new ProxyTestResult(strategy, success, total);
+      lock (_resultLock) {
+        ProxyTestResult existing = _results.FirstOrDefault(item => item.Strategy == strategy);
+        if (existing != null) _results.Remove(existing);
+        _results.Add(result);
+        _results.Sort((left, right) => right.SuccessRate.CompareTo(left.SuccessRate));
       }
+      ResultUpdated?.Invoke(this, result);
     }
 
-    private async Task<int> CheckDomainAccess(string domain, int requestsCount, CancellationToken cancellationToken) {
-      int domainTimeoutSeconds = RequestTimeoutSeconds * Math.Max(1, requestsCount) + DomainTimeoutBufferSeconds;
-      Task<int> checkTask = CheckDomain(domain, requestsCount, cancellationToken);
-      Task timeoutTask = Task.Delay(TimeSpan.FromSeconds(domainTimeoutSeconds), cancellationToken);
-
-      Task completedTask = await Task.WhenAny(checkTask, timeoutTask);
-      if (completedTask == checkTask) {
-        return await checkTask;
-      }
-
-      cancellationToken.ThrowIfCancellationRequested();
-
-      Task observeFaultTask = checkTask.ContinueWith(task => {
-        Exception ignored = task.Exception;
-      }, TaskContinuationOptions.OnlyOnFaulted);
-
+    private async Task<int> CheckDomainAccess(string domain, int requestsCount, CancellationToken token) {
+      int timeoutSeconds = RequestTimeoutSeconds * Math.Max(1, requestsCount) + DomainTimeoutBufferSeconds;
+      Task<int> checkTask = CheckDomain(domain, requestsCount, token);
+      Task timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds), token);
+      Task completed = await Task.WhenAny(checkTask, timeoutTask);
+      if (completed == checkTask) return await checkTask;
+      token.ThrowIfCancellationRequested();
+      Task ignoredTask = checkTask.ContinueWith(
+        task => { var ignored = task.Exception; },
+        TaskContinuationOptions.OnlyOnFaulted
+      );
       return 0;
     }
 
-    private async Task<int> CheckDomain(string domain, int requestsCount, CancellationToken cancellationToken) {
+    private async Task<int> CheckDomain(string domain, int requestsCount, CancellationToken token) {
       Uri websiteUrl = GetValidUrl(domain);
       int successRequests = 0;
-
-      ProxySettings proxySettings = new ProxySettings() {
-        Host = "127.0.0.1",
-        Port = 1080
-      };
+      ProxySettings proxySettings = new ProxySettings { Host = "127.0.0.1", Port = 1080 };
 
       try {
-        using (var proxyClientHandler = new ProxyClientHandler<Socks5>(proxySettings))
-        using (var httpClient = new HttpClient(proxyClientHandler) {
-          Timeout = TimeSpan.FromSeconds(RequestTimeoutSeconds)
-        }) {
-          httpClient.DefaultRequestHeaders.ConnectionClose = true;
+        using (ProxyClientHandler<Socks5> handler = new ProxyClientHandler<Socks5>(proxySettings))
+        using (HttpClient client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(RequestTimeoutSeconds) }) {
+          client.DefaultRequestHeaders.ConnectionClose = true;
 
-          for (int i = 0; i < requestsCount && !cancellationToken.IsCancellationRequested; i++) {
+          for (int index = 0; index < requestsCount && !token.IsCancellationRequested; index++) {
             try {
-              using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds)))
-              using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken)) {
-                using (var response = await httpClient.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token)) {
+              using (CancellationTokenSource timeout = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds)))
+              using (CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, token))
+              using (HttpResponseMessage response = await client.GetAsync(websiteUrl, HttpCompletionOption.ResponseHeadersRead, linked.Token)) {
+                long? declaredLength = response.Content.Headers.ContentLength;
+                long actualLength = 0;
 
-                  int responseCode = (int)response.StatusCode;
-                  long? declaredLength = response.Content.Headers.ContentLength;
-                  long actualLength = 0;
-
-                  try {
-                    using (var stream = await response.Content.ReadAsStreamAsync()) {
-                      byte[] buffer = new byte[8192];
-                      int bytesRead;
-
-                      long limit = declaredLength ?? (1024 * 1024);
-
-                      while (actualLength < limit) {
-                        long remaining = limit - actualLength;
-                        int toRead = (int)Math.Min(remaining, buffer.Length);
-
-                        bytesRead = await stream.ReadAsync(buffer, 0, toRead, linkedCts.Token);
-                        if (bytesRead == 0) break;
-
-                        actualLength += bytesRead;
-                      }
+                try {
+                  using (Stream stream = await response.Content.ReadAsStreamAsync()) {
+                    byte[] buffer = new byte[8192];
+                    long limit = declaredLength ?? 1024 * 1024;
+                    while (actualLength < limit) {
+                      int read = await stream.ReadAsync(
+                        buffer,
+                        0,
+                        (int)Math.Min(limit - actualLength, buffer.Length),
+                        linked.Token
+                      );
+                      if (read == 0) break;
+                      actualLength += read;
                     }
                   }
-                  catch (IOException) {
-                  }
-                  catch (OperationCanceledException) {
-                    if (cancellationToken.IsCancellationRequested) throw;
-                  }
-
-                  if (!declaredLength.HasValue || actualLength >= declaredLength.Value) {
-                    successRequests++;
-                  }
                 }
+                catch (IOException) {
+                }
+                catch (OperationCanceledException) {
+                  if (token.IsCancellationRequested) throw;
+                }
+
+                if (!declaredLength.HasValue || actualLength >= declaredLength.Value) successRequests++;
               }
             }
-            catch (TaskCanceledException) { }
-            catch (HttpRequestException) { }
-            catch (OperationCanceledException) {
-              if (cancellationToken.IsCancellationRequested) throw;
+            catch (TaskCanceledException) {
             }
-            catch (Exception) { }
+            catch (HttpRequestException) {
+            }
+            catch (OperationCanceledException) {
+              if (token.IsCancellationRequested) throw;
+            }
+            catch {
+            }
           }
         }
       }
       catch (OperationCanceledException) {
-        if (cancellationToken.IsCancellationRequested) throw;
+        if (token.IsCancellationRequested) throw;
       }
-      catch (Exception) { }
+      catch {
+      }
 
       return successRequests;
     }
 
     private void AppendLogLine(string text) {
       try {
-        try {
-          Directory.CreateDirectory(Path.GetDirectoryName(PROXY_TEST_LATEST_LOG));
-          File.AppendAllText(PROXY_TEST_LATEST_LOG, $"{text}{Environment.NewLine}");
-        }
-        catch (Exception) { }
-
-        LogAdded?.Invoke(this, text);
-
-        if (ProxyTestLogsBox == null || ProxyTestLogsBox.IsDisposed) return;
-
-        Action updateUi = () => {
-          try {
-            lock (_logLock) {
-              ProxyTestLogsBox.AppendText(text);
-              ProxyTestLogsBox.AppendText(Environment.NewLine);
-              ProxyTestLogsBox.ScrollToCaret();
-            }
-          }
-          catch (Exception) { }
-        };
-
-        if (ProxyTestLogsBox.InvokeRequired) {
-          try {
-            ProxyTestLogsBox.BeginInvoke(updateUi);
-          }
-          catch (Exception) { }
-        }
-        else {
-          updateUi();
-        }
+        Directory.CreateDirectory(PROXY_TEST_FOLDER);
+        File.AppendAllText(PROXY_TEST_LATEST_LOG, text + Environment.NewLine);
       }
-      catch (Exception) { }
+      catch {
+      }
+      LogAdded?.Invoke(this, text);
     }
   }
 }

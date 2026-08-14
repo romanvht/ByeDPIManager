@@ -1,0 +1,17 @@
+<Window x:Class="bdmanager.Views.RenameWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:bdmanager"
+        Title="{local:Loc settings_form.byedpi.rename_title}"
+        Width="440" Height="125" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid Margin="10">
+    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+    <TextBox x:Name="NameTextBox" />
+    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+      <Button Content="{local:Loc settings_form.buttons.cancel}" IsCancel="True" MinWidth="84" />
+      <Button Content="{local:Loc settings_form.buttons.ok}" IsDefault="True" MinWidth="84"
+              Margin="7,0,0,0" Click="OkButton_Click" />
+    </StackPanel>
+  </Grid>
+</Window>

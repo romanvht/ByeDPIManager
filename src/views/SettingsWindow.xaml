@@ -1,0 +1,39 @@
+<Window x:Class="bdmanager.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:bdmanager"
+        xmlns:tabs="clr-namespace:bdmanager.Views.Tabs"
+        Title="{local:Loc settings_form.title}"
+        Width="720" Height="700"
+        MinWidth="600" MinHeight="580"
+        WindowStartupLocation="CenterOwner"
+        Icon="/src/resources/icons/icon.ico"
+        Loaded="SettingsWindow_Loaded"
+        Closing="SettingsWindow_Closing">
+  <Grid Margin="10">
+    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+    <TabControl>
+      <TabItem Header="{local:Loc settings_form.byedpi.tab}">
+        <tabs:ByeDpiTab x:Name="ByeDpiSettingsTab" />
+      </TabItem>
+      <TabItem Header="{local:Loc settings_form.proxifyre.tab}">
+        <tabs:ProxiFyreTab x:Name="ProxiFyreSettingsTab" />
+      </TabItem>
+      <TabItem Header="{local:Loc settings_form.other.tab}">
+        <tabs:OtherTab x:Name="OtherSettingsTab" />
+      </TabItem>
+      <TabItem Header="{local:Loc settings_form.proxy_test.tab}">
+        <tabs:ProxyTestTab x:Name="ProxyTestSettingsTab" />
+      </TabItem>
+      <TabItem Header="{local:Loc settings_form.about.tab}">
+        <tabs:AboutTab />
+      </TabItem>
+    </TabControl>
+
+    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+      <Button Content="{local:Loc settings_form.buttons.cancel}" IsCancel="True" MinWidth="88" />
+      <Button Content="{local:Loc settings_form.buttons.ok}" IsDefault="True" MinWidth="88"
+              Margin="8,0,0,0" Click="OkButton_Click" />
+    </StackPanel>
+  </Grid>
+</Window>

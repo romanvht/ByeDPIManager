@@ -1,0 +1,15 @@
+<Application x:Class="bdmanager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="resources/themes/Dark.xaml" />
+        <ResourceDictionary Source="resources/styles/Buttons.xaml" />
+        <ResourceDictionary Source="resources/styles/TextBoxes.xaml" />
+        <ResourceDictionary Source="resources/styles/DataGrids.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

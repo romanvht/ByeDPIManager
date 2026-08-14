@@ -1,0 +1,19 @@
+<UserControl x:Class="bdmanager.Views.Tabs.OtherTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:bdmanager">
+  <StackPanel Margin="10">
+    <GroupBox Header="{local:Loc settings_form.autorun.group}" Margin="0,0,0,10">
+      <StackPanel Margin="8">
+        <CheckBox x:Name="AutoStartCheckBox" Content="{local:Loc settings_form.autorun.auto_start}" />
+        <CheckBox x:Name="StartMinimizedCheckBox" Margin="0,8,0,0" Content="{local:Loc settings_form.autorun.start_minimized}" />
+      </StackPanel>
+    </GroupBox>
+    <GroupBox Header="{local:Loc settings_form.behavior.group}">
+      <StackPanel Margin="8">
+        <CheckBox x:Name="AutoConnectCheckBox" Content="{local:Loc settings_form.behavior.auto_connect}" />
+        <CheckBox x:Name="MinimizeToTrayCheckBox" Margin="0,8,0,0" Content="{local:Loc settings_form.behavior.minimize_to_tray}" />
+      </StackPanel>
+    </GroupBox>
+  </StackPanel>
+</UserControl>

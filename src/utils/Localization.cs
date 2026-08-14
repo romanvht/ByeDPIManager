@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Forms;
 using System.Linq;
 
 namespace bdmanager
 {
     public class Localization
     {
-        private Dictionary<string, string> _localeStrings;
+        private Dictionary<string, string> _localeStrings = new Dictionary<string, string>();
 
         public event EventHandler LanguageChanged;
         public static readonly string[] AvailableLanguages = { "ru", "en", "tr" };
@@ -72,13 +71,13 @@ namespace bdmanager
                     }
                     else
                     {
-                        MessageBox.Show($"Файл локализации {resourceName} не найден", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Program.logger?.Log($"Localization resource not found: {resourceName}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки языка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.logger?.Log($"Localization load error: {ex.Message}");
             }
         }
     }

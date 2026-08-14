@@ -1,0 +1,69 @@
+<UserControl x:Class="bdmanager.Views.Tabs.ByeDpiTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:bdmanager">
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="45*" />
+      <RowDefinition Height="55*" />
+    </Grid.RowDefinitions>
+
+    <GroupBox Header="{local:Loc settings_form.byedpi.group}" Margin="0,0,0,5">
+      <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="0,0,8,0"
+                   Text="{local:Loc settings_form.byedpi.path_label}" />
+        <TextBox x:Name="ByeDpiPathTextBox" Grid.Row="0" Grid.Column="1" />
+        <Button Grid.Row="0" Grid.Column="2" Content="..." MinWidth="32" Margin="5,0,0,0"
+                Click="BrowseByeDpi_Click" />
+
+        <TextBlock Grid.Row="1" Margin="0,8,8,0" VerticalAlignment="Center"
+                   Text="{local:Loc settings_form.byedpi.hotkey_label}" />
+        <TextBox x:Name="HotkeyTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                 Margin="0,8,0,0" IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" />
+
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Margin="0,8,0,4"
+                   Text="{local:Loc settings_form.byedpi.args_label}" />
+        <TextBox x:Name="ByeDpiArgsTextBox" Grid.Row="3" Grid.ColumnSpan="3"
+                 AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" />
+      </Grid>
+    </GroupBox>
+
+    <GroupBox Grid.Row="1" Header="{local:Loc settings_form.byedpi.history_group}" Margin="0,5,0,0">
+      <DataGrid x:Name="HistoryDataGrid" Margin="8" AutoGenerateColumns="False" IsReadOnly="True"
+                SelectionMode="Single" HeadersVisibility="Column" MinRowHeight="30"
+                CanUserResizeRows="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
+                MouseDoubleClick="HistoryDataGrid_MouseDoubleClick">
+        <DataGrid.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="{local:Loc settings_form.byedpi.history_apply}" Click="ApplyHistory_Click" />
+            <MenuItem Header="{local:Loc settings_form.byedpi.history_pin}" Click="TogglePinHistory_Click" />
+            <MenuItem Header="{local:Loc settings_form.byedpi.history_rename}" Click="RenameHistory_Click" />
+            <MenuItem Header="{local:Loc settings_form.byedpi.history_delete}" Click="DeleteHistory_Click" />
+          </ContextMenu>
+        </DataGrid.ContextMenu>
+        <DataGrid.Columns>
+          <DataGridTextColumn Binding="{Binding Marker}" Width="36"
+                              ElementStyle="{StaticResource CenteredDataGridCellText}" />
+          <DataGridTextColumn Header="{local:Loc settings_form.byedpi.history_strategy_column}"
+                              Binding="{Binding DisplayText}" Width="*"
+                              ElementStyle="{StaticResource WrappingDataGridCellText}"
+                              CellStyle="{StaticResource LeftSeparatedDataGridCell}"
+                              HeaderStyle="{StaticResource LeftSeparatedDataGridColumnHeader}" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </GroupBox>
+  </Grid>
+</UserControl>

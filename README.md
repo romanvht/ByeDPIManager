@@ -8,7 +8,7 @@
 
 ## Требования
 
-1. Windows 7+, [.NET Framework 4.7.2+](https://dotnet.microsoft.com/ru-ru/download/dotnet-framework/thank-you/net472-offline-installer)
+1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/ru-ru/download/dotnet-framework/net48)
 2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
@@ -104,7 +104,7 @@
 
 ## Решение проблем
 
-- Если программа не запускается, убедитесь, что установлен .NET Framework 4.7.2+
+- Если программа не запускается, убедитесь, что установлен .NET Framework 4.8
 - Если не работает обход блокировок, попробуйте другую стратегию
 - При проблемах с подключением проверьте, что Windows Packet Filter установлен корректно
 - Убедитесь, что антивирус или брандмауэр не блокирует работу программы

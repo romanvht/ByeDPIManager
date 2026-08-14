@@ -8,7 +8,7 @@ A mini utility for running ByeDPI and ProxiFyre.
 
 ## Requirements
 
-1. Windows 7+, [.NET Framework 4.7.2+](https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net472-offline-installer)
+1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
 2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
@@ -125,7 +125,7 @@ If you don’t have a predefined strategy, you can use the built-in tester:
 
 ## Troubleshooting
 
-* If the app won’t start, ensure .NET Framework 4.7.2+ is installed
+* If the app won’t start, ensure .NET Framework 4.8 is installed
 * If bypassing doesn’t work, try a different strategy
 * If connection issues occur, ensure Windows Packet Filter is installed properly
 * Make sure your antivirus or firewall isn’t blocking the app
