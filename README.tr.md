@@ -8,7 +8,7 @@ ByeDPI ve ProxiFyre'ı çalıştırmak için küçük bir araç.
 
 ## Gereksinimler
 
-1. Windows 7+, [.NET Framework 4.7.2+](https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net472-offline-installer)
+1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
 2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
@@ -125,7 +125,7 @@ Eğer hazır tanımlanmış bir stratejiniz yoksa, yerleşik test aracını kull
 
 ## Sorun Giderme
 
-* Eğer uygulama başlamazsa, .NET Framework 4.7.2+ yüklü olduğundan emin olun.
+* Eğer uygulama başlamazsa, .NET Framework 4.8'in yüklü olduğundan emin olun.
 * Eğer engel aşma çalışmazsa, başka bir strateji deneyin.
 * Eğer bağlantı sorunları olursa, Windows Packet Filter'ın doğru şekilde yüklendiğinden emin olun.
 * Antivirüs veya güvenlik duvarınızın uygulamayı engellemediğinden emin olun.
