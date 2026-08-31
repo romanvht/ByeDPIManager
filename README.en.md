@@ -2,14 +2,14 @@
 
 [Русский](README.md) | English | [Türkçe](README.tr.md)
 
-A mini utility for running ByeDPI and ProxiFyre.
+A small utility for running ByeDPI with routing through ProxiFyre or the Windows system proxy.
 
 ![Interface Screenshot](screens/screen_en.png)
 
 ## Requirements
 
 1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
-2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
+2. For ProxiFyre mode: [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
 ## Installation
@@ -59,7 +59,7 @@ If you prefer managing components separately:
 4. **Run and set paths:**
 
    * Specify the correct path to `ciadpi.exe` in the ByeDPI tab
-   * Specify the correct path to `proxifyre.exe` in the ProxiFyre tab
+   * Specify the correct path to `proxifyre.exe` under “Routing → ProxiFyre”
 
 ## Configuration
 
@@ -70,10 +70,13 @@ If you prefer managing components separately:
    * Run `ByeDPI Manager.exe`
    * Click the "Settings" button
 
-2. **ProxiFyre setup:**
+2. **Routing setup:**
 
-   * Go to the “ProxiFyre” tab
-   * Specify applications to be bypassed (e.g., Chrome, Firefox, etc.)
+   * Open the “Routing” tab
+   * Select “ProxiFyre” (the default), “System proxy”, or “Disabled”
+   * In ProxiFyre mode, specify the applications to route through the proxy
+
+The local SOCKS5 proxy IP and port are configured on the “ByeDPI” tab. If a strategy already contains `-i`/`--ip` or `-p`/`--port`, those values are used, missing options are added at startup.
 
 ### Strategy Configuration
 

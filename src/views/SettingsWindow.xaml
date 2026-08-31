@@ -18,8 +18,8 @@
       <TabItem Header="{local:Loc settings_form.byedpi.tab}">
         <tabs:ByeDpiTab x:Name="ByeDpiSettingsTab" />
       </TabItem>
-      <TabItem Header="{local:Loc settings_form.proxifyre.tab}">
-        <tabs:ProxiFyreTab x:Name="ProxiFyreSettingsTab" />
+      <TabItem Header="{local:Loc settings_form.routing.tab}">
+        <tabs:RoutingTab x:Name="RoutingSettingsTab" />
       </TabItem>
       <TabItem Header="{local:Loc settings_form.other.tab}">
         <tabs:OtherTab x:Name="OtherSettingsTab" />

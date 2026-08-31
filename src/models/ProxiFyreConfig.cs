@@ -29,7 +29,7 @@ namespace bdmanager {
       File.WriteAllText(filePath, json);
     }
 
-    public static bool UpdateConfig(AppSettings settings) {
+    public static bool UpdateConfig(AppSettings settings, string proxyIp, int proxyPort) {
       try {
         string byeDpiPath = settings.GetByeDpiExecutablePath();
         string proxiFyrePath = settings.GetProxiFyreExecutablePath();
@@ -40,7 +40,7 @@ namespace bdmanager {
 
         config.proxies.Add(new ProxyConfig {
           appNames = appNames.Count > 0 ? appNames : new List<string> { "" },
-          socks5ProxyEndpoint = $"{settings.ProxiFyreIp}:{settings.ProxiFyrePort}",
+          socks5ProxyEndpoint = FormatEndpoint(proxyIp, proxyPort),
           supportedProtocols = new List<string> { "TCP", "UDP" }
         });
 
@@ -54,6 +54,11 @@ namespace bdmanager {
         Program.logger.Log($"ProxiFyre: {ex.Message}");
         return false;
       }
+    }
+
+    private static string FormatEndpoint(string host, int port) {
+      string formattedHost = host != null && host.Contains(":") ? $"[{host}]" : host;
+      return $"{formattedHost}:{port}";
     }
   }
 }

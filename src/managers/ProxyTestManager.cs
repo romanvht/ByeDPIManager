@@ -195,7 +195,7 @@ namespace bdmanager {
         return false;
       }
 
-      if (!_settings.DisableProxiFyre) {
+      if (_settings.RoutingMode == RoutingMode.ProxiFyre) {
         string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
         if (!File.Exists(proxiFyrePath)) {
           RaiseLocalizedError("settings_form.proxifyre.not_found", proxiFyrePath);
@@ -344,7 +344,10 @@ namespace bdmanager {
     private async Task<int> CheckDomain(string domain, int requestsCount, CancellationToken token) {
       Uri websiteUrl = GetValidUrl(domain);
       int successRequests = 0;
-      ProxySettings proxySettings = new ProxySettings { Host = "127.0.0.1", Port = 1080 };
+      ProxySettings proxySettings = new ProxySettings {
+        Host = _processManager.CurrentProxyIp,
+        Port = _processManager.CurrentProxyPort
+      };
 
       try {
         using (ProxyClientHandler<Socks5> handler = new ProxyClientHandler<Socks5>(proxySettings))

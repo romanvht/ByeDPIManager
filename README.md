@@ -2,14 +2,14 @@
 
 Русский | [English](README.en.md) | [Türkçe](README.tr.md)
 
-Мини утилита для запуска ByeDPI и ProxiFyre.
+Мини-утилита для запуска ByeDPI с маршрутизацией через ProxiFyre или системный прокси Windows.
 
 ![Скриншот интерфейса](screens/screen_ru.png)
 
 ## Требования
 
 1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/ru-ru/download/dotnet-framework/net48)
-2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
+2. Для режима ProxiFyre: [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
 ## Инструкции
@@ -50,7 +50,7 @@
 
 4. **Запустите и укажите пути**
    - Укажите правильный путь к файлу `ciadpi.exe` во вкладке ByeDPI
-   - Укажите правильный путь к файлу `proxifyre.exe` во вкладке ProxiFyre
+   - Укажите правильный путь к файлу `proxifyre.exe` в разделе «Маршрутизация → ProxiFyre»
 
 ## Настройка
 
@@ -60,9 +60,12 @@
    - Запустите файл `ByeDPI Manager.exe`
    - Нажмите кнопку "Настройки"
 
-2. **Настройка ProxiFyre:**
-   - Перейдите на вкладку "ProxiFyre"
-   - Укажите приложения, для которых будет выполняться обход (например, Chrome, Firefox и т.д.)
+2. **Настройка маршрутизации:**
+   - Перейдите на вкладку «Маршрутизация»
+   - Выберите «ProxiFyre» (режим по умолчанию), «Системный прокси» или «Выключена»
+   - Для ProxiFyre укажите приложения, которые должны идти через прокси
+
+IP и порт локального SOCKS5-прокси задаются на вкладке «ByeDPI». Если стратегия уже содержит `-i`/`--ip` или `-p`/`--port`, используются значения из стратегии, отсутствующие параметры добавляются при запуске.
 
 ### Настройка стратегии
 

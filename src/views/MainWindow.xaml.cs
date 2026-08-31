@@ -1,25 +1,36 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
 
 namespace bdmanager.Views {
   public partial class MainWindow : Window {
+    private const int MaxPendingLogLines = 2000;
+    private const int MaxLogLinesPerFlush = 250;
+    private const int MaxVisibleLogChars = 50000;
+    private const int RetainedLogChars = 40000;
+
     private readonly AppSettings _settings;
     private readonly ProcessManager _processManager;
     private readonly Logger _logger;
+    private readonly object _logQueueLock = new object();
+    private readonly Queue<string> _pendingLogLines = new Queue<string>();
     private Forms.NotifyIcon _notifyIcon;
     private Forms.MenuItem _toggleMenuItem;
     private HotkeyManager _hotkeyManager;
     private HwndSource _windowSource;
+    private DispatcherTimer _logFlushTimer;
+    private int _droppedLogLines;
     private bool _trayTipShown;
     private bool _allowClose;
 
@@ -38,6 +49,7 @@ namespace bdmanager.Views {
       _processManager.ProxiFyreUnexpectedStopped += ProcessManager_ProxiFyreUnexpectedStopped;
       Program.localization.LanguageChanged += Localization_LanguageChanged;
 
+      InitializeLogFlushTimer();
       InitializeTray();
       UpdateLocale();
       UpdateStatus(_processManager.IsRunning);
@@ -121,6 +133,8 @@ namespace bdmanager.Views {
 
       _hotkeyManager?.Dispose();
       _windowSource?.RemoveHook(WindowMessageHook);
+      _logFlushTimer?.Stop();
+      _logger.LogAdded -= Logger_LogAdded;
       _notifyIcon.Visible = false;
       _notifyIcon.Dispose();
     }
@@ -173,14 +187,59 @@ namespace bdmanager.Views {
     }
 
     private void Logger_LogAdded(object sender, string message) {
-      Dispatcher.BeginInvoke(new Action(() => AddLogToUi(message)));
+      string line = "[" + DateTime.Now.ToString("HH:mm:ss") + "] " + message + Environment.NewLine;
+      lock (_logQueueLock) {
+        if (_pendingLogLines.Count >= MaxPendingLogLines) {
+          _pendingLogLines.Dequeue();
+          _droppedLogLines++;
+        }
+        _pendingLogLines.Enqueue(line);
+      }
     }
 
-    private void AddLogToUi(string message) {
-      string[] lines = LogTextBox.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-      if (lines.Length > 500) LogTextBox.Text = string.Join(Environment.NewLine, lines.Skip(lines.Length - 500));
-      LogTextBox.AppendText("[" + DateTime.Now.ToString("HH:mm:ss") + "] " + message + Environment.NewLine);
+    private void InitializeLogFlushTimer() {
+      _logFlushTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher) {
+        Interval = TimeSpan.FromMilliseconds(100)
+      };
+      _logFlushTimer.Tick += (sender, args) => FlushPendingLogs();
+      _logFlushTimer.Start();
+    }
+
+    private void FlushPendingLogs() {
+      List<string> lines = new List<string>(MaxLogLinesPerFlush);
+      int droppedLines;
+
+      lock (_logQueueLock) {
+        droppedLines = _droppedLogLines;
+        _droppedLogLines = 0;
+        while (lines.Count < MaxLogLinesPerFlush && _pendingLogLines.Count > 0) {
+          lines.Add(_pendingLogLines.Dequeue());
+        }
+      }
+
+      if (lines.Count == 0 && droppedLines == 0) return;
+
+      StringBuilder text = new StringBuilder();
+      if (droppedLines > 0) {
+        text.Append('[').Append(DateTime.Now.ToString("HH:mm:ss")).Append("] ")
+          .AppendFormat(Program.localization.GetString("main_form.log_lines_skipped"), droppedLines)
+          .AppendLine();
+      }
+      foreach (string line in lines) text.Append(line);
+
+      LogTextBox.AppendText(text.ToString());
+      TrimVisibleLog();
       LogTextBox.ScrollToEnd();
+    }
+
+    private void TrimVisibleLog() {
+      if (LogTextBox.Text.Length <= MaxVisibleLogChars) return;
+
+      int startIndex = LogTextBox.Text.Length - RetainedLogChars;
+      int nextLineIndex = LogTextBox.Text.IndexOf('\n', startIndex);
+      if (nextLineIndex >= 0) startIndex = nextLineIndex + 1;
+      LogTextBox.Text = LogTextBox.Text.Substring(startIndex);
+      LogTextBox.CaretIndex = LogTextBox.Text.Length;
     }
 
     private void ProcessManager_StatusChanged(object sender, bool isRunning) {

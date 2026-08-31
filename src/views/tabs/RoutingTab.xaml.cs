@@ -4,46 +4,33 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace bdmanager.Views.Tabs {
-  public partial class ProxiFyreTab : UserControl {
-    private static readonly Regex IntegerRegex = new Regex("^[0-9]+$");
+  public partial class RoutingTab : UserControl {
     private readonly AppSettings _settings = Program.settings;
 
-    public ProxiFyreTab() {
+    public RoutingTab() {
       InitializeComponent();
     }
 
     public void LoadSettings() {
+      RoutingModeTabControl.SelectedIndex = (int)_settings.RoutingMode;
       ProxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
-      ProxiFyrePortTextBox.Text = _settings.ProxiFyrePort.ToString();
       ProxyLanCheckBox.IsChecked = _settings.ProxiFyreLan;
-      DisableProxiFyreCheckBox.IsChecked = _settings.DisableProxiFyre;
       AppListBox.Items.Clear();
       foreach (string app in _settings.ProxifiedApps ?? new List<string>()) AppListBox.Items.Add(app);
     }
 
     public void SaveSettings() {
+      _settings.RoutingMode = (RoutingMode)RoutingModeTabControl.SelectedIndex;
       _settings.ProxiFyreLan = ProxyLanCheckBox.IsChecked == true;
-      _settings.DisableProxiFyre = DisableProxiFyreCheckBox.IsChecked == true;
       _settings.ProxiFyrePath = ProxiFyrePathTextBox.Text;
-      _settings.ProxiFyrePort = ParsePort(ProxiFyrePortTextBox.Text, _settings.ProxiFyrePort);
+      if (_settings.ProxifiedApps == null) _settings.ProxifiedApps = new List<string>();
       _settings.ProxifiedApps.Clear();
       foreach (object item in AppListBox.Items) _settings.ProxifiedApps.Add(item.ToString());
-    }
-
-    private static int ParsePort(string text, int fallback) {
-      if (!int.TryParse(text, out int value)) return fallback;
-      return Math.Max(1, Math.Min(65535, value));
-    }
-
-    private void IntegerTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
-      e.Handled = !IntegerRegex.IsMatch(e.Text);
     }
 
     private void BrowseProxiFyre_Click(object sender, RoutedEventArgs e) {

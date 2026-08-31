@@ -13,7 +13,7 @@ namespace bdmanager.Views {
 
     private void SettingsWindow_Loaded(object sender, RoutedEventArgs e) {
       ByeDpiSettingsTab.LoadSettings();
-      ProxiFyreSettingsTab.LoadSettings();
+      RoutingSettingsTab.LoadSettings();
       OtherSettingsTab.LoadSettings();
       ProxyTestSettingsTab.LoadSettings();
     }
@@ -24,7 +24,7 @@ namespace bdmanager.Views {
 
     private void OkButton_Click(object sender, RoutedEventArgs e) {
       ByeDpiSettingsTab.SaveSettings();
-      ProxiFyreSettingsTab.SaveSettings();
+      RoutingSettingsTab.SaveSettings();
       OtherSettingsTab.SaveSettings();
       ProxyTestSettingsTab.SaveSettings();
       _settings.Save();

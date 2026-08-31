@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace bdmanager.Views.Tabs {
   public partial class ByeDpiTab : UserControl {
+    private static readonly Regex IntegerRegex = new Regex("^[0-9]+$");
     private readonly AppSettings _settings = Program.settings;
     private readonly ObservableCollection<HistoryRow> _historyRows = new ObservableCollection<HistoryRow>();
 
@@ -23,6 +26,8 @@ namespace bdmanager.Views.Tabs {
       ByeDpiPathTextBox.Text = _settings.ByeDpiPath;
       HotkeyTextBox.Text = _settings.Hotkey;
       ByeDpiArgsTextBox.Text = _settings.ByeDpiArguments;
+      ByeDpiIpTextBox.Text = _settings.ByeDpiIp;
+      ByeDpiPortTextBox.Text = _settings.ByeDpiPort.ToString();
       _settings.ByeDpiHistory = HistoryManager.Ensure(_settings.ByeDpiHistory);
       HistoryManager.AddOrUpdate(_settings.ByeDpiHistory, _settings.ByeDpiArguments);
       RefreshHistory();
@@ -32,6 +37,8 @@ namespace bdmanager.Views.Tabs {
       _settings.ByeDpiPath = ByeDpiPathTextBox.Text;
       _settings.Hotkey = HotkeyTextBox.Text;
       _settings.ByeDpiArguments = ByeDpiArgsTextBox.Text;
+      _settings.ByeDpiIp = ParseIp(ByeDpiIpTextBox.Text, _settings.ByeDpiIp);
+      _settings.ByeDpiPort = ParsePort(ByeDpiPortTextBox.Text, _settings.ByeDpiPort);
       _settings.ByeDpiHistory = HistoryManager.Ensure(_settings.ByeDpiHistory);
       HistoryManager.AddOrUpdate(_settings.ByeDpiHistory, _settings.ByeDpiArguments);
       RefreshHistory();
@@ -44,6 +51,20 @@ namespace bdmanager.Views.Tabs {
       }
       ByeDpiArgsTextBox.Text = arguments;
       RefreshHistory();
+    }
+
+    private static string ParseIp(string text, string fallback) {
+      string value = (text ?? string.Empty).Trim().Trim('[', ']');
+      return IPAddress.TryParse(value, out IPAddress ignoredAddress) ? value : fallback;
+    }
+
+    private static int ParsePort(string text, int fallback) {
+      if (!int.TryParse(text, out int value)) return fallback;
+      return Math.Max(1, Math.Min(65535, value));
+    }
+
+    private void IntegerTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
+      e.Handled = !IntegerRegex.IsMatch(e.Text);
     }
 
     private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e) {

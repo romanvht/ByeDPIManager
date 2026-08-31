@@ -12,9 +12,7 @@ namespace bdmanager {
     public static Logger logger;
 
     public static void ShutdownProcesses() {
-      if (processManager != null && processManager.IsRunning) {
-        processManager.Stop();
-      }
+      processManager?.Stop();
     }
   }
 }

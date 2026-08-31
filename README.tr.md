@@ -2,14 +2,14 @@
 
 [Русский](README.md) | [English](README.en.md) | Türkçe
 
-ByeDPI ve ProxiFyre'ı çalıştırmak için küçük bir araç.
+ByeDPI'ı ProxiFyre veya Windows sistem proxy'si üzerinden yönlendirmek için küçük bir araç.
 
 ![Interface Screenshot](screens/screen_en.png)
 
 ## Gereksinimler
 
 1. Windows 7 SP1+, [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48)
-2. [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
+2. ProxiFyre modu için: [ProxiFyre](https://github.com/wiresock/proxifyre), [Windows Packet Filter](https://github.com/wiresock/ndisapi), [Visual C++ Redist 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version)
 3. [ByeDPI](https://github.com/hufrea/byedpi)
 
 ## Kurulum
@@ -33,7 +33,7 @@ Bu seçenek gerekli tüm bileşenleri tek bir arşivin içinde toplar.
 
 3. **Bağımlılıkları yükleme:**
 
-   * Ayıklanmış arşivin içindeki `redist` klasörünü açın. 
+   * Ayıklanmış arşivin içindeki `redist` klasörünü açın.
    * Bu klasörün içindeki iki uygulamayı da kurun:
 
      * Windows Packet Filter (ProxiFyre için gerekli)
@@ -58,8 +58,8 @@ Bileşenleri ayrı bir şekilde yönetmeyi tercih ediyorsanız:
 
 4. **Çalıştırın ve yolları ayarlayın:**
 
-   * ByeDPI sekmesinde `ciadpi.exe` için doğru yolu belirtin. 
-   * ProxiFyre sekmesinde `proxifyre.exe` için doğru yolu belirtin. 
+   * ByeDPI sekmesinde `ciadpi.exe` için doğru yolu belirtin.
+   * “Yönlendirme → ProxiFyre” bölümünde `proxifyre.exe` için doğru yolu belirtin.
 
 ## Yapılandırma
 
@@ -70,10 +70,13 @@ Bileşenleri ayrı bir şekilde yönetmeyi tercih ediyorsanız:
    * `ByeDPI Manager.exe`'yi çalıştırın.
    * "Ayarlar" düğmesine tıklayın.
 
-2. **ProxiFyre kurulumu:**
+2. **Yönlendirme kurulumu:**
 
-   * “ProxiFyre” sekmesine gidin.
-   * Engeli aşılacak uygulamaları seçin (ör. Chrome, Firefox vb.)
+   * “Yönlendirme” sekmesini açın.
+   * “ProxiFyre” (varsayılan), “Sistem proxy'si” veya “Kapalı” seçeneklerinden birini seçin.
+   * ProxiFyre modunda proxy üzerinden yönlendirilecek uygulamaları belirtin.
+
+Yerel SOCKS5 proxy IP'si ve portu “ByeDPI” sekmesinde yapılandırılır. Bir strateji zaten `-i`/`--ip` veya `-p`/`--port` içeriyorsa bu değerler kullanılır, eksik seçenekler başlangıçta eklenir.
 
 ### Strateji Yapılandırması
 
@@ -87,7 +90,7 @@ Eğer hazır tanımlanmış bir stratejiniz yoksa, yerleşik test aracını kull
 
 1. **Test aracı sekmesine gidin:**
 
-   * “Denemeler (Beta)” sekmesini açın 
+   * “Denemeler (Beta)” sekmesini açın
 
 2. **Testi başlatın:**
 
@@ -101,7 +104,7 @@ Eğer hazır tanımlanmış bir stratejiniz yoksa, yerleşik test aracını kull
 
 4. **Stratejiyi uygulayın:**
 
-   * “ByeDPI” sekmesine geri gidin. 
+   * “ByeDPI” sekmesine geri gidin.
    * Kopyaladığınız stratejiyi “Parametreler” alanına yapıştırın (Ctrl+V)
 
 5. **Testi özelleştirin (isteğe bağlı):**

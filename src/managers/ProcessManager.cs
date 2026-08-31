@@ -6,15 +6,37 @@ namespace bdmanager {
   public class ProcessManager {
     private Process _byeDpiProcess;
     private Process _proxifyreProcess;
-    private AppSettings _settings;
+    private readonly AppSettings _settings;
+    private readonly SystemProxyManager _systemProxyManager;
     private bool _isStopping;
+    private bool _suppressByeDpiOutput;
+    private bool _suppressProxiFyreOutput;
 
-    public bool IsRunning => _byeDpiProcess?.HasExited == false && (_settings.DisableProxiFyre || _proxifyreProcess?.HasExited == false);
+    public string CurrentProxyIp { get; private set; } = "127.0.0.1";
+    public int CurrentProxyPort { get; private set; } = 1080;
+
+    public bool IsRunning {
+      get {
+        if (_byeDpiProcess?.HasExited != false) {
+          return false;
+        }
+
+        switch (_settings.RoutingMode) {
+          case RoutingMode.Disabled:
+            return true;
+          case RoutingMode.SystemProxy:
+            return _systemProxyManager.IsActive;
+          default:
+            return _proxifyreProcess?.HasExited == false;
+        }
+      }
+    }
     public event EventHandler<bool> StatusChanged;
     public event EventHandler ProxiFyreUnexpectedStopped;
 
     public ProcessManager() {
       _settings = Program.settings;
+      _systemProxyManager = new SystemProxyManager();
     }
 
     public bool StartByeDpi(string arguments = null, bool logStatus = true) {
@@ -30,7 +52,10 @@ namespace bdmanager {
         }
 
         bool useCustomArgs = !string.IsNullOrWhiteSpace(arguments);
-        string args = useCustomArgs ? arguments : _settings.GetByeDpiArguments();
+        string strategy = useCustomArgs ? arguments : _settings.ByeDpiArguments;
+        string args = _settings.GetByeDpiArguments(strategy);
+        CurrentProxyIp = _settings.GetProxyIp(args);
+        CurrentProxyPort = _settings.GetProxyPort(args);
 
         _byeDpiProcess = new Process {
           StartInfo = new ProcessStartInfo {
@@ -44,6 +69,7 @@ namespace bdmanager {
           },
           EnableRaisingEvents = true
         };
+        _suppressByeDpiOutput = false;
 
         if (!useCustomArgs) {
           _byeDpiProcess.OutputDataReceived += ByeDpiOutputHandler;
@@ -75,10 +101,6 @@ namespace bdmanager {
     }
 
     public bool StartProxiFyre() {
-      if (_settings.DisableProxiFyre) {
-        return true;
-      }
-
       try {
         string proxiFyrePath = _settings.GetProxiFyreExecutablePath();
 
@@ -90,7 +112,7 @@ namespace bdmanager {
           return false;
         }
 
-        if (!ProxiFyreConfig.UpdateConfig(_settings)) {
+        if (!ProxiFyreConfig.UpdateConfig(_settings, CurrentProxyIp, CurrentProxyPort)) {
           return false;
         }
 
@@ -105,6 +127,7 @@ namespace bdmanager {
           },
           EnableRaisingEvents = true
         };
+        _suppressProxiFyreOutput = false;
 
         _proxifyreProcess.OutputDataReceived += ProxifyreOutputHandler;
         _proxifyreProcess.ErrorDataReceived += ProxifyreOutputHandler;
@@ -129,9 +152,13 @@ namespace bdmanager {
     }
 
     public void StopByeDpi(bool logStatus = true) {
+      _suppressByeDpiOutput = true;
       if (_byeDpiProcess?.HasExited == false) {
         try {
           _byeDpiProcess.Exited -= ProcessStopHandler;
+          _byeDpiProcess.OutputDataReceived -= ByeDpiOutputHandler;
+          _byeDpiProcess.ErrorDataReceived -= ByeDpiOutputHandler;
+          CancelAsyncReads(_byeDpiProcess);
           _byeDpiProcess.Kill();
           _byeDpiProcess = null;
           if (logStatus) {
@@ -148,13 +175,13 @@ namespace bdmanager {
     }
 
     public void StopProxiFyre() {
-      if (_settings.DisableProxiFyre) {
-        return;
-      }
-
+      _suppressProxiFyreOutput = true;
       if (_proxifyreProcess?.HasExited == false) {
         try {
           _proxifyreProcess.Exited -= ProcessStopHandler;
+          _proxifyreProcess.OutputDataReceived -= ProxifyreOutputHandler;
+          _proxifyreProcess.ErrorDataReceived -= ProxifyreOutputHandler;
+          CancelAsyncReads(_proxifyreProcess);
           _proxifyreProcess.Kill();
           _proxifyreProcess = null;
           Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.stopped"));
@@ -174,7 +201,16 @@ namespace bdmanager {
           return;
         }
 
-        StartProxiFyre();
+        switch (_settings.RoutingMode) {
+          case RoutingMode.Disabled:
+            break;
+          case RoutingMode.SystemProxy:
+            _systemProxyManager.Enable(CurrentProxyIp, CurrentProxyPort);
+            break;
+          default:
+            StartProxiFyre();
+            break;
+        }
 
         if (IsRunning) {
           RaiseStatusChanged(true);
@@ -195,8 +231,9 @@ namespace bdmanager {
     public void Stop() {
       try {
         _isStopping = true;
-        StopByeDpi();
+        _systemProxyManager.Disable();
         StopProxiFyre();
+        StopByeDpi();
         RaiseStatusChanged(false);
       }
       catch (Exception ex) {
@@ -208,7 +245,7 @@ namespace bdmanager {
     }
 
     private void ByeDpiOutputHandler(object sender, DataReceivedEventArgs e) {
-      if (!string.IsNullOrEmpty(e.Data)) {
+      if (!_suppressByeDpiOutput && sender == _byeDpiProcess && !string.IsNullOrEmpty(e.Data)) {
         Program.logger.Log(string.Format(
           Program.localization.GetString("process_manager.byedpi.output"),
           e.Data
@@ -217,12 +254,30 @@ namespace bdmanager {
     }
 
     private void ProxifyreOutputHandler(object sender, DataReceivedEventArgs e) {
-      if (!string.IsNullOrEmpty(e.Data)) {
+      if (!_suppressProxiFyreOutput && sender == _proxifyreProcess && !string.IsNullOrEmpty(e.Data)) {
         Program.logger.Log(string.Format(
           Program.localization.GetString("process_manager.proxifyre.output"),
           e.Data
         ));
       }
+    }
+
+    private static void CancelAsyncReads(Process process) {
+      try {
+        process.CancelOutputRead();
+      }
+      catch (InvalidOperationException) {
+      }
+
+      try {
+        process.CancelErrorRead();
+      }
+      catch (InvalidOperationException) {
+      }
+    }
+
+    public void RestoreSystemProxyOnStartup() {
+      _systemProxyManager.RestoreIfNeeded();
     }
 
     public void CleanupOnStartup() {
@@ -275,7 +330,7 @@ namespace bdmanager {
       }
     }
     private void ProcessStopHandler(object sender, EventArgs e) {
-      if (sender == _proxifyreProcess && !_isStopping && !_settings.DisableProxiFyre) {
+      if (sender == _proxifyreProcess && !_isStopping && _settings.RoutingMode == RoutingMode.ProxiFyre) {
         Program.logger.Log(Program.localization.GetString("process_manager.proxifyre.unexpected_stop"));
         RaiseProxiFyreUnexpectedStopped();
       }

@@ -9,7 +9,8 @@ namespace bdmanager.Views.Tabs {
     public AboutTab() {
       InitializeComponent();
       Assembly assembly = Assembly.GetExecutingAssembly();
-      VersionText.Text = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? assembly.GetName().Version.ToString();
+      System.Version version = assembly.GetName().Version;
+      VersionText.Text = version.ToString(3);
       DeveloperText.Text = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "romanvht";
       ConfigureLink(GithubLink, "settings_form.about.github_link", "https://github.com/romanvht/ByeDPIManager");
       ConfigureLink(CloudTipsLink, "settings_form.about.donate_cloudtips", "https://pay.cloudtips.ru/p/92c754db");

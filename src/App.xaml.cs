@@ -38,6 +38,7 @@ namespace bdmanager {
         }
 
         Program.processManager = new ProcessManager();
+        Program.processManager.RestoreSystemProxyOnStartup();
         Program.autorunManager = new AutorunManager();
 
         _mainWindow = new MainWindow();

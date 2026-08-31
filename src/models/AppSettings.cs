@@ -16,10 +16,10 @@ namespace bdmanager {
 
     public string ByeDpiArguments { get; set; } = "-Ku -a1 -An -o1 -At,r,s -d1";
     public List<HistoryItem> ByeDpiHistory { get; set; } = new List<HistoryItem>();
+    public string ByeDpiIp { get; set; } = "127.0.0.1";
+    public int ByeDpiPort { get; set; } = 1080;
 
-    public bool DisableProxiFyre { get; set; } = false;
-    public string ProxiFyreIp { get; set; } = "127.0.0.1";
-    public int ProxiFyrePort { get; set; } = 1080;
+    public RoutingMode RoutingMode { get; set; } = RoutingMode.ProxiFyre;
     public bool ProxiFyreLan { get; set; } = false;
     public List<string> ProxifiedApps { get; set; } = new List<string>();
 
@@ -164,28 +164,108 @@ namespace bdmanager {
     }
 
     public string GetByeDpiArguments() {
-      try {
-        if (string.IsNullOrWhiteSpace(ByeDpiArguments)) {
-          return string.Empty;
-        }
+      return GetByeDpiArguments(ByeDpiArguments);
+    }
 
-        var args = ShellSplit(ByeDpiArguments);
+    public string GetByeDpiArguments(string arguments) {
+      try {
+        var args = ShellSplit(arguments ?? string.Empty);
         var result = FilterLinuxOnlyArgs(args).ToList();
 
-        if (!DisableProxiFyre) {
-          bool hasPort = result.Any(arg => arg == "-p" || arg == "--port") || result.Any(arg => arg.StartsWith("-p") && arg.Length > 2 && char.IsDigit(arg[2]));
-
-          if (!hasPort) {
-            result.AddRange(new[] { "--port", ProxiFyrePort.ToString() });
-          }
+        if (!HasOption(result, "-i", "--ip")) {
+          result.AddRange(new[] { "--ip", ByeDpiIp });
+        }
+        if (!HasOption(result, "-p", "--port")) {
+          result.AddRange(new[] { "--port", ByeDpiPort.ToString() });
         }
 
         return string.Join(" ", result);
       }
       catch (Exception ex) {
         Program.logger.Log($"ByeDPI: {ex.Message}");
-        return ByeDpiArguments;
+        return arguments;
       }
+    }
+
+    public string GetProxyIp(string arguments) {
+      try {
+        List<string> args = ShellSplit(arguments ?? string.Empty);
+        if (TryGetOptionValue(args, "-i", "--ip", out string ip) && !string.IsNullOrWhiteSpace(ip)) {
+          return GetConnectableIp(ip);
+        }
+      }
+      catch (Exception ex) {
+        Program.logger.Log($"ByeDPI: {ex.Message}");
+      }
+
+      return GetConnectableIp(ByeDpiIp);
+    }
+
+    public int GetProxyPort(string arguments) {
+      try {
+        List<string> args = ShellSplit(arguments ?? string.Empty);
+        if (TryGetOptionValue(args, "-p", "--port", out string value)
+            && int.TryParse(value, out int port)
+            && port >= 1 && port <= 65535) {
+          return port;
+        }
+      }
+      catch (Exception ex) {
+        Program.logger.Log($"ByeDPI: {ex.Message}");
+      }
+
+      return Math.Max(1, Math.Min(65535, ByeDpiPort));
+    }
+
+    private static bool HasOption(IReadOnlyList<string> args, string shortOption, string longOption) {
+      return args.Any(argument => IsOption(argument, shortOption, longOption));
+    }
+
+    private static bool TryGetOptionValue(
+      IReadOnlyList<string> args,
+      string shortOption,
+      string longOption,
+      out string value
+    ) {
+      for (int index = 0; index < args.Count; index++) {
+        string argument = args[index];
+        if (argument == shortOption || argument == longOption) {
+          return SetOptionValue(index + 1 < args.Count ? args[index + 1] : null, out value);
+        }
+
+        string longPrefix = longOption + "=";
+        if (argument.StartsWith(longPrefix, StringComparison.Ordinal)) {
+          return SetOptionValue(argument.Substring(longPrefix.Length), out value);
+        }
+
+        if (argument.StartsWith(shortOption, StringComparison.Ordinal) && argument.Length > shortOption.Length) {
+          return SetOptionValue(argument.Substring(shortOption.Length).TrimStart('='), out value);
+        }
+      }
+
+      value = null;
+      return false;
+    }
+
+    private static bool SetOptionValue(string candidate, out string value) {
+      value = candidate?.Trim().Trim('"', '\'');
+      return !string.IsNullOrWhiteSpace(value);
+    }
+
+    private static bool IsOption(string argument, string shortOption, string longOption) {
+      return argument == shortOption
+        || argument == longOption
+        || argument.StartsWith(longOption + "=", StringComparison.Ordinal)
+        || (argument.StartsWith(shortOption, StringComparison.Ordinal) && argument.Length > shortOption.Length);
+    }
+
+    private static string GetConnectableIp(string ip) {
+      string value = string.IsNullOrWhiteSpace(ip)
+        ? "127.0.0.1"
+        : ip.Trim().Trim('"', '\'').Trim('[', ']');
+      if (value == "0.0.0.0") return "127.0.0.1";
+      if (value == "::") return "::1";
+      return value;
     }
   }
 }

@@ -19,6 +19,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="0,0,8,0"
@@ -32,9 +33,24 @@
         <TextBox x:Name="HotkeyTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                  Margin="0,8,0,0" IsReadOnly="True" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" />
 
-        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Margin="0,8,0,4"
+        <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="0,8,8,0"
+                   Text="{local:Loc settings_form.byedpi.ip_label}" />
+        <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,8,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBox x:Name="ByeDpiIpTextBox" />
+          <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="16,0,8,0"
+                     Text="{local:Loc settings_form.byedpi.port_label}" />
+          <TextBox x:Name="ByeDpiPortTextBox" Grid.Column="2" Width="80"
+                   PreviewTextInput="IntegerTextBox_PreviewTextInput" />
+        </Grid>
+
+        <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Margin="0,8,0,4"
                    Text="{local:Loc settings_form.byedpi.args_label}" />
-        <TextBox x:Name="ByeDpiArgsTextBox" Grid.Row="3" Grid.ColumnSpan="3"
+        <TextBox x:Name="ByeDpiArgsTextBox" Grid.Row="4" Grid.ColumnSpan="3"
                  AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" />
       </Grid>
