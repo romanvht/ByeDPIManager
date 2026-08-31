@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace bdmanager.Views.Tabs {
   public partial class AboutTab : UserControl {
@@ -10,13 +11,19 @@ namespace bdmanager.Views.Tabs {
       Assembly assembly = Assembly.GetExecutingAssembly();
       VersionText.Text = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? assembly.GetName().Version.ToString();
       DeveloperText.Text = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "romanvht";
-      string github = Program.localization.GetString("settings_form.about.github_link");
-      GithubLink.Inlines.Add(github);
-      GithubLink.Tag = github;
+      ConfigureLink(GithubLink, "settings_form.about.github_link", "https://github.com/romanvht/ByeDPIManager");
+      ConfigureLink(CloudTipsLink, "settings_form.about.donate_cloudtips", "https://pay.cloudtips.ru/p/92c754db");
+      ConfigureLink(BoostyLink, "settings_form.about.donate_boosty", "https://boosty.to/romanvht/donate");
+      ConfigureLink(TelegramDonateLink, "settings_form.about.donate_telegram", "https://t.me/romanvht_donate_bot");
     }
 
-    private void GithubLink_Click(object sender, RoutedEventArgs e) {
-      string url = GithubLink.Tag as string;
+    private static void ConfigureLink(Hyperlink link, string localizationKey, string url) {
+      link.Inlines.Add(Program.localization.GetString(localizationKey));
+      link.Tag = url;
+    }
+
+    private void OpenLink_Click(object sender, RoutedEventArgs e) {
+      string url = (sender as Hyperlink)?.Tag as string;
       if (!string.IsNullOrWhiteSpace(url)) Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
   }

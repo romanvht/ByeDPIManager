@@ -2,18 +2,39 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:bdmanager">
-  <GroupBox Margin="10" Header="{local:Loc settings_form.about.group}">
-    <Grid Margin="10">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-      <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-      <TextBlock Text="{local:Loc settings_form.about.version_label}" />
-      <TextBlock x:Name="VersionText" Grid.Column="1" Margin="12,0,0,0" />
-      <TextBlock Grid.Row="1" Margin="0,8,0,0" Text="{local:Loc settings_form.about.developer_label}" />
-      <TextBlock x:Name="DeveloperText" Grid.Row="1" Grid.Column="1" Margin="12,8,0,0" />
-      <TextBlock Grid.Row="2" Margin="0,8,0,0" Text="{local:Loc settings_form.about.github_label}" />
-      <TextBlock Grid.Row="2" Grid.Column="1" Margin="12,8,0,0">
-        <Hyperlink x:Name="GithubLink" Click="GithubLink_Click" />
-      </TextBlock>
-    </Grid>
-  </GroupBox>
+  <StackPanel>
+    <GroupBox Margin="10,10,10,5" Header="{local:Loc settings_form.about.group}">
+      <Grid Margin="10">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <TextBlock Text="{local:Loc settings_form.about.version_label}" />
+        <TextBlock x:Name="VersionText" Grid.Column="1" Margin="12,0,0,0" />
+        <TextBlock Grid.Row="1" Margin="0,8,0,0" Text="{local:Loc settings_form.about.developer_label}" />
+        <TextBlock x:Name="DeveloperText" Grid.Row="1" Grid.Column="1" Margin="12,8,0,0" />
+        <TextBlock Grid.Row="2" Margin="0,8,0,0" Text="{local:Loc settings_form.about.github_label}" />
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="12,8,0,0">
+          <Hyperlink x:Name="GithubLink" Click="OpenLink_Click" />
+        </TextBlock>
+      </Grid>
+    </GroupBox>
+
+    <GroupBox Margin="10,5,10,10" Header="{local:Loc settings_form.about.donate_group}">
+      <StackPanel Margin="10">
+        <TextBlock Margin="0,0,0,10"
+                   Text="{local:Loc settings_form.about.donate_message}"
+                   TextWrapping="Wrap" />
+        <TextBlock Margin="0,0,0,6">
+          <Hyperlink x:Name="CloudTipsLink" Click="OpenLink_Click" />
+        </TextBlock>
+        <TextBlock Margin="0,0,0,6">
+          <Hyperlink x:Name="BoostyLink" Click="OpenLink_Click" />
+        </TextBlock>
+        <TextBlock Margin="0,0,0,10">
+          <Hyperlink x:Name="TelegramDonateLink" Click="OpenLink_Click" />
+        </TextBlock>
+        <TextBlock Text="{local:Loc settings_form.about.donate_thanks}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </GroupBox>
+  </StackPanel>
 </UserControl>
