@@ -4,6 +4,8 @@ using System.IO;
 
 namespace bdmanager {
   public class ProcessManager {
+    private const string ProxiFyreNonAdminArgument = "--allow-not-admin";
+    private static readonly Version ProxiFyreNonAdminMinimumVersion = new Version(2, 6, 0, 0);
     private Process _byeDpiProcess;
     private Process _proxifyreProcess;
     private readonly AppSettings _settings;
@@ -116,15 +118,21 @@ namespace bdmanager {
           return false;
         }
 
+        var startInfo = new ProcessStartInfo {
+          FileName = proxiFyrePath,
+          WorkingDirectory = Path.GetDirectoryName(proxiFyrePath),
+          UseShellExecute = false,
+          CreateNoWindow = true,
+          RedirectStandardOutput = true,
+          RedirectStandardError = true
+        };
+
+        if (SupportsProxiFyreNonAdmin(proxiFyrePath)) {
+          startInfo.Arguments = ProxiFyreNonAdminArgument;
+        }
+
         _proxifyreProcess = new Process {
-          StartInfo = new ProcessStartInfo {
-            FileName = proxiFyrePath,
-            WorkingDirectory = Path.GetDirectoryName(proxiFyrePath),
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-          },
+          StartInfo = startInfo,
           EnableRaisingEvents = true
         };
         _suppressProxiFyreOutput = false;
@@ -273,6 +281,23 @@ namespace bdmanager {
         process.CancelErrorRead();
       }
       catch (InvalidOperationException) {
+      }
+    }
+
+    private static bool SupportsProxiFyreNonAdmin(string filePath) {
+      try {
+        var versionInfo = FileVersionInfo.GetVersionInfo(filePath);
+        var version = new Version(
+          Math.Max(0, versionInfo.FileMajorPart),
+          Math.Max(0, versionInfo.FileMinorPart),
+          Math.Max(0, versionInfo.FileBuildPart),
+          Math.Max(0, versionInfo.FilePrivatePart)
+        );
+
+        return version.CompareTo(ProxiFyreNonAdminMinimumVersion) >= 0;
+      }
+      catch {
+        return false;
       }
     }
 
