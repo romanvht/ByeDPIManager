@@ -112,6 +112,37 @@ IP и порт локального SOCKS5-прокси задаются на в
 - При проблемах с подключением проверьте, что Windows Packet Filter установлен корректно
 - Убедитесь, что антивирус или брандмауэр не блокирует работу программы
 
+## Сборка релиза
+
+Для сборки нужны Windows, .NET SDK с поддержкой проекта `net48` и .NET Framework 4.8 Developer Pack.
+
+Разместите зависимости в папке `redist` в корне проекта:
+
+```text
+redist/
+  libs/
+    byedpi/
+      ciadpi.exe
+    proxifyre/
+      ...файлы ProxiFyre
+  redist/
+    VC_redist.x64.exe
+    Windows.Packet.Filter.*.x64.msi
+```
+
+Запустите из корня проекта:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build-release.ps1
+```
+
+Скрипт собирает проект в конфигурации `Release` и создаёт два файла в `release`:
+
+- `ByeDPI Manager.exe` - менеджер отдельно.
+- `All_in_One_w64.zip` - менеджер, зависимости и библиотеки в одном архиве.
+
+Папка `proxytest` берётся из проекта, `libs` и установщики - из локальной папки `redist`.
+
 ## Большое спасибо
 
 - [ByeDPI](https://github.com/hufrea/byedpi)

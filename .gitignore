@@ -10,3 +10,5 @@ $RECYCLE.BIN/
 *.log
 *.sln
 FodyWeavers.xsd
+/redist/
+/release/

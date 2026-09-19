@@ -133,6 +133,37 @@ If you don’t have a predefined strategy, you can use the built-in tester:
 * If connection issues occur, ensure Windows Packet Filter is installed properly
 * Make sure your antivirus or firewall isn’t blocking the app
 
+## Release build
+
+To build the release, you need Windows, the .NET SDK with support for the `net48` project, and .NET Framework 4.8 Developer Pack.
+
+Place the dependencies in the `redist` folder at the root of the project:
+
+```text
+redist/
+  libs/
+    byedpi/
+      ciadpi.exe
+    proxifyre/
+      ...ProxiFyre files
+  redist/
+    VC_redist.x64.exe
+    Windows.Packet.Filter.*.x64.msi
+```
+
+Run from the project root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build-release.ps1
+```
+
+The script builds the project in the `Release` configuration and creates two files in `release`:
+
+- `ByeDPI Manager.exe` - the standalone manager.
+- `All_in_One_w64.zip` - a manager, dependencies, and libraries in a single archive.
+
+The `proxytest` folder is taken from the project, `libs` and the installers are taken from the local `redist` folder.
+
 ## Special Thanks
 
 * [ByeDPI](https://github.com/hufrea/byedpi)
