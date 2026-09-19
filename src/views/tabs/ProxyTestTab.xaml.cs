@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace bdmanager.Views.Tabs {
   public partial class ProxyTestTab : UserControl {
@@ -138,6 +139,11 @@ namespace bdmanager.Views.Tabs {
       ProxyTestResult result = ResultsDataGrid.SelectedItem as ProxyTestResult;
       if (result == null) return;
       try { Clipboard.SetText(result.Strategy); } catch { }
+    }
+
+    private void AlternativeLink_RequestNavigate(object sender, RequestNavigateEventArgs e) {
+      e.Handled = true;
+      Process.Start(new ProcessStartInfo { FileName = e.Uri.AbsoluteUri, UseShellExecute = true });
     }
 
     private void EditDomains_Click(object sender, RoutedEventArgs e) {
