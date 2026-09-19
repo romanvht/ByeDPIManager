@@ -133,6 +133,37 @@ Eğer hazır tanımlanmış bir stratejiniz yoksa, yerleşik test aracını kull
 * Eğer bağlantı sorunları olursa, Windows Packet Filter'ın doğru şekilde yüklendiğinden emin olun.
 * Antivirüs veya güvenlik duvarınızın uygulamayı engellemediğinden emin olun.
 
+## Sürümün derlenmesi
+
+Derleme için Windows, `net48` projesini destekleyen .NET SDK ve .NET Framework 4.8 Developer Pack gereklidir.
+
+Bağımlılıkları projenin kök dizininde `redist` klasörüne yerleştirin:
+
+```text
+redist/
+  libs/
+    byedpi/
+      ciadpi.exe
+    proxifyre/
+      ...ProxiFyre dosyaları
+  redist/
+    VC_redist.x64.exe
+    Windows.Packet.Filter.*.x64.msi
+```
+
+Projeyi kök dizininden başlatın:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build-release.ps1
+```
+
+Script, projeyi `Release` yapılandırmasında toplar ve `release` içinde iki dosya oluşturur:
+
+- `ByeDPI Manager.exe` - ayrı bir yönetici.
+- `All_in_One_w64.zip` - yönetici, bağımlılıklar ve kütüphaneler tek bir arşivde.
+
+`proxytest` klasörü projeden, `libs` ve yükleyiciler ise yerel `redist` klasöründen alınır.
+
 ## Özel Teşekkür
 
 * [ByeDPI](https://github.com/hufrea/byedpi)

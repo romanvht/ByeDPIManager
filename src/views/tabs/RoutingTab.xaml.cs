@@ -17,7 +17,7 @@ namespace bdmanager.Views.Tabs {
     }
 
     public void LoadSettings() {
-      RoutingModeTabControl.SelectedIndex = (int)_settings.RoutingMode;
+      RoutingModeComboBox.SelectedValue = _settings.RoutingMode;
       ProxiFyrePathTextBox.Text = _settings.ProxiFyrePath;
       ProxyLanCheckBox.IsChecked = _settings.ProxiFyreLan;
       AppListBox.Items.Clear();
@@ -25,7 +25,7 @@ namespace bdmanager.Views.Tabs {
     }
 
     public void SaveSettings() {
-      _settings.RoutingMode = (RoutingMode)RoutingModeTabControl.SelectedIndex;
+      _settings.RoutingMode = (RoutingMode)RoutingModeComboBox.SelectedValue;
       _settings.ProxiFyreLan = ProxyLanCheckBox.IsChecked == true;
       _settings.ProxiFyrePath = ProxiFyrePathTextBox.Text;
       if (_settings.ProxifiedApps == null) _settings.ProxifiedApps = new List<string>();
