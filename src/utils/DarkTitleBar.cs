@@ -5,6 +5,7 @@ using System.Windows.Interop;
 
 namespace bdmanager {
   internal static class DarkTitleBar {
+    private const int Cloak = 13;
     private const int UseImmersiveDarkMode = 20;
     private const int UseImmersiveDarkModeBefore20H1 = 19;
     private const int BorderColor = 34;
@@ -19,7 +20,34 @@ namespace bdmanager {
 
     public static void Apply(Window window) {
       if (window == null) return;
-      window.SourceInitialized += (sender, args) => ApplyToHandle(new WindowInteropHelper(window).Handle);
+      window.SourceInitialized += (sender, args) => {
+        IntPtr handle = new WindowInteropHelper(window).Handle;
+        if (TryHide(handle, true)) {
+          window.ContentRendered += ShowLoaded;
+        }
+        ApplyToHandle(handle);
+      };
+    }
+
+    private static void ShowLoaded(object sender, EventArgs e) {
+      Window window = (Window)sender;
+      TryHide(new WindowInteropHelper(window).Handle, false);
+      window.ContentRendered -= ShowLoaded;
+    }
+
+    private static bool TryHide(IntPtr handle, bool hidden) {
+      if (handle == IntPtr.Zero) return false;
+
+      try {
+        int value = hidden ? 1 : 0;
+        return DwmSetWindowAttribute(handle, Cloak, ref value, sizeof(int)) == 0;
+      }
+      catch (DllNotFoundException) {
+        return false;
+      }
+      catch (EntryPointNotFoundException) {
+        return false;
+      }
     }
 
     private static void ApplyToHandle(IntPtr handle) {
