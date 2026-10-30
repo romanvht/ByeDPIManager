@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace bdmanager.Views.Tabs {
     public ProxyTestTab() {
       InitializeComponent();
       ResultsDataGrid.ItemsSource = _results;
+      ResultsDataGrid.Items.SortDescriptions.Add(new SortDescription(nameof(ProxyTestResult.SuccessRate), ListSortDirection.Descending));
       _manager.LogAdded += Manager_LogAdded;
       _manager.ResultUpdated += Manager_ResultUpdated;
       _manager.ProgressChanged += Manager_ProgressChanged;

@@ -45,6 +45,7 @@
                                     ElementStyle="{StaticResource WrappingDataGridCellText}" />
                 <DataGridTextColumn Header="{local:Loc settings_form.proxy_test.result_column}"
                                     Binding="{Binding Result}" Width="100"
+                                    SortMemberPath="SuccessRate" SortDirection="Descending"
                                     ElementStyle="{StaticResource CenteredDataGridCellText}"
                                     CellStyle="{StaticResource LeftSeparatedDataGridCell}"
                                     HeaderStyle="{StaticResource CenteredDataGridColumnHeader}" />
